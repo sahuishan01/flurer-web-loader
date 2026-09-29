@@ -1,14 +1,14 @@
 {
   "package.json": {
-    "mtime": 1790672132.3376977,
-    "seen": 1790672199.59811,
-    "ast_hash": "5c868227b431d39e607a79ce0cd0eaac",
+    "mtime": 1790673584.287804,
+    "seen": 1790673638.270536,
+    "ast_hash": "6ceed75b50d460dcbb5e4c79458642b6",
     "semantic_hash": ""
   },
   "plugin.json": {
-    "mtime": 1790672179.585894,
-    "seen": 1790672199.5981135,
-    "ast_hash": "e04546e38e9e771a91bd7ed2bc6142b9",
+    "mtime": 1790673622.395968,
+    "seen": 1790673638.2705538,
+    "ast_hash": "01f2820ae156c4a2d8ab9f9578d203af",
     "semantic_hash": ""
   },
   "scripts/sync-version.cjs": {
@@ -42,9 +42,9 @@
     "semantic_hash": ""
   },
   "src/components/WebViewport.tsx": {
-    "mtime": 1790672107.4375944,
-    "seen": 1790672199.5981245,
-    "ast_hash": "d070750e5555aff44b480d612aaf112a",
+    "mtime": 1790673561.315705,
+    "seen": 1790673638.270568,
+    "ast_hash": "b8a034ef74d12ca794c4536c28d97a3c",
     "semantic_hash": ""
   },
   "src/icons.tsx": {
@@ -54,15 +54,15 @@
     "semantic_hash": ""
   },
   "src/index.tsx": {
-    "mtime": 1790672125.5016694,
-    "seen": 1790672199.5981274,
-    "ast_hash": "168f2a685b6798f05471fe6d1500fa0f",
+    "mtime": 1790673578.2357779,
+    "seen": 1790673638.2705712,
+    "ast_hash": "d0d9d3f9dd31c9ebb069cd93aee8fcde",
     "semantic_hash": ""
   },
   "src/styles.ts": {
-    "mtime": 1790672162.5618234,
-    "seen": 1790672199.5981286,
-    "ast_hash": "f2d9d650d17f91eeb1e4c749ce68c43b",
+    "mtime": 1790673610.8359182,
+    "seen": 1790673638.270573,
+    "ast_hash": "ca5d9c097fe1b872691ff0478c725cc6",
     "semantic_hash": ""
   },
   "src/types.ts": {
@@ -72,9 +72,9 @@
     "semantic_hash": "e52f0d229e0856c363e9ba0daf93de5c"
   },
   "src/utils.ts": {
-    "mtime": 1790667155.9211454,
-    "seen": 1790667242.5237484,
-    "ast_hash": "c94bc2709030d2ac5eb7ee2531d37201",
+    "mtime": 1790673544.3516319,
+    "seen": 1790673638.2705798,
+    "ast_hash": "cd3aa4ecb970c8857064a57f001f284d",
     "semantic_hash": ""
   },
   "tsconfig.json": {

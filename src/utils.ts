@@ -88,6 +88,8 @@ export function getDomain(url: string): string {
 
 export const KNOWN_FRAME_RESTRICTED_DOMAINS = [
   "google.com",
+  "duckduckgo.com",
+  "bing.com",
   "youtube.com",
   "github.com",
   "twitter.com",

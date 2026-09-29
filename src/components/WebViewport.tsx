@@ -19,12 +19,11 @@ interface WebViewportProps {
 export function WebViewport(props: WebViewportProps) {
   const isBlank = () => !props.activeTab || props.activeTab.url === "about:blank" || !props.activeTab.url;
   const isRestricted = () => (props.activeTab ? isKnownFrameRestricted(props.activeTab.url) : false);
-  const [dismissedWarnings, setDismissedWarnings] = createSignal<Record<string, boolean>>({});
+  const [forceEmbedTabs, setForceEmbedTabs] = createSignal<Record<string, boolean>>({});
 
-  const showWarning = () => {
+  const shouldShowLauncher = () => {
     if (!props.activeTab) return false;
-    if (dismissedWarnings()[props.activeTab.id]) return false;
-    return isRestricted();
+    return isRestricted() && !forceEmbedTabs()[props.activeTab.id];
   };
 
   return (
@@ -43,85 +42,111 @@ export function WebViewport(props: WebViewportProps) {
           />
         }
       >
-        {/* Floating helper pill for sites that may enforce frame restrictions */}
-        <Show when={showWarning()}>
-          <div
-            style={{
-              position: "absolute",
-              top: "10px",
-              right: "12px",
-              "z-index": 10,
-              display: "flex",
-              "align-items": "center",
-              gap: "8px",
-              padding: "6px 12px",
-              background: "rgba(15, 23, 42, 0.92)",
-              "backdrop-filter": "blur(12px)",
-              "-webkit-backdrop-filter": "blur(12px)",
-              border: "1px solid rgba(var(--accent-rgb, 56, 189, 248), 0.35)",
-              "border-radius": "8px",
-              color: "var(--text-primary, #f8fafc)",
-              "font-size": "12px",
-              "font-family": "Space Mono, monospace",
-              "box-shadow": "0 4px 16px rgba(0, 0, 0, 0.45)",
-            }}
-          >
-            <span>If page refuses to connect:</span>
-            <button
-              type="button"
-              class="icon-btn"
-              style={{
-                ...S.actionBtn,
-                padding: "4px 10px",
-                "font-size": "11px",
-                display: "inline-flex",
-                "align-items": "center",
-                gap: "5px",
-              }}
-              onClick={() => props.onOpenInWebviewWindow(props.activeTab!.url)}
-            >
-              <PopoutIcon size={14} />
-              Pop out Window
-            </button>
-            <button
-              type="button"
-              class="icon-btn web-loader-icon-btn"
-              style={{
-                background: "transparent",
-                border: "none",
-                color: "var(--text-muted, #94a3b8)",
-                cursor: "pointer",
-                padding: "0",
-                width: "22px",
-                height: "22px",
-                display: "inline-flex",
-                "align-items": "center",
-                "justify-content": "center",
-              }}
-              onClick={() => {
-                if (props.activeTab) {
-                  setDismissedWarnings((prev) => ({ ...prev, [props.activeTab!.id]: true }));
-                }
-              }}
-              title="Dismiss notice"
-            >
-              <CloseIcon size={14} />
-            </button>
-          </div>
-        </Show>
+        <Show
+          when={!shouldShowLauncher()}
+          fallback={
+            <div style={S.blockedNotice}>
+              <div
+                style={{
+                  display: "inline-flex",
+                  padding: "18px",
+                  "border-radius": "999px",
+                  background: "rgba(var(--accent-rgb, 56, 189, 248), 0.12)",
+                  color: "var(--accent-default, #38bdf8)",
+                  border: "1px solid rgba(var(--accent-rgb, 56, 189, 248), 0.3)",
+                  "box-shadow": "0 0 24px rgba(var(--accent-rgb, 56, 189, 248), 0.2)",
+                }}
+              >
+                <GlobeIcon size={38} />
+              </div>
 
-        <iframe
-          src={props.activeTab!.url}
-          title={props.activeTab!.title || "Web View"}
-          style={{
-            ...S.iframe,
-            transform: `scale(${props.activeTab!.zoom})`,
-            "transform-origin": "0 0",
-            width: `${100 / props.activeTab!.zoom}%`,
-            height: `${100 / props.activeTab!.zoom}%`,
-          }}
-          allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share; fullscreen"
-        />
+              <div style={{ "max-width": "540px" }}>
+                <div style={{ display: "flex", "align-items": "center", "justify-content": "center", gap: "8px", "margin-bottom": "8px" }}>
+                  <span style={S.badge}>Frame Protected</span>
+                  <span style={{ "font-size": "11px", "font-family": "Space Mono, monospace", color: "var(--text-muted, #94a3b8)" }}>
+                    X-Frame-Options: DENY
+                  </span>
+                </div>
+
+                <h2
+                  style={{
+                    margin: "0 0 8px 0",
+                    "font-size": "22px",
+                    "font-weight": 600,
+                    color: "var(--text-primary, #f8fafc)",
+                  }}
+                >
+                  {getDomain(props.activeTab!.url)}
+                </h2>
+
+                <p
+                  style={{
+                    margin: 0,
+                    "font-size": "13px",
+                    color: "var(--text-secondary, #94a3b8)",
+                    "line-height": 1.55,
+                  }}
+                >
+                  This platform enforces browser frame security (<code>X-Frame-Options</code>), which blocks embedded tab rendering.
+                  <br />
+                  <br />
+                  Launch it in an unrestricted <strong>Native WebviewWindow</strong> powered by {getPlatformEngineName()} for full compatibility, WebGL, cookies, and chat sessions.
+                </p>
+              </div>
+
+              <div style={{ display: "flex", gap: "10px", "margin-top": "8px", "flex-wrap": "wrap", "justify-content": "center" }}>
+                <button
+                  type="button"
+                  style={S.actionBtn}
+                  onClick={() => props.onOpenInWebviewWindow(props.activeTab!.url)}
+                >
+                  <PopoutIcon size={18} />
+                  Launch Native Window
+                </button>
+
+                <button
+                  type="button"
+                  style={S.secondaryBtn}
+                  onClick={() => props.onOpenExternal(props.activeTab!.url)}
+                >
+                  <ExternalIcon size={18} />
+                  Open in System Browser
+                </button>
+
+                <button
+                  type="button"
+                  style={{
+                    ...S.secondaryBtn,
+                    background: "transparent",
+                    color: "var(--text-muted, #94a3b8)",
+                    border: "1px dashed var(--border-color, rgba(255, 255, 255, 0.15))",
+                  }}
+                  onClick={() => {
+                    if (props.activeTab) {
+                      setForceEmbedTabs((prev) => ({ ...prev, [props.activeTab!.id]: true }));
+                    }
+                  }}
+                  title="Attempt loading in iframe anyway"
+                >
+                  Try in Tab Anyway
+                </button>
+              </div>
+            </div>
+          }
+        >
+          <iframe
+            src={props.activeTab!.url}
+            title={props.activeTab!.title || "Web View"}
+            style={{
+              ...S.iframe,
+              transform: `scale(${props.activeTab!.zoom})`,
+              "transform-origin": "0 0",
+              width: `${100 / props.activeTab!.zoom}%`,
+              height: `${100 / props.activeTab!.zoom}%`,
+            }}
+            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share; fullscreen"
+          />
+        </Show>
       </Show>
     </div>
   );
