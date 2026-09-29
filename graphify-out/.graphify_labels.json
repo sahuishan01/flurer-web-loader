@@ -1,0 +1,13 @@
+{
+  "0": "types.ts",
+  "1": "NavigationBar.tsx",
+  "2": "compilerOptions",
+  "3": "package.json",
+  "4": "index.tsx",
+  "5": "QuickDial.tsx",
+  "6": "Flurer Web Loader Plugin (`web-loader`)",
+  "7": "sync-version.cjs",
+  "8": "vite.config.ts",
+  "9": "rules/graphify.md",
+  "10": "workflows/graphify.md"
+}

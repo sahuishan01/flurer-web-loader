@@ -6,8 +6,8 @@
     "semantic_hash": "5f01df85bf0e9ac9aa1fd49229debb63"
   },
   "plugin.json": {
-    "mtime": 1790663806.814937,
-    "seen": 1790663861.008933,
+    "mtime": 1790663935.3514678,
+    "seen": 1790663950.6490602,
     "ast_hash": "2cce7afde6a1ee7a1e4f5c8523d3977d",
     "semantic_hash": "2cce7afde6a1ee7a1e4f5c8523d3977d"
   },
@@ -88,5 +88,29 @@
     "seen": 1790663861.0089562,
     "ast_hash": "d7570caebd6044c9e86dd5504fba13cb",
     "semantic_hash": "d7570caebd6044c9e86dd5504fba13cb"
+  },
+  ".agents/rules/graphify.md": {
+    "mtime": 1790663858.4991415,
+    "seen": 1790663950.649087,
+    "ast_hash": "f1e53ecc9194573d3c28fc116c743a2e",
+    "semantic_hash": ""
+  },
+  ".agents/workflows/graphify.md": {
+    "mtime": 1790663858.4991415,
+    "seen": 1790663950.649088,
+    "ast_hash": "6d73634a678cf1e1c71930adf80bd1f0",
+    "semantic_hash": ""
+  },
+  ".github/workflows/release.yml": {
+    "mtime": 1790663830.5830312,
+    "seen": 1790663950.6490893,
+    "ast_hash": "b0698dcbd966074b052c9afc858da3c8",
+    "semantic_hash": ""
+  },
+  "README.md": {
+    "mtime": 1790663853.8151228,
+    "seen": 1790663950.6490905,
+    "ast_hash": "159a9cf3450cda7f037dd8965fd25868",
+    "semantic_hash": ""
   }
 }
