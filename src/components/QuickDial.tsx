@@ -1,16 +1,19 @@
 import { For, createSignal } from "solid-js";
-import { Bookmark } from "../types";
+import { Bookmark, HistoryItem } from "../types";
 import { S } from "../styles";
-import { PopoutIcon, GlobeIcon, PlusIcon, CloseIcon, NewTabIcon, ExternalIcon } from "../icons";
+import { PopoutIcon, GlobeIcon, PlusIcon, CloseIcon, NewTabIcon, ExternalIcon, HistoryIcon, TrashIcon } from "../icons";
 
 interface QuickDialProps {
   bookmarks: Bookmark[];
+  history?: HistoryItem[];
   onOpenUrl: (url: string) => void;
   onNewTab: (url: string) => void;
   onOpenInWebviewWindow: (url: string) => void;
   onOpenExternal: (url: string) => void;
   onAddBookmark: (title: string, url: string, category: "dev" | "docs" | "ai" | "custom") => void;
   onRemoveBookmark: (id: string) => void;
+  onRemoveHistory?: (id: string) => void;
+  onClearHistory?: () => void;
 }
 
 const DEFAULT_DEV_TARGETS: { title: string; url: string; tag: string }[] = [
@@ -411,6 +414,143 @@ export function QuickDial(props: QuickDialProps) {
                   </span>
                 </div>
               )}
+            </For>
+          </div>
+        </div>
+      )}
+
+      {/* Browsing History */}
+      {props.history && props.history.length > 0 && (
+        <div>
+          <div style={{ display: "flex", "align-items": "center", "justify-content": "space-between", "margin-bottom": "12px" }}>
+            <div style={{ display: "flex", "align-items": "center", gap: "8px" }}>
+              <HistoryIcon size={16} />
+              <span style={{ "font-size": "11px", "font-family": "Space Mono, monospace", "text-transform": "uppercase", "letter-spacing": "0.12em", color: "var(--accent-default, #38bdf8)" }}>
+                Recent Browsing History ({props.history.length})
+              </span>
+            </div>
+            {props.onClearHistory && (
+              <button
+                type="button"
+                class="icon-btn web-loader-icon-btn"
+                style={{ ...S.secondaryBtn, padding: "4px 10px", "font-size": "11px", "font-family": "Space Mono, monospace", gap: "4px" }}
+                onClick={() => props.onClearHistory?.()}
+                title="Clear all history"
+              >
+                <TrashIcon size={13} />
+                Clear History
+              </button>
+            )}
+          </div>
+          <div style={{ display: "grid", "grid-template-columns": "repeat(auto-fill, minmax(260px, 1fr))", gap: "12px" }}>
+            <For each={props.history.slice(0, 12)}>
+              {(item) => {
+                const timeAgo = () => {
+                  const sec = Math.floor((Date.now() - item.timestamp) / 1000);
+                  if (sec < 60) return "Just now";
+                  const min = Math.floor(sec / 60);
+                  if (min < 60) return `${min}m ago`;
+                  const hr = Math.floor(min / 60);
+                  if (hr < 24) return `${hr}h ago`;
+                  return `${Math.floor(hr / 24)}d ago`;
+                };
+                return (
+                  <div
+                    style={{
+                      display: "flex",
+                      "flex-direction": "column",
+                      gap: "8px",
+                      background: "var(--card-bg, rgba(255, 255, 255, 0.04))",
+                      border: "1px solid var(--card-border, rgba(255, 255, 255, 0.08))",
+                      "border-radius": "10px",
+                      padding: "14px",
+                      cursor: "pointer",
+                      transition: "all 0.2s cubic-bezier(0.22, 1, 0.36, 1)",
+                    }}
+                    onClick={() => props.onOpenUrl(item.url)}
+                  >
+                    <div style={{ display: "flex", "align-items": "center", "justify-content": "space-between" }}>
+                      <span
+                        style={{
+                          "font-weight": 600,
+                          "font-size": "14px",
+                          overflow: "hidden",
+                          "text-overflow": "ellipsis",
+                          "white-space": "nowrap",
+                          "max-width": "160px",
+                        }}
+                        title={item.title}
+                      >
+                        {item.title}
+                      </span>
+                      <div style={{ display: "flex", "align-items": "center", gap: "6px" }} onClick={(e) => e.stopPropagation()}>
+                        <button
+                          type="button"
+                          class="icon-btn web-loader-icon-btn"
+                          style={S.cardIconBtn}
+                          onClick={() => props.onNewTab(item.url)}
+                          title="Open in New Tab"
+                        >
+                          <NewTabIcon size={18} />
+                        </button>
+                        <button
+                          type="button"
+                          class="icon-btn web-loader-icon-btn"
+                          style={S.cardIconBtn}
+                          onClick={() => props.onOpenInWebviewWindow(item.url)}
+                          title="Open in Dedicated Native WebviewWindow"
+                        >
+                          <PopoutIcon size={18} />
+                        </button>
+                        <button
+                          type="button"
+                          class="icon-btn web-loader-icon-btn"
+                          style={S.cardIconBtn}
+                          onClick={() => props.onOpenExternal(item.url)}
+                          title="Open in System Browser"
+                        >
+                          <ExternalIcon size={18} />
+                        </button>
+                        {props.onRemoveHistory && (
+                          <button
+                            type="button"
+                            class="icon-btn web-loader-icon-btn"
+                            style={S.cardIconBtn}
+                            onClick={() => props.onRemoveHistory?.(item.id)}
+                            title="Remove from History"
+                          >
+                            <CloseIcon size={16} />
+                          </button>
+                        )}
+                      </div>
+                    </div>
+                    <div style={{ display: "flex", "align-items": "center", "justify-content": "space-between", gap: "6px" }}>
+                      <span
+                        style={{
+                          "font-size": "11px",
+                          "font-family": "Space Mono, monospace",
+                          color: "var(--text-muted, #94a3b8)",
+                          overflow: "hidden",
+                          "text-overflow": "ellipsis",
+                          "white-space": "nowrap",
+                        }}
+                      >
+                        {item.url}
+                      </span>
+                      <span
+                        style={{
+                          "font-size": "10px",
+                          "font-family": "Space Mono, monospace",
+                          color: "var(--accent-default, #38bdf8)",
+                          "flex-shrink": 0,
+                        }}
+                      >
+                        {timeAgo()}
+                      </span>
+                    </div>
+                  </div>
+                );
+              }}
             </For>
           </div>
         </div>

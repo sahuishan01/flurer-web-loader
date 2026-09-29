@@ -1,5 +1,5 @@
 import { createSignal, createRoot } from "solid-js";
-import { MainPanelProps, Tab, Bookmark } from "./types";
+import { MainPanelProps, Tab, Bookmark, HistoryItem } from "./types";
 import { S } from "./styles";
 import { GlobeIcon } from "./icons";
 import { TabBar } from "./components/TabBar";
@@ -17,6 +17,10 @@ import {
   saveActiveTab,
   getSavedBookmarks,
   saveBookmarks,
+  getSavedHistory,
+  addHistoryItem,
+  removeHistoryItem,
+  clearHistory,
 } from "./utils";
 
 declare const __VERSION__: string;
@@ -82,9 +86,16 @@ const initialTabsState = initRestoredTabs();
 const [tabs, setTabs] = createRoot(() => createSignal<Tab[]>(initialTabsState.tabs));
 const [activeTabId, setActiveTabId] = createRoot(() => createSignal<string>(initialTabsState.activeId));
 const [bookmarks, setBookmarks] = createRoot(() => createSignal<Bookmark[]>(getSavedBookmarks()));
+const [history, setHistory] = createRoot(() => createSignal<HistoryItem[]>(getSavedHistory()));
 
 function WebBrowserPanel(props: MainPanelProps) {
   const activeTab = () => tabs().find((t) => t.id === activeTabId()) || tabs()[0];
+
+  const getLaunchOptions = () => ({
+    incognito: props.pluginSettings?.incognitoMode,
+    userAgent: props.pluginSettings?.customUserAgent,
+    reuseExisting: props.pluginSettings?.singleWindowPerDomain ?? true,
+  });
 
   const persistCurrentTabs = (currentTabs: Tab[], activeUrl?: string) => {
     saveTabs(currentTabs.map((t) => ({ title: t.title, url: t.url })));
@@ -139,13 +150,19 @@ function WebBrowserPanel(props: MainPanelProps) {
 
     // If preferred launch mode is WebviewWindow, spawn directly
     if (props.pluginSettings?.defaultMode === "webviewwindow") {
-      openInWebviewWindow(url, domain);
+      openInWebviewWindow(url, domain, getLaunchOptions());
+      if (url && url !== "about:blank") {
+        setHistory(addHistoryItem(domain, url));
+      }
       return;
     }
 
     const nextTabs = tabs().map((t) => (t.id === id ? { ...t, url, title: domain } : t));
     setTabs(nextTabs);
     persistCurrentTabs(nextTabs, url);
+    if (url && url !== "about:blank") {
+      setHistory(addHistoryItem(domain, url));
+    }
   };
 
   const handleReload = () => {
@@ -173,7 +190,8 @@ function WebBrowserPanel(props: MainPanelProps) {
   const handlePopoutWebviewWindow = () => {
     const current = activeTab();
     if (current && current.url !== "about:blank") {
-      openInWebviewWindow(current.url, current.title);
+      openInWebviewWindow(current.url, current.title, getLaunchOptions());
+      setHistory(addHistoryItem(current.title || getDomain(current.url), current.url));
     }
   };
 
@@ -294,12 +312,22 @@ function WebBrowserPanel(props: MainPanelProps) {
       <WebViewport
         activeTab={activeTab()}
         bookmarks={bookmarks()}
+        history={history()}
         onOpenUrl={handleNavigate}
         onNewTab={handleNewTab}
-        onOpenInWebviewWindow={(url) => openInWebviewWindow(url)}
+        onOpenInWebviewWindow={(url) => {
+          const domain = getDomain(url);
+          openInWebviewWindow(url, domain, getLaunchOptions());
+          setHistory(addHistoryItem(domain, url));
+        }}
         onOpenExternal={handleOpenExternal}
         onAddBookmark={handleAddBookmark}
         onRemoveBookmark={handleRemoveBookmark}
+        onRemoveHistory={(id) => setHistory(removeHistoryItem(id))}
+        onClearHistory={() => {
+          clearHistory();
+          setHistory([]);
+        }}
       />
     </div>
   );
@@ -310,7 +338,7 @@ function WebBrowserPanel(props: MainPanelProps) {
   id: "web-loader",
   name: "Web Loader",
   description: "High-performance browser and WebviewWindow loader for modern websites and local web apps.",
-  version: typeof __VERSION__ !== "undefined" ? __VERSION__ : "0.1.6",
+  version: typeof __VERSION__ !== "undefined" ? __VERSION__ : "0.1.7",
   author: "Algosculptor",
   hasCustomAppearanceSettings: true,
   viewRailButton: (props: any) => (

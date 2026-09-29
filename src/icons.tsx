@@ -120,3 +120,45 @@ export function LockIcon(props: { size?: number }) {
     </svg>
   );
 }
+
+export function ShieldIcon(props: { size?: number }) {
+  const s = () => props.size || 20;
+  return (
+    <svg width={s()} height={s()} viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" style={{ "flex-shrink": "0", display: "block" }}>
+      <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" />
+    </svg>
+  );
+}
+
+export function HistoryIcon(props: { size?: number }) {
+  const s = () => props.size || 20;
+  return (
+    <svg width={s()} height={s()} viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" style={{ "flex-shrink": "0", display: "block" }}>
+      <circle cx="12" cy="12" r="10" />
+      <polyline points="12 6 12 12 16 14" />
+    </svg>
+  );
+}
+
+export function TrashIcon(props: { size?: number }) {
+  const s = () => props.size || 18;
+  return (
+    <svg width={s()} height={s()} viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" style={{ "flex-shrink": "0", display: "block" }}>
+      <polyline points="3 6 5 6 21 6" />
+      <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2" />
+    </svg>
+  );
+}
+
+export function IncognitoIcon(props: { size?: number }) {
+  const s = () => props.size || 20;
+  return (
+    <svg width={s()} height={s()} viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" style={{ "flex-shrink": "0", display: "block" }}>
+      <path d="M2 12h20" />
+      <path d="M20 12l-2-7H6l-2 7" />
+      <circle cx="7.5" cy="16.5" r="3.5" />
+      <circle cx="16.5" cy="16.5" r="3.5" />
+      <path d="M11 16.5h2" />
+    </svg>
+  );
+}

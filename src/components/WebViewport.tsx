@@ -1,5 +1,5 @@
 import { Show, createSignal } from "solid-js";
-import { Tab, Bookmark } from "../types";
+import { Tab, Bookmark, HistoryItem } from "../types";
 import { S } from "../styles";
 import { QuickDial } from "./QuickDial";
 import { PopoutIcon, ExternalIcon, GlobeIcon, NewTabIcon, CloseIcon } from "../icons";
@@ -8,12 +8,15 @@ import { isKnownFrameRestricted, getDomain, getPlatformEngineName } from "../uti
 interface WebViewportProps {
   activeTab: Tab | undefined;
   bookmarks: Bookmark[];
+  history?: HistoryItem[];
   onOpenUrl: (url: string) => void;
   onNewTab: (url: string) => void;
   onOpenInWebviewWindow: (url: string) => void;
   onOpenExternal: (url: string) => void;
   onAddBookmark: (title: string, url: string, category: "dev" | "docs" | "ai" | "custom") => void;
   onRemoveBookmark: (id: string) => void;
+  onRemoveHistory?: (id: string) => void;
+  onClearHistory?: () => void;
 }
 
 export function WebViewport(props: WebViewportProps) {
@@ -33,12 +36,15 @@ export function WebViewport(props: WebViewportProps) {
         fallback={
           <QuickDial
             bookmarks={props.bookmarks}
+            history={props.history}
             onOpenUrl={props.onOpenUrl}
             onNewTab={props.onNewTab}
             onOpenInWebviewWindow={props.onOpenInWebviewWindow}
             onOpenExternal={props.onOpenExternal}
             onAddBookmark={props.onAddBookmark}
             onRemoveBookmark={props.onRemoveBookmark}
+            onRemoveHistory={props.onRemoveHistory}
+            onClearHistory={props.onClearHistory}
           />
         }
       >

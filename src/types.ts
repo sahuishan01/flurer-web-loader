@@ -38,6 +38,10 @@ export interface WebPluginSettings {
   surfaceOpacity?: number;
   surfaceBlur?: number;
   customUserAgent?: string;
+  persistLogin?: boolean;
+  incognitoMode?: boolean;
+  singleWindowPerDomain?: boolean;
+  strictUrlSanitization?: boolean;
 }
 
 export interface MainPanelProps {

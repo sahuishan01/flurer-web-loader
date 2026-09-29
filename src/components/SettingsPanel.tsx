@@ -1,4 +1,4 @@
-import { For, Show } from "solid-js";
+import { For, Show, createSignal } from "solid-js";
 import { SettingsPanelProps, SearchEngine } from "../types";
 import {
   themeConfig,
@@ -10,6 +10,8 @@ import {
   ThemeMode,
   hexToRgb,
 } from "../theme";
+import { ShieldIcon, TrashIcon, LockIcon, IncognitoIcon } from "../icons";
+import { clearAllBrowsingData, clearHistory, DEFAULT_DESKTOP_USER_AGENT, CHROME_DESKTOP_USER_AGENT } from "../utils";
 
 const QUICK_ACCENTS = [
   { name: "Cyan", hex: "#00f0ff" },
@@ -35,6 +37,13 @@ export function SettingsPanel(props: SettingsPanelProps) {
   const homeUrl = () => props.pluginSettings.homeUrl ?? "";
   const defaultMode = () => props.pluginSettings.defaultMode ?? "embedded";
   const persistTabs = () => props.pluginSettings.persistTabs ?? true;
+  const persistLogin = () => props.pluginSettings.persistLogin ?? true;
+  const incognitoMode = () => props.pluginSettings.incognitoMode ?? false;
+  const singleWindow = () => props.pluginSettings.singleWindowPerDomain ?? true;
+  const customUserAgent = () => props.pluginSettings.customUserAgent ?? DEFAULT_DESKTOP_USER_AGENT;
+
+  const [securityStatus, setSecurityStatus] = createSignal("");
+  const [isWiping, setIsWiping] = createSignal(false);
 
   const currentThemeMode = () => themeConfig().mode;
   const currentPreset = () => themeConfig().preset;
@@ -519,6 +528,233 @@ export function SettingsPanel(props: SettingsPanelProps) {
           <label for="persist-tabs" style={{ "font-size": "13px", cursor: "pointer" }}>
             Restore open tabs on startup
           </label>
+        </div>
+
+        {/* --- Security, Persistent Login & Privacy Systems --- */}
+        <div style={{ "margin-top": "16px", "padding-top": "20px", "border-top": "1px solid var(--border-color, rgba(255, 255, 255, 0.1))" }}>
+          <div style={{ display: "flex", "align-items": "center", gap: "8px", "margin-bottom": "6px" }}>
+            <ShieldIcon size={18} />
+            <h3 style={{ margin: 0, "font-size": "15px", "font-weight": 600, color: "var(--text-primary, #f8fafc)" }}>
+              Data Security & Persistent Login
+            </h3>
+          </div>
+          <p style={{ margin: "0 0 16px 0", "font-size": "12.5px", color: "var(--text-secondary, #94a3b8)" }}>
+            Configure authentication session persistence, private browsing, and Webview2 security invariants.
+          </p>
+
+          <div style={{ display: "flex", "flex-direction": "column", gap: "14px" }}>
+            {/* Persistent Login Toggle */}
+            <div style={{ display: "flex", "flex-direction": "column", gap: "4px" }}>
+              <div style={{ display: "flex", "align-items": "center", gap: "10px" }}>
+                <input
+                  type="checkbox"
+                  id="persist-login"
+                  checked={persistLogin()}
+                  onChange={(e) => props.onPluginSettingsChange({ persistLogin: e.currentTarget.checked })}
+                />
+                <label for="persist-login" style={{ "font-size": "13px", "font-weight": 600, cursor: "pointer" }}>
+                  Persistent Logins & Session Cookies
+                </label>
+              </div>
+              <span style={{ "font-size": "12px", color: "var(--text-muted, #94a3b8)", "margin-left": "24px" }}>
+                Preserves authenticated sessions (ChatGPT, Claude, GitHub, Termix, etc.) in the secure profile across Flurer restarts.
+              </span>
+            </div>
+
+            {/* Incognito Default Toggle */}
+            <div style={{ display: "flex", "flex-direction": "column", gap: "4px" }}>
+              <div style={{ display: "flex", "align-items": "center", gap: "10px" }}>
+                <input
+                  type="checkbox"
+                  id="incognito-mode"
+                  checked={incognitoMode()}
+                  onChange={(e) => props.onPluginSettingsChange({ incognitoMode: e.currentTarget.checked })}
+                />
+                <label for="incognito-mode" style={{ "font-size": "13px", "font-weight": 600, cursor: "pointer" }}>
+                  Ephemeral / Incognito Mode (Zero Disk Traces)
+                </label>
+              </div>
+              <span style={{ "font-size": "12px", color: "var(--text-muted, #94a3b8)", "margin-left": "24px" }}>
+                Runs WebviewWindows in ephemeral memory. No cookies, auth tokens, or cache are stored on disk.
+              </span>
+            </div>
+
+            {/* Single Window per Service Toggle */}
+            <div style={{ display: "flex", "flex-direction": "column", gap: "4px" }}>
+              <div style={{ display: "flex", "align-items": "center", gap: "10px" }}>
+                <input
+                  type="checkbox"
+                  id="single-window"
+                  checked={singleWindow()}
+                  onChange={(e) => props.onPluginSettingsChange({ singleWindowPerDomain: e.currentTarget.checked })}
+                />
+                <label for="single-window" style={{ "font-size": "13px", "font-weight": 600, cursor: "pointer" }}>
+                  Reuse Existing Window per Service
+                </label>
+              </div>
+              <span style={{ "font-size": "12px", color: "var(--text-muted, #94a3b8)", "margin-left": "24px" }}>
+                Focuses and brings existing service windows to front rather than spawning redundant instances.
+              </span>
+            </div>
+
+            {/* Desktop User-Agent Selector */}
+            <div style={{ display: "flex", "flex-direction": "column", gap: "6px", "margin-top": "6px" }}>
+              <label style={{ "font-size": "13px", "font-weight": 500 }}>
+                Desktop User-Agent Identifier
+              </label>
+              <div style={{ display: "flex", gap: "8px", "flex-wrap": "wrap" }}>
+                <button
+                  type="button"
+                  style={{
+                    padding: "6px 12px",
+                    "font-size": "12px",
+                    "font-family": "Space Mono, monospace",
+                    "border-radius": "6px",
+                    border: "1px solid var(--border-color, rgba(255, 255, 255, 0.12))",
+                    background: customUserAgent() === DEFAULT_DESKTOP_USER_AGENT ? "var(--accent-default, #38bdf8)" : "rgba(255, 255, 255, 0.05)",
+                    color: customUserAgent() === DEFAULT_DESKTOP_USER_AGENT ? "#0f172a" : "var(--text-primary, #f8fafc)",
+                    cursor: "pointer",
+                  }}
+                  onClick={() => props.onPluginSettingsChange({ customUserAgent: DEFAULT_DESKTOP_USER_AGENT })}
+                >
+                  Edge Desktop (Recommended)
+                </button>
+                <button
+                  type="button"
+                  style={{
+                    padding: "6px 12px",
+                    "font-size": "12px",
+                    "font-family": "Space Mono, monospace",
+                    "border-radius": "6px",
+                    border: "1px solid var(--border-color, rgba(255, 255, 255, 0.12))",
+                    background: customUserAgent() === CHROME_DESKTOP_USER_AGENT ? "var(--accent-default, #38bdf8)" : "rgba(255, 255, 255, 0.05)",
+                    color: customUserAgent() === CHROME_DESKTOP_USER_AGENT ? "#0f172a" : "var(--text-primary, #f8fafc)",
+                    cursor: "pointer",
+                  }}
+                  onClick={() => props.onPluginSettingsChange({ customUserAgent: CHROME_DESKTOP_USER_AGENT })}
+                >
+                  Chrome Desktop
+                </button>
+              </div>
+              <input
+                type="text"
+                value={customUserAgent()}
+                onInput={(e) => props.onPluginSettingsChange({ customUserAgent: e.currentTarget.value })}
+                style={{
+                  padding: "8px 12px",
+                  "border-radius": "6px",
+                  background: "var(--input-bg, rgba(255, 255, 255, 0.06))",
+                  border: "1px solid var(--border-color, rgba(255, 255, 255, 0.12))",
+                  color: "var(--text-primary, #f8fafc)",
+                  "font-family": "Space Mono, monospace",
+                  "font-size": "11.5px",
+                  outline: "none",
+                  "max-width": "600px",
+                }}
+              />
+            </div>
+
+            {/* Data Security & Privacy Controls */}
+            <div
+              style={{
+                "margin-top": "10px",
+                padding: "16px",
+                background: "rgba(239, 68, 68, 0.06)",
+                border: "1px solid rgba(239, 68, 68, 0.2)",
+                "border-radius": "8px",
+                display: "flex",
+                "flex-direction": "column",
+                gap: "10px",
+              }}
+            >
+              <div style={{ display: "flex", "align-items": "center", gap: "8px" }}>
+                <TrashIcon size={16} />
+                <span style={{ "font-size": "13px", "font-weight": 600, color: "#f87171" }}>
+                  Data Security & Session Purge
+                </span>
+              </div>
+              <p style={{ margin: 0, "font-size": "12px", color: "var(--text-secondary, #94a3b8)", "line-height": 1.4 }}>
+                Purge all stored session tokens, cookies, indexedDB databases, and cached web assets from disk.
+              </p>
+
+              {securityStatus() && (
+                <div
+                  style={{
+                    padding: "8px 12px",
+                    background: "rgba(56, 189, 248, 0.15)",
+                    border: "1px solid rgba(56, 189, 248, 0.3)",
+                    "border-radius": "6px",
+                    color: "var(--text-primary, #f8fafc)",
+                    "font-size": "12px",
+                    "font-family": "Space Mono, monospace",
+                  }}
+                >
+                  {securityStatus()}
+                </div>
+              )}
+
+              <div style={{ display: "flex", gap: "10px", "flex-wrap": "wrap" }}>
+                <button
+                  type="button"
+                  disabled={isWiping()}
+                  style={{
+                    display: "inline-flex",
+                    "align-items": "center",
+                    gap: "6px",
+                    padding: "8px 14px",
+                    background: "#ef4444",
+                    color: "#ffffff",
+                    border: "none",
+                    "border-radius": "6px",
+                    "font-size": "12px",
+                    "font-weight": 600,
+                    "font-family": "Space Mono, monospace",
+                    cursor: isWiping() ? "wait" : "pointer",
+                    opacity: isWiping() ? 0.6 : 1,
+                  }}
+                  onClick={async () => {
+                    setIsWiping(true);
+                    setSecurityStatus("Purging all webview data...");
+                    const res = await clearAllBrowsingData();
+                    setIsWiping(false);
+                    if (res.success) {
+                      setSecurityStatus("✓ All webview cookies, cache & local data purged successfully.");
+                    } else {
+                      setSecurityStatus(`⚠️ Notice: ${res.error || "Cleared"}`);
+                    }
+                    setTimeout(() => setSecurityStatus(""), 5000);
+                  }}
+                >
+                  <TrashIcon size={14} />
+                  {isWiping() ? "Purging..." : "Purge All Browsing Data (Cookies & Cache)"}
+                </button>
+
+                <button
+                  type="button"
+                  style={{
+                    display: "inline-flex",
+                    "align-items": "center",
+                    gap: "6px",
+                    padding: "8px 14px",
+                    background: "rgba(255, 255, 255, 0.08)",
+                    color: "var(--text-primary, #f8fafc)",
+                    border: "1px solid var(--border-color, rgba(255, 255, 255, 0.15))",
+                    "border-radius": "6px",
+                    "font-size": "12px",
+                    "font-family": "Space Mono, monospace",
+                    cursor: "pointer",
+                  }}
+                  onClick={() => {
+                    clearHistory();
+                    setSecurityStatus("✓ Browsing history cleared.");
+                    setTimeout(() => setSecurityStatus(""), 4000);
+                  }}
+                >
+                  Clear History
+                </button>
+              </div>
+            </div>
+          </div>
         </div>
       </div>
     </div>
