@@ -82,6 +82,19 @@
       "source_location": "L43"
     },
     {
+      "id": "src_types_searchengine",
+      "label": "SearchEngine",
+      "_callable": true,
+      "_callable_class": true,
+      "_origin": "ast",
+      "community": 0,
+      "community_name": "WebViewport.tsx",
+      "file_type": "code",
+      "norm_label": "searchengine",
+      "source_file": "src/types.ts",
+      "source_location": "L1"
+    },
+    {
       "id": "src_types_settingspanelprops",
       "label": "SettingsPanelProps",
       "_callable": true,
@@ -132,19 +145,6 @@
       "norm_label": "navigationbarprops",
       "source_file": "src/components/NavigationBar.tsx",
       "source_location": "L16"
-    },
-    {
-      "id": "src_types_searchengine",
-      "label": "SearchEngine",
-      "_callable": true,
-      "_callable_class": true,
-      "_origin": "ast",
-      "community": 1,
-      "community_name": "NavigationBar.tsx",
-      "file_type": "code",
-      "norm_label": "searchengine",
-      "source_file": "src/types.ts",
-      "source_location": "L1"
     },
     {
       "id": "src_utils_platform",
@@ -1504,30 +1504,6 @@
       "weight": 1.0
     },
     {
-      "source": "src_components_navigationbar_navigationbarprops",
-      "target": "src_types_tab",
-      "relation": "references",
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "context": "field",
-      "source_file": "src/components/NavigationBar.tsx",
-      "source_location": "L17",
-      "weight": 1.0
-    },
-    {
-      "source": "src_components_navigationbar_navigationbarprops",
-      "target": "src_types_searchengine",
-      "relation": "references",
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "context": "field",
-      "source_file": "src/components/NavigationBar.tsx",
-      "source_location": "L18",
-      "weight": 1.0
-    },
-    {
       "source": "src_components_quickdial_quickdialprops",
       "target": "src_types_bookmark",
       "relation": "references",
@@ -1537,42 +1513,6 @@
       "context": "field",
       "source_file": "src/components/QuickDial.tsx",
       "source_location": "L7",
-      "weight": 1.0
-    },
-    {
-      "source": "src_components_tabbar_tabbarprops",
-      "target": "src_types_tab",
-      "relation": "references",
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "context": "field",
-      "source_file": "src/components/TabBar.tsx",
-      "source_location": "L8",
-      "weight": 1.0
-    },
-    {
-      "source": "src_components_webviewport_webviewportprops",
-      "target": "src_types_bookmark",
-      "relation": "references",
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "context": "field",
-      "source_file": "src/components/WebViewport.tsx",
-      "source_location": "L10",
-      "weight": 1.0
-    },
-    {
-      "source": "src_components_webviewport_webviewportprops",
-      "target": "src_types_tab",
-      "relation": "references",
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "context": "field",
-      "source_file": "src/components/WebViewport.tsx",
-      "source_location": "L9",
       "weight": 1.0
     },
     {
@@ -3544,5 +3484,5 @@
     }
   ],
   "hyperedges": [],
-  "built_at_commit": "4aa72cf90de290b7c210216a647fba084ba00306"
+  "built_at_commit": "061c58870321a3f4c0d3c4916f436ea16a483d3e"
 }

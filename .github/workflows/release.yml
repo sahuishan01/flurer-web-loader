@@ -22,13 +22,13 @@ jobs:
           cp dist/index.js _plugin/
           cp plugin.json _plugin/
           cp package.json _plugin/
-          cd _plugin && zip -r ../flurer-web-loader-plugin.zip .
+          cd _plugin && zip -r ../flurer-web-loader.zip .
       - name: Create Release
         uses: softprops/action-gh-release@v2
         with:
-          name: flurer-web-loader-plugin ${{ github.ref_name }}
+          name: flurer-web-loader ${{ github.ref_name }}
           tag_name: ${{ github.ref_name }}
           draft: false
           prerelease: false
-          files: flurer-web-loader-plugin.zip
+          files: flurer-web-loader.zip
           generate_release_notes: true

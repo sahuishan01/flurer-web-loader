@@ -1,10 +1,9 @@
 {
-  "0": "types.ts",
+  "0": "WebViewport.tsx",
   "1": "NavigationBar.tsx",
   "2": "compilerOptions",
   "3": "package.json",
   "4": "index.tsx",
-  "5": "QuickDial.tsx",
   "6": "Flurer Web Loader Plugin (`web-loader`)",
   "7": "sync-version.cjs",
   "8": "vite.config.ts",
