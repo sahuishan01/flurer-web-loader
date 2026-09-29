@@ -150,8 +150,12 @@ export const KNOWN_FRAME_RESTRICTED_DOMAINS = [
 export function isKnownFrameRestricted(url: string): boolean {
   try {
     const domain = getDomain(url).toLowerCase();
-    return KNOWN_FRAME_RESTRICTED_DOMAINS.some(
-      (blocked) => domain === blocked || domain.endsWith("." + blocked)
+    return (
+      domain.includes("google.") ||
+      domain.includes("youtube.") ||
+      KNOWN_FRAME_RESTRICTED_DOMAINS.some(
+        (blocked) => domain === blocked || domain.endsWith("." + blocked)
+      )
     );
   } catch {
     return false;
@@ -307,6 +311,114 @@ export async function clearAllBrowsingData(): Promise<{ success: boolean; error?
     console.error("Failed to clear browsing data:", err);
     return { success: false, error: String(err?.message || err) };
   }
+}
+
+export const DOCKED_WEBVIEW_LABEL = "web-docked-view";
+
+export async function createDockedWebview(
+  url: string,
+  rect: { x: number; y: number; width: number; height: number },
+  windowLabel?: string
+): Promise<{ success: boolean; error?: string }> {
+  if (!window.TauriCore) {
+    return { success: false, error: "TauriCore not available" };
+  }
+  const targetWindowLabel =
+    windowLabel ||
+    (window as any).__TAURI_INTERNALS__?.metadata?.currentWindow?.label ||
+    "main";
+
+  const sanitized = sanitizeUrl(url);
+  if (!sanitized.isSafe) {
+    return { success: false, error: sanitized.warning || "Unsafe URL blocked" };
+  }
+
+  try {
+    // Attempt closing existing docked view first to cleanly remount with new URL
+    try {
+      await window.TauriCore.invoke("plugin:webview|webview_close", {
+        label: DOCKED_WEBVIEW_LABEL,
+      });
+    } catch {}
+
+    const x = Math.max(0, Math.round(rect.x));
+    const y = Math.max(0, Math.round(rect.y));
+    const width = Math.max(100, Math.round(rect.width));
+    const height = Math.max(100, Math.round(rect.height));
+
+    await window.TauriCore.invoke("plugin:webview|create_webview", {
+      windowLabel: targetWindowLabel,
+      options: {
+        label: DOCKED_WEBVIEW_LABEL,
+        url: sanitized.url,
+        x,
+        y,
+        width,
+        height,
+        autoResize: true,
+        userAgent: DEFAULT_DESKTOP_USER_AGENT,
+      },
+    });
+
+    return { success: true };
+  } catch (err: any) {
+    return { success: false, error: String(err?.message || err) };
+  }
+}
+
+export async function updateDockedWebviewBounds(rect: {
+  x: number;
+  y: number;
+  width: number;
+  height: number;
+}): Promise<void> {
+  if (!window.TauriCore) return;
+  try {
+    const x = Math.max(0, Math.round(rect.x));
+    const y = Math.max(0, Math.round(rect.y));
+    const width = Math.max(100, Math.round(rect.width));
+    const height = Math.max(100, Math.round(rect.height));
+
+    await window.TauriCore.invoke("plugin:webview|set_webview_position", {
+      label: DOCKED_WEBVIEW_LABEL,
+      value: {
+        Logical: { x, y },
+      },
+    });
+    await window.TauriCore.invoke("plugin:webview|set_webview_size", {
+      label: DOCKED_WEBVIEW_LABEL,
+      value: {
+        Logical: { width, height },
+      },
+    });
+  } catch {}
+}
+
+export async function closeDockedWebview(): Promise<void> {
+  if (!window.TauriCore) return;
+  try {
+    await window.TauriCore.invoke("plugin:webview|webview_close", {
+      label: DOCKED_WEBVIEW_LABEL,
+    });
+  } catch {}
+}
+
+export async function hideDockedWebview(): Promise<void> {
+  if (!window.TauriCore) return;
+  try {
+    await window.TauriCore.invoke("plugin:webview|webview_hide", {
+      label: DOCKED_WEBVIEW_LABEL,
+    });
+  } catch {}
+}
+
+export async function showDockedWebview(): Promise<void> {
+  if (!window.TauriCore) return;
+  try {
+    await window.TauriCore.invoke("plugin:webview|webview_show", {
+      label: DOCKED_WEBVIEW_LABEL,
+    });
+  } catch {}
 }
 
 const TABS_KEY = "flurer-web-loader-tabs";

@@ -313,6 +313,8 @@ function WebBrowserPanel(props: MainPanelProps) {
         activeTab={activeTab()}
         bookmarks={bookmarks()}
         history={history()}
+        active={props.active}
+        dockedChildWebview={props.pluginSettings?.dockedChildWebview !== false}
         onOpenUrl={handleNavigate}
         onNewTab={handleNewTab}
         onOpenInWebviewWindow={(url) => {
@@ -338,7 +340,7 @@ function WebBrowserPanel(props: MainPanelProps) {
   id: "web-loader",
   name: "Web Loader",
   description: "High-performance browser and WebviewWindow loader for modern websites and local web apps.",
-  version: typeof __VERSION__ !== "undefined" ? __VERSION__ : "0.1.8",
+  version: typeof __VERSION__ !== "undefined" ? __VERSION__ : "0.1.9",
   author: "Algosculptor",
   hasCustomAppearanceSettings: true,
   viewRailButton: (props: any) => (

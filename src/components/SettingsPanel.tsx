@@ -530,6 +530,19 @@ export function SettingsPanel(props: SettingsPanelProps) {
           </label>
         </div>
 
+        {/* Docked Child Webview Toggle */}
+        <div style={{ display: "flex", "align-items": "center", gap: "10px" }}>
+          <input
+            type="checkbox"
+            id="docked-child"
+            checked={props.pluginSettings.dockedChildWebview !== false}
+            onChange={(e) => props.onPluginSettingsChange({ dockedChildWebview: e.currentTarget.checked })}
+          />
+          <label for="docked-child" style={{ "font-size": "13px", cursor: "pointer" }}>
+            Enable Native Docked Child Webview (bypasses iframe restrictions)
+          </label>
+        </div>
+
         {/* --- Security, Persistent Login & Privacy Systems --- */}
         <div style={{ "margin-top": "16px", "padding-top": "20px", "border-top": "1px solid var(--border-color, rgba(255, 255, 255, 0.1))" }}>
           <div style={{ display: "flex", "align-items": "center", gap: "8px", "margin-bottom": "6px" }}>

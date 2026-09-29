@@ -31,6 +31,7 @@ export interface WebPluginSettings {
   searchEngine?: SearchEngine;
   homeUrl?: string;
   defaultMode?: "embedded" | "webviewwindow";
+  dockedChildWebview?: boolean;
   persistTabs?: boolean;
   savedTabs?: { title: string; url: string }[];
   savedActiveTabUrl?: string;
