@@ -272,6 +272,7 @@ function WebBrowserPanel(props: MainPanelProps) {
         activeTab={activeTab()}
         bookmarks={bookmarks()}
         onOpenUrl={handleNavigate}
+        onNewTab={handleNewTab}
         onOpenInWebviewWindow={(url) => openInWebviewWindow(url)}
         onOpenExternal={handleOpenExternal}
         onAddBookmark={handleAddBookmark}
@@ -286,7 +287,7 @@ function WebBrowserPanel(props: MainPanelProps) {
   id: "web-loader",
   name: "Web Loader",
   description: "High-performance browser and WebviewWindow loader for modern websites and local web apps.",
-  version: typeof __VERSION__ !== "undefined" ? __VERSION__ : "0.1.2",
+  version: typeof __VERSION__ !== "undefined" ? __VERSION__ : "0.1.3",
   author: "Algosculptor",
   hasCustomAppearanceSettings: true,
   viewRailButton: (props: any) => (
@@ -298,7 +299,7 @@ function WebBrowserPanel(props: MainPanelProps) {
       aria-label="Web Loader"
       onClick={props.onClick}
     >
-      <GlobeIcon size={19} />
+      <GlobeIcon size={20} />
     </button>
   ),
   fullPanel: (props: any) => <WebBrowserPanel {...props} />,

@@ -29,7 +29,7 @@ export function TabBar(props: TabBarProps) {
               onClick={() => props.onSelectTab(tab.id)}
               title={tab.url}
             >
-              <GlobeIcon size={14} />
+              <GlobeIcon size={16} />
               <span style={S.tabTitle}>{tab.title || "New Tab"}</span>
               <button
                 type="button"
@@ -40,7 +40,7 @@ export function TabBar(props: TabBarProps) {
                   props.onCloseTab(tab.id);
                 }}
               >
-                <CloseIcon size={12} />
+                <CloseIcon size={14} />
               </button>
             </div>
           );
@@ -51,13 +51,13 @@ export function TabBar(props: TabBarProps) {
         type="button"
         style={{
           ...S.iconBtn,
-          width: "28px",
-          height: "28px",
+          width: "30px",
+          height: "30px",
         }}
         onClick={props.onNewTab}
         title={`Open New Tab (${mod}+T)`}
       >
-        <PlusIcon size={14} />
+        <PlusIcon size={18} />
       </button>
     </div>
   );

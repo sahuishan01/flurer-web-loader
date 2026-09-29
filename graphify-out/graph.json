@@ -10,7 +10,7 @@
       "_callable_class": true,
       "_origin": "ast",
       "community": 0,
-      "community_name": "WebViewport.tsx",
+      "community_name": "NavigationBar.tsx",
       "file_type": "code",
       "norm_label": "quickdialprops",
       "source_file": "src/components/QuickDial.tsx",
@@ -23,7 +23,7 @@
       "_callable_class": true,
       "_origin": "ast",
       "community": 0,
-      "community_name": "WebViewport.tsx",
+      "community_name": "NavigationBar.tsx",
       "file_type": "code",
       "norm_label": "tabbarprops",
       "source_file": "src/components/TabBar.tsx",
@@ -36,7 +36,7 @@
       "_callable_class": true,
       "_origin": "ast",
       "community": 0,
-      "community_name": "WebViewport.tsx",
+      "community_name": "NavigationBar.tsx",
       "file_type": "code",
       "norm_label": "webviewportprops",
       "source_file": "src/components/WebViewport.tsx",
@@ -49,24 +49,11 @@
       "_callable_class": true,
       "_origin": "ast",
       "community": 0,
-      "community_name": "WebViewport.tsx",
+      "community_name": "NavigationBar.tsx",
       "file_type": "code",
       "norm_label": "bookmark",
       "source_file": "src/types.ts",
       "source_location": "L15"
-    },
-    {
-      "id": "src_types_historyitem",
-      "label": "HistoryItem",
-      "_callable": true,
-      "_callable_class": true,
-      "_origin": "ast",
-      "community": 0,
-      "community_name": "WebViewport.tsx",
-      "file_type": "code",
-      "norm_label": "historyitem",
-      "source_file": "src/types.ts",
-      "source_location": "L23"
     },
     {
       "id": "src_types_tab",
@@ -75,63 +62,11 @@
       "_callable_class": true,
       "_origin": "ast",
       "community": 0,
-      "community_name": "WebViewport.tsx",
+      "community_name": "NavigationBar.tsx",
       "file_type": "code",
       "norm_label": "tab",
       "source_file": "src/types.ts",
       "source_location": "L3"
-    },
-    {
-      "id": "src_types_webpluginsettings",
-      "label": "WebPluginSettings",
-      "_callable": true,
-      "_callable_class": true,
-      "_origin": "ast",
-      "community": 0,
-      "community_name": "WebViewport.tsx",
-      "file_type": "code",
-      "norm_label": "webpluginsettings",
-      "source_file": "src/types.ts",
-      "source_location": "L30"
-    },
-    {
-      "id": "src_components_navigationbar_navigationbarprops",
-      "label": "NavigationBarProps",
-      "_callable": true,
-      "_callable_class": true,
-      "_origin": "ast",
-      "community": 1,
-      "community_name": "NavigationBar.tsx",
-      "file_type": "code",
-      "norm_label": "navigationbarprops",
-      "source_file": "src/components/NavigationBar.tsx",
-      "source_location": "L16"
-    },
-    {
-      "id": "src_types_searchengine",
-      "label": "SearchEngine",
-      "_callable": true,
-      "_callable_class": true,
-      "_origin": "ast",
-      "community": 1,
-      "community_name": "NavigationBar.tsx",
-      "file_type": "code",
-      "norm_label": "searchengine",
-      "source_file": "src/types.ts",
-      "source_location": "L1"
-    },
-    {
-      "id": "src_types_mainpanelprops",
-      "label": "MainPanelProps",
-      "_callable": true,
-      "_callable_class": true,
-      "_origin": "ast",
-      "community": 4,
-      "community_name": "index.tsx",
-      "file_type": "code",
-      "norm_label": "mainpanelprops",
-      "source_file": "src/types.ts",
-      "source_location": "L43"
     },
     {
       "id": "src_utils_platform",
@@ -158,6 +93,19 @@
       "norm_label": "window",
       "source_file": "src/utils.ts",
       "source_location": "L30"
+    },
+    {
+      "id": "src_components_navigationbar_navigationbarprops",
+      "label": "NavigationBarProps",
+      "_callable": true,
+      "_callable_class": true,
+      "_origin": "ast",
+      "community": 5,
+      "community_name": "SettingsPanel.tsx",
+      "file_type": "code",
+      "norm_label": "navigationbarprops",
+      "source_file": "src/components/NavigationBar.tsx",
+      "source_location": "L16"
     },
     {
       "id": "src_theme_presetdef",
@@ -225,6 +173,45 @@
       "source_location": "L3"
     },
     {
+      "id": "src_types_historyitem",
+      "label": "HistoryItem",
+      "_callable": true,
+      "_callable_class": true,
+      "_origin": "ast",
+      "community": 5,
+      "community_name": "SettingsPanel.tsx",
+      "file_type": "code",
+      "norm_label": "historyitem",
+      "source_file": "src/types.ts",
+      "source_location": "L23"
+    },
+    {
+      "id": "src_types_mainpanelprops",
+      "label": "MainPanelProps",
+      "_callable": true,
+      "_callable_class": true,
+      "_origin": "ast",
+      "community": 5,
+      "community_name": "SettingsPanel.tsx",
+      "file_type": "code",
+      "norm_label": "mainpanelprops",
+      "source_file": "src/types.ts",
+      "source_location": "L43"
+    },
+    {
+      "id": "src_types_searchengine",
+      "label": "SearchEngine",
+      "_callable": true,
+      "_callable_class": true,
+      "_origin": "ast",
+      "community": 5,
+      "community_name": "SettingsPanel.tsx",
+      "file_type": "code",
+      "norm_label": "searchengine",
+      "source_file": "src/types.ts",
+      "source_location": "L1"
+    },
+    {
       "id": "src_types_settingspanelprops",
       "label": "SettingsPanelProps",
       "_callable": true,
@@ -238,71 +225,36 @@
       "source_location": "L57"
     },
     {
+      "id": "src_types_webpluginsettings",
+      "label": "WebPluginSettings",
+      "_callable": true,
+      "_callable_class": true,
+      "_origin": "ast",
+      "community": 5,
+      "community_name": "SettingsPanel.tsx",
+      "file_type": "code",
+      "norm_label": "webpluginsettings",
+      "source_file": "src/types.ts",
+      "source_location": "L30"
+    },
+    {
       "id": "src_components_quickdial_quickdial",
       "label": "QuickDial()",
       "_callable": true,
       "_origin": "ast",
       "community": 0,
-      "community_name": "WebViewport.tsx",
+      "community_name": "NavigationBar.tsx",
       "file_type": "code",
       "norm_label": "quickdial()",
       "source_file": "src/components/QuickDial.tsx",
-      "source_location": "L37"
-    },
-    {
-      "id": "src_components_tabbar_tabbar",
-      "label": "TabBar()",
-      "_callable": true,
-      "_origin": "ast",
-      "community": 0,
-      "community_name": "WebViewport.tsx",
-      "file_type": "code",
-      "norm_label": "tabbar()",
-      "source_file": "src/components/TabBar.tsx",
-      "source_location": "L15"
-    },
-    {
-      "id": "src_icons_closeicon",
-      "label": "CloseIcon()",
-      "_callable": true,
-      "_origin": "ast",
-      "community": 0,
-      "community_name": "WebViewport.tsx",
-      "file_type": "code",
-      "norm_label": "closeicon()",
-      "source_file": "src/icons.tsx",
-      "source_location": "L84"
-    },
-    {
-      "id": "src_icons_globeicon",
-      "label": "GlobeIcon()",
-      "_callable": true,
-      "_origin": "ast",
-      "community": 0,
-      "community_name": "WebViewport.tsx",
-      "file_type": "code",
-      "norm_label": "globeicon()",
-      "source_file": "src/icons.tsx",
-      "source_location": "L1"
-    },
-    {
-      "id": "src_icons_plusicon",
-      "label": "PlusIcon()",
-      "_callable": true,
-      "_origin": "ast",
-      "community": 0,
-      "community_name": "WebViewport.tsx",
-      "file_type": "code",
-      "norm_label": "plusicon()",
-      "source_file": "src/icons.tsx",
-      "source_location": "L74"
+      "source_location": "L39"
     },
     {
       "id": "src_icons_arrowlefticon",
       "label": "ArrowLeftIcon()",
       "_callable": true,
       "_origin": "ast",
-      "community": 1,
+      "community": 0,
       "community_name": "NavigationBar.tsx",
       "file_type": "code",
       "norm_label": "arrowlefticon()",
@@ -314,7 +266,7 @@
       "label": "ArrowRightIcon()",
       "_callable": true,
       "_origin": "ast",
-      "community": 1,
+      "community": 0,
       "community_name": "NavigationBar.tsx",
       "file_type": "code",
       "norm_label": "arrowrighticon()",
@@ -322,11 +274,23 @@
       "source_location": "L22"
     },
     {
+      "id": "src_icons_closeicon",
+      "label": "CloseIcon()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 0,
+      "community_name": "NavigationBar.tsx",
+      "file_type": "code",
+      "norm_label": "closeicon()",
+      "source_file": "src/icons.tsx",
+      "source_location": "L95"
+    },
+    {
       "id": "src_icons_externalicon",
       "label": "ExternalIcon()",
       "_callable": true,
       "_origin": "ast",
-      "community": 1,
+      "community": 0,
       "community_name": "NavigationBar.tsx",
       "file_type": "code",
       "norm_label": "externalicon()",
@@ -334,11 +298,23 @@
       "source_location": "L63"
     },
     {
+      "id": "src_icons_globeicon",
+      "label": "GlobeIcon()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 0,
+      "community_name": "NavigationBar.tsx",
+      "file_type": "code",
+      "norm_label": "globeicon()",
+      "source_file": "src/icons.tsx",
+      "source_location": "L1"
+    },
+    {
       "id": "src_icons_homeicon",
       "label": "HomeIcon()",
       "_callable": true,
       "_origin": "ast",
-      "community": 1,
+      "community": 0,
       "community_name": "NavigationBar.tsx",
       "file_type": "code",
       "norm_label": "homeicon()",
@@ -350,19 +326,43 @@
       "label": "LockIcon()",
       "_callable": true,
       "_origin": "ast",
-      "community": 1,
+      "community": 0,
       "community_name": "NavigationBar.tsx",
       "file_type": "code",
       "norm_label": "lockicon()",
       "source_file": "src/icons.tsx",
-      "source_location": "L103"
+      "source_location": "L114"
+    },
+    {
+      "id": "src_icons_newtabicon",
+      "label": "NewTabIcon()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 0,
+      "community_name": "NavigationBar.tsx",
+      "file_type": "code",
+      "norm_label": "newtabicon()",
+      "source_file": "src/icons.tsx",
+      "source_location": "L74"
+    },
+    {
+      "id": "src_icons_plusicon",
+      "label": "PlusIcon()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 0,
+      "community_name": "NavigationBar.tsx",
+      "file_type": "code",
+      "norm_label": "plusicon()",
+      "source_file": "src/icons.tsx",
+      "source_location": "L85"
     },
     {
       "id": "src_icons_popouticon",
       "label": "PopoutIcon()",
       "_callable": true,
       "_origin": "ast",
-      "community": 1,
+      "community": 0,
       "community_name": "NavigationBar.tsx",
       "file_type": "code",
       "norm_label": "popouticon()",
@@ -374,7 +374,7 @@
       "label": "ReloadIcon()",
       "_callable": true,
       "_origin": "ast",
-      "community": 1,
+      "community": 0,
       "community_name": "NavigationBar.tsx",
       "file_type": "code",
       "norm_label": "reloadicon()",
@@ -386,12 +386,12 @@
       "label": "StarIcon()",
       "_callable": true,
       "_origin": "ast",
-      "community": 1,
+      "community": 0,
       "community_name": "NavigationBar.tsx",
       "file_type": "code",
       "norm_label": "staricon()",
       "source_file": "src/icons.tsx",
-      "source_location": "L94"
+      "source_location": "L105"
     },
     {
       "id": "src_components_navigationbar_navigationbar",
@@ -406,6 +406,18 @@
       "source_location": "L32"
     },
     {
+      "id": "src_components_tabbar_tabbar",
+      "label": "TabBar()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 4,
+      "community_name": "index.tsx",
+      "file_type": "code",
+      "norm_label": "tabbar()",
+      "source_file": "src/components/TabBar.tsx",
+      "source_location": "L15"
+    },
+    {
       "id": "src_components_webviewport_webviewport",
       "label": "WebViewport()",
       "_callable": true,
@@ -415,7 +427,7 @@
       "file_type": "code",
       "norm_label": "webviewport()",
       "source_file": "src/components/WebViewport.tsx",
-      "source_location": "L18"
+      "source_location": "L19"
     },
     {
       "id": "src_index_createnewtab",
@@ -706,11 +718,22 @@
       "source_location": "L179"
     },
     {
+      "id": "src_components_navigationbar",
+      "label": "NavigationBar.tsx",
+      "_origin": "ast",
+      "community": 0,
+      "community_name": "NavigationBar.tsx",
+      "file_type": "code",
+      "norm_label": "navigationbar.tsx",
+      "source_file": "src/components/NavigationBar.tsx",
+      "source_location": "L1"
+    },
+    {
       "id": "src_components_quickdial",
       "label": "QuickDial.tsx",
       "_origin": "ast",
       "community": 0,
-      "community_name": "WebViewport.tsx",
+      "community_name": "NavigationBar.tsx",
       "file_type": "code",
       "norm_label": "quickdial.tsx",
       "source_file": "src/components/QuickDial.tsx",
@@ -721,40 +744,40 @@
       "label": "DEFAULT_AI_TARGETS",
       "_origin": "ast",
       "community": 0,
-      "community_name": "WebViewport.tsx",
+      "community_name": "NavigationBar.tsx",
       "file_type": "code",
       "norm_label": "default_ai_targets",
       "source_file": "src/components/QuickDial.tsx",
-      "source_location": "L31"
+      "source_location": "L33"
     },
     {
       "id": "src_components_quickdial_default_dev_targets",
       "label": "DEFAULT_DEV_TARGETS",
       "_origin": "ast",
       "community": 0,
-      "community_name": "WebViewport.tsx",
+      "community_name": "NavigationBar.tsx",
       "file_type": "code",
       "norm_label": "default_dev_targets",
       "source_file": "src/components/QuickDial.tsx",
-      "source_location": "L14"
+      "source_location": "L16"
     },
     {
       "id": "src_components_quickdial_default_doc_targets",
       "label": "DEFAULT_DOC_TARGETS",
       "_origin": "ast",
       "community": 0,
-      "community_name": "WebViewport.tsx",
+      "community_name": "NavigationBar.tsx",
       "file_type": "code",
       "norm_label": "default_doc_targets",
       "source_file": "src/components/QuickDial.tsx",
-      "source_location": "L23"
+      "source_location": "L25"
     },
     {
       "id": "src_components_tabbar",
       "label": "TabBar.tsx",
       "_origin": "ast",
       "community": 0,
-      "community_name": "WebViewport.tsx",
+      "community_name": "NavigationBar.tsx",
       "file_type": "code",
       "norm_label": "tabbar.tsx",
       "source_file": "src/components/TabBar.tsx",
@@ -765,10 +788,21 @@
       "label": "WebViewport.tsx",
       "_origin": "ast",
       "community": 0,
-      "community_name": "WebViewport.tsx",
+      "community_name": "NavigationBar.tsx",
       "file_type": "code",
       "norm_label": "webviewport.tsx",
       "source_file": "src/components/WebViewport.tsx",
+      "source_location": "L1"
+    },
+    {
+      "id": "src_icons",
+      "label": "icons.tsx",
+      "_origin": "ast",
+      "community": 0,
+      "community_name": "NavigationBar.tsx",
+      "file_type": "code",
+      "norm_label": "icons.tsx",
+      "source_file": "src/icons.tsx",
       "source_location": "L1"
     },
     {
@@ -776,7 +810,7 @@
       "label": "styles.ts",
       "_origin": "ast",
       "community": 0,
-      "community_name": "WebViewport.tsx",
+      "community_name": "NavigationBar.tsx",
       "file_type": "code",
       "norm_label": "styles.ts",
       "source_file": "src/styles.ts",
@@ -787,43 +821,10 @@
       "label": "S",
       "_origin": "ast",
       "community": 0,
-      "community_name": "WebViewport.tsx",
+      "community_name": "NavigationBar.tsx",
       "file_type": "code",
       "norm_label": "s",
       "source_file": "src/styles.ts",
-      "source_location": "L1"
-    },
-    {
-      "id": "src_types",
-      "label": "types.ts",
-      "_origin": "ast",
-      "community": 0,
-      "community_name": "WebViewport.tsx",
-      "file_type": "code",
-      "norm_label": "types.ts",
-      "source_file": "src/types.ts",
-      "source_location": "L1"
-    },
-    {
-      "id": "src_components_navigationbar",
-      "label": "NavigationBar.tsx",
-      "_origin": "ast",
-      "community": 1,
-      "community_name": "NavigationBar.tsx",
-      "file_type": "code",
-      "norm_label": "navigationbar.tsx",
-      "source_file": "src/components/NavigationBar.tsx",
-      "source_location": "L1"
-    },
-    {
-      "id": "src_icons",
-      "label": "icons.tsx",
-      "_origin": "ast",
-      "community": 1,
-      "community_name": "NavigationBar.tsx",
-      "file_type": "code",
-      "norm_label": "icons.tsx",
-      "source_file": "src/icons.tsx",
       "source_location": "L1"
     },
     {
@@ -1361,6 +1362,17 @@
       "source_location": "L185"
     },
     {
+      "id": "src_types",
+      "label": "types.ts",
+      "_origin": "ast",
+      "community": 5,
+      "community_name": "SettingsPanel.tsx",
+      "file_type": "code",
+      "norm_label": "types.ts",
+      "source_file": "src/types.ts",
+      "source_location": "L1"
+    },
+    {
       "id": "readme",
       "label": "README.md",
       "_origin": "ast",
@@ -1619,7 +1631,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "src/components/WebViewport.tsx",
-      "source_location": "L20",
+      "source_location": "L23",
       "weight": 1.0
     },
     {
@@ -1631,7 +1643,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "src/components/WebViewport.tsx",
-      "source_location": "L61",
+      "source_location": "L71",
       "weight": 1.0
     },
     {
@@ -1643,7 +1655,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "src/components/WebViewport.tsx",
-      "source_location": "L74",
+      "source_location": "L84",
       "weight": 1.0
     },
     {
@@ -2260,7 +2272,31 @@
     },
     {
       "source": "src_components_quickdial",
+      "target": "src_icons_externalicon",
+      "relation": "imports",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "source_file": "src/components/QuickDial.tsx",
+      "source_location": "L4",
+      "weight": 1.0
+    },
+    {
+      "source": "src_components_quickdial",
       "target": "src_icons_globeicon",
+      "relation": "imports",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "source_file": "src/components/QuickDial.tsx",
+      "source_location": "L4",
+      "weight": 1.0
+    },
+    {
+      "source": "src_components_quickdial",
+      "target": "src_icons_newtabicon",
       "relation": "imports",
       "_origin": "ast",
       "confidence": "EXTRACTED",
@@ -2537,6 +2573,18 @@
     {
       "source": "src_components_webviewport",
       "target": "src_icons_globeicon",
+      "relation": "imports",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "source_file": "src/components/WebViewport.tsx",
+      "source_location": "L5",
+      "weight": 1.0
+    },
+    {
+      "source": "src_components_webviewport",
+      "target": "src_icons_newtabicon",
       "relation": "imports",
       "_origin": "ast",
       "confidence": "EXTRACTED",
@@ -3488,7 +3536,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "src/components/QuickDial.tsx",
-      "source_location": "L14",
+      "source_location": "L16",
       "weight": 1.0
     },
     {
@@ -3499,7 +3547,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "src/components/QuickDial.tsx",
-      "source_location": "L23",
+      "source_location": "L25",
       "weight": 1.0
     },
     {
@@ -3510,7 +3558,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "src/components/QuickDial.tsx",
-      "source_location": "L31",
+      "source_location": "L33",
       "weight": 1.0
     },
     {
@@ -3521,7 +3569,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "src/components/QuickDial.tsx",
-      "source_location": "L37",
+      "source_location": "L39",
       "weight": 1.0
     },
     {
@@ -3598,7 +3646,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "src/components/WebViewport.tsx",
-      "source_location": "L18",
+      "source_location": "L19",
       "weight": 1.0
     },
     {
@@ -3625,13 +3673,24 @@
     },
     {
       "source": "src_icons",
+      "target": "src_icons_staricon",
+      "relation": "contains",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "src/icons.tsx",
+      "source_location": "L105",
+      "weight": 1.0
+    },
+    {
+      "source": "src_icons",
       "target": "src_icons_lockicon",
       "relation": "contains",
       "_origin": "ast",
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "src/icons.tsx",
-      "source_location": "L103",
+      "source_location": "L114",
       "weight": 1.0
     },
     {
@@ -3702,7 +3761,7 @@
     },
     {
       "source": "src_icons",
-      "target": "src_icons_plusicon",
+      "target": "src_icons_newtabicon",
       "relation": "contains",
       "_origin": "ast",
       "confidence": "EXTRACTED",
@@ -3713,24 +3772,24 @@
     },
     {
       "source": "src_icons",
+      "target": "src_icons_plusicon",
+      "relation": "contains",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "src/icons.tsx",
+      "source_location": "L85",
+      "weight": 1.0
+    },
+    {
+      "source": "src_icons",
       "target": "src_icons_closeicon",
       "relation": "contains",
       "_origin": "ast",
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "src/icons.tsx",
-      "source_location": "L84",
-      "weight": 1.0
-    },
-    {
-      "source": "src_icons",
-      "target": "src_icons_staricon",
-      "relation": "contains",
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "source_file": "src/icons.tsx",
-      "source_location": "L94",
+      "source_location": "L95",
       "weight": 1.0
     },
     {
@@ -4362,5 +4421,5 @@
     }
   ],
   "hyperedges": [],
-  "built_at_commit": "f2b332084c5305df32ca1710077f7687d4af0887"
+  "built_at_commit": "60a9c0e54e78d86d5578b22b808ed1f4b69f1a38"
 }

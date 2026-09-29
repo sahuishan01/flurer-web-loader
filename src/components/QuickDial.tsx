@@ -1,12 +1,14 @@
 import { For, createSignal } from "solid-js";
 import { Bookmark } from "../types";
 import { S } from "../styles";
-import { PopoutIcon, GlobeIcon, PlusIcon, CloseIcon } from "../icons";
+import { PopoutIcon, GlobeIcon, PlusIcon, CloseIcon, NewTabIcon, ExternalIcon } from "../icons";
 
 interface QuickDialProps {
   bookmarks: Bookmark[];
   onOpenUrl: (url: string) => void;
+  onNewTab: (url: string) => void;
   onOpenInWebviewWindow: (url: string) => void;
+  onOpenExternal: (url: string) => void;
   onAddBookmark: (title: string, url: string, category: "dev" | "docs" | "ai" | "custom") => void;
   onRemoveBookmark: (id: string) => void;
 }
@@ -95,7 +97,7 @@ export function QuickDial(props: QuickDialProps) {
           style={S.secondaryBtn}
           onClick={() => setShowAddForm(!showAddForm())}
         >
-          <PlusIcon size={14} />
+          <PlusIcon size={16} />
           {showAddForm() ? "Cancel" : "Add Bookmark"}
         </button>
       </div>
@@ -160,17 +162,32 @@ export function QuickDial(props: QuickDialProps) {
               >
                 <div style={{ display: "flex", "align-items": "center", "justify-content": "space-between" }}>
                   <span style={{ "font-weight": 600, "font-size": "14px" }}>{item.title}</span>
-                  <button
-                    type="button"
-                    style={{ ...S.iconBtn, width: "24px", height: "24px" }}
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      props.onOpenInWebviewWindow(item.url);
-                    }}
-                    title="Open in Dedicated Native WebviewWindow"
-                  >
-                    <PopoutIcon size={13} />
-                  </button>
+                  <div style={{ display: "flex", "align-items": "center", gap: "4px" }} onClick={(e) => e.stopPropagation()}>
+                    <button
+                      type="button"
+                      style={{ ...S.iconBtn, width: "28px", height: "28px" }}
+                      onClick={() => props.onNewTab(item.url)}
+                      title="Open in New Tab"
+                    >
+                      <NewTabIcon size={16} />
+                    </button>
+                    <button
+                      type="button"
+                      style={{ ...S.iconBtn, width: "28px", height: "28px" }}
+                      onClick={() => props.onOpenInWebviewWindow(item.url)}
+                      title="Open in Dedicated Native WebviewWindow"
+                    >
+                      <PopoutIcon size={16} />
+                    </button>
+                    <button
+                      type="button"
+                      style={{ ...S.iconBtn, width: "28px", height: "28px" }}
+                      onClick={() => props.onOpenExternal(item.url)}
+                      title="Open in System Browser"
+                    >
+                      <ExternalIcon size={16} />
+                    </button>
+                  </div>
                 </div>
                 <div style={{ display: "flex", "align-items": "center", gap: "6px" }}>
                   <span style={S.badge}>{item.tag}</span>
@@ -210,17 +227,32 @@ export function QuickDial(props: QuickDialProps) {
               >
                 <div style={{ display: "flex", "align-items": "center", "justify-content": "space-between" }}>
                   <span style={{ "font-weight": 600, "font-size": "14px" }}>{item.title}</span>
-                  <button
-                    type="button"
-                    style={{ ...S.iconBtn, width: "24px", height: "24px" }}
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      props.onOpenInWebviewWindow(item.url);
-                    }}
-                    title="Open in Dedicated Native WebviewWindow"
-                  >
-                    <PopoutIcon size={13} />
-                  </button>
+                  <div style={{ display: "flex", "align-items": "center", gap: "4px" }} onClick={(e) => e.stopPropagation()}>
+                    <button
+                      type="button"
+                      style={{ ...S.iconBtn, width: "28px", height: "28px" }}
+                      onClick={() => props.onNewTab(item.url)}
+                      title="Open in New Tab"
+                    >
+                      <NewTabIcon size={16} />
+                    </button>
+                    <button
+                      type="button"
+                      style={{ ...S.iconBtn, width: "28px", height: "28px" }}
+                      onClick={() => props.onOpenInWebviewWindow(item.url)}
+                      title="Open in Dedicated Native WebviewWindow"
+                    >
+                      <PopoutIcon size={16} />
+                    </button>
+                    <button
+                      type="button"
+                      style={{ ...S.iconBtn, width: "28px", height: "28px" }}
+                      onClick={() => props.onOpenExternal(item.url)}
+                      title="Open in System Browser"
+                    >
+                      <ExternalIcon size={16} />
+                    </button>
+                  </div>
                 </div>
                 <div style={{ display: "flex", "align-items": "center", gap: "6px" }}>
                   <span style={S.badge}>{item.tag}</span>
@@ -256,13 +288,36 @@ export function QuickDial(props: QuickDialProps) {
                   cursor: "pointer",
                   transition: "all 0.2s cubic-bezier(0.22, 1, 0.36, 1)",
                 }}
-                onClick={() => props.onOpenInWebviewWindow(item.url)}
+                onClick={() => props.onOpenUrl(item.url)}
               >
                 <div style={{ display: "flex", "align-items": "center", "justify-content": "space-between" }}>
                   <span style={{ "font-weight": 600, "font-size": "14px" }}>{item.title}</span>
-                  <span style={{ ...S.badge, background: "rgba(var(--accent-rgb, 56, 189, 248), 0.2)", color: "var(--accent-default, #38bdf8)" }}>
-                    WebviewWindow Recommended
-                  </span>
+                  <div style={{ display: "flex", "align-items": "center", gap: "4px" }} onClick={(e) => e.stopPropagation()}>
+                    <button
+                      type="button"
+                      style={{ ...S.iconBtn, width: "28px", height: "28px" }}
+                      onClick={() => props.onNewTab(item.url)}
+                      title="Open in New Tab"
+                    >
+                      <NewTabIcon size={16} />
+                    </button>
+                    <button
+                      type="button"
+                      style={{ ...S.iconBtn, width: "28px", height: "28px" }}
+                      onClick={() => props.onOpenInWebviewWindow(item.url)}
+                      title="Open in Dedicated Native WebviewWindow"
+                    >
+                      <PopoutIcon size={16} />
+                    </button>
+                    <button
+                      type="button"
+                      style={{ ...S.iconBtn, width: "28px", height: "28px" }}
+                      onClick={() => props.onOpenExternal(item.url)}
+                      title="Open in System Browser"
+                    >
+                      <ExternalIcon size={16} />
+                    </button>
+                  </div>
                 </div>
                 <div style={{ display: "flex", "align-items": "center", gap: "6px" }}>
                   <span style={S.badge}>{item.tag}</span>
@@ -302,28 +357,38 @@ export function QuickDial(props: QuickDialProps) {
                 >
                   <div style={{ display: "flex", "align-items": "center", "justify-content": "space-between" }}>
                     <span style={{ "font-weight": 600, "font-size": "14px" }}>{b.title}</span>
-                    <div style={{ display: "flex", "align-items": "center", gap: "4px" }}>
+                    <div style={{ display: "flex", "align-items": "center", gap: "4px" }} onClick={(e) => e.stopPropagation()}>
                       <button
                         type="button"
-                        style={{ ...S.iconBtn, width: "24px", height: "24px" }}
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          props.onOpenInWebviewWindow(b.url);
-                        }}
-                        title="Open in Dedicated Native WebviewWindow"
+                        style={{ ...S.iconBtn, width: "28px", height: "28px" }}
+                        onClick={() => props.onNewTab(b.url)}
+                        title="Open in New Tab"
                       >
-                        <PopoutIcon size={13} />
+                        <NewTabIcon size={16} />
                       </button>
                       <button
                         type="button"
-                        style={{ ...S.iconBtn, width: "24px", height: "24px" }}
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          props.onRemoveBookmark(b.id);
-                        }}
+                        style={{ ...S.iconBtn, width: "28px", height: "28px" }}
+                        onClick={() => props.onOpenInWebviewWindow(b.url)}
+                        title="Open in Dedicated Native WebviewWindow"
+                      >
+                        <PopoutIcon size={16} />
+                      </button>
+                      <button
+                        type="button"
+                        style={{ ...S.iconBtn, width: "28px", height: "28px" }}
+                        onClick={() => props.onOpenExternal(b.url)}
+                        title="Open in System Browser"
+                      >
+                        <ExternalIcon size={16} />
+                      </button>
+                      <button
+                        type="button"
+                        style={{ ...S.iconBtn, width: "28px", height: "28px" }}
+                        onClick={() => props.onRemoveBookmark(b.id)}
                         title="Remove Bookmark"
                       >
-                        <CloseIcon size={12} />
+                        <CloseIcon size={15} />
                       </button>
                     </div>
                   </div>

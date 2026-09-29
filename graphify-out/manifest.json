@@ -1,14 +1,14 @@
 {
   "package.json": {
-    "mtime": 1790668831.404118,
-    "seen": 1790668859.4707413,
-    "ast_hash": "180dc51213ab1c490a54033376d59b5e",
+    "mtime": 1790670143.3494053,
+    "seen": 1790670158.9488854,
+    "ast_hash": "989b268bd47008d4f295ef48f519b794",
     "semantic_hash": ""
   },
   "plugin.json": {
-    "mtime": 1790668844.7361698,
-    "seen": 1790668859.4707444,
-    "ast_hash": "dddab8fff51edce92db8d598ff209efd",
+    "mtime": 1790670147.7774236,
+    "seen": 1790670158.9488885,
+    "ast_hash": "5cec8b5d82698dfd34de901fb4e4c084",
     "semantic_hash": ""
   },
   "scripts/sync-version.cjs": {
@@ -18,15 +18,15 @@
     "semantic_hash": "ef96a62f28a8b6ec493bef1c52182fc0"
   },
   "src/components/NavigationBar.tsx": {
-    "mtime": 1790666432.438016,
-    "seen": 1790666479.6569831,
-    "ast_hash": "1000e03093825d3e19736f9d65ddb6bd",
+    "mtime": 1790670044.660998,
+    "seen": 1790670158.948893,
+    "ast_hash": "5101e3add892670260d0fd975a57ba03",
     "semantic_hash": ""
   },
   "src/components/QuickDial.tsx": {
-    "mtime": 1790668659.5274117,
-    "seen": 1790668859.4707513,
-    "ast_hash": "d890769acce70ccb4684e55d7995deeb",
+    "mtime": 1790670102.6412373,
+    "seen": 1790670158.9488952,
+    "ast_hash": "d70799468825842039730dd830080fa1",
     "semantic_hash": ""
   },
   "src/components/SettingsPanel.tsx": {
@@ -36,33 +36,33 @@
     "semantic_hash": ""
   },
   "src/components/TabBar.tsx": {
-    "mtime": 1790666406.9779024,
-    "seen": 1790666479.656988,
-    "ast_hash": "923005d46fcff1e14cacfc4961511b9c",
+    "mtime": 1790670031.3529432,
+    "seen": 1790670158.9488983,
+    "ast_hash": "fec027c95f03516f08230a6e8c79abbd",
     "semantic_hash": ""
   },
   "src/components/WebViewport.tsx": {
-    "mtime": 1790666454.5581145,
-    "seen": 1790666479.656989,
-    "ast_hash": "e39809079aab1976e1a8a2464c083c22",
+    "mtime": 1790670119.9093084,
+    "seen": 1790670158.9489,
+    "ast_hash": "f5c6bf0cd51ef010b67aa352c028579c",
     "semantic_hash": ""
   },
   "src/icons.tsx": {
-    "mtime": 1790663703.5225291,
-    "seen": 1790663861.0089495,
-    "ast_hash": "f56cbb8b86282023ad4188ef1ae00022",
-    "semantic_hash": "f56cbb8b86282023ad4188ef1ae00022"
+    "mtime": 1790669999.676813,
+    "seen": 1790670158.948902,
+    "ast_hash": "59640fb45d0f65fae78b2e5915d28fb0",
+    "semantic_hash": ""
   },
   "src/index.tsx": {
-    "mtime": 1790668841.2761564,
-    "seen": 1790668859.4707592,
-    "ast_hash": "6a233739155bbb58a7b59045b921bc4c",
+    "mtime": 1790670134.093367,
+    "seen": 1790670158.948903,
+    "ast_hash": "95d128cdbfc78fdae3c076eab07e39d3",
     "semantic_hash": ""
   },
   "src/styles.ts": {
-    "mtime": 1790668627.8192782,
-    "seen": 1790668859.4707603,
-    "ast_hash": "217444aaf006666063b482565d4690dc",
+    "mtime": 1790670022.600907,
+    "seen": 1790670158.9489048,
+    "ast_hash": "a8da5f1cc94d8240794473fa120d4454",
     "semantic_hash": ""
   },
   "src/types.ts": {
