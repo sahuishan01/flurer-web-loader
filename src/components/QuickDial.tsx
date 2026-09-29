@@ -62,7 +62,7 @@ export function QuickDial(props: QuickDialProps) {
         margin: "0 auto",
         width: "100%",
         "box-sizing": "border-box",
-        overflow_y: "auto",
+        "overflow-y": "auto",
         height: "100%",
       }}
     >
@@ -166,7 +166,7 @@ export function QuickDial(props: QuickDialProps) {
                   <div style={{ display: "flex", "align-items": "center", gap: "6px" }} onClick={(e) => e.stopPropagation()}>
                     <button
                       type="button"
-                      class="icon-btn"
+                      class="icon-btn web-loader-icon-btn"
                       style={S.cardIconBtn}
                       onClick={() => props.onNewTab(item.url)}
                       title="Open in New Tab"
@@ -175,7 +175,7 @@ export function QuickDial(props: QuickDialProps) {
                     </button>
                     <button
                       type="button"
-                      class="icon-btn"
+                      class="icon-btn web-loader-icon-btn"
                       style={S.cardIconBtn}
                       onClick={() => props.onOpenInWebviewWindow(item.url)}
                       title="Open in Dedicated Native WebviewWindow"
@@ -184,7 +184,7 @@ export function QuickDial(props: QuickDialProps) {
                     </button>
                     <button
                       type="button"
-                      class="icon-btn"
+                      class="icon-btn web-loader-icon-btn"
                       style={S.cardIconBtn}
                       onClick={() => props.onOpenExternal(item.url)}
                       title="Open in System Browser"
@@ -234,7 +234,7 @@ export function QuickDial(props: QuickDialProps) {
                   <div style={{ display: "flex", "align-items": "center", gap: "6px" }} onClick={(e) => e.stopPropagation()}>
                     <button
                       type="button"
-                      class="icon-btn"
+                      class="icon-btn web-loader-icon-btn"
                       style={S.cardIconBtn}
                       onClick={() => props.onNewTab(item.url)}
                       title="Open in New Tab"
@@ -243,7 +243,7 @@ export function QuickDial(props: QuickDialProps) {
                     </button>
                     <button
                       type="button"
-                      class="icon-btn"
+                      class="icon-btn web-loader-icon-btn"
                       style={S.cardIconBtn}
                       onClick={() => props.onOpenInWebviewWindow(item.url)}
                       title="Open in Dedicated Native WebviewWindow"
@@ -252,7 +252,7 @@ export function QuickDial(props: QuickDialProps) {
                     </button>
                     <button
                       type="button"
-                      class="icon-btn"
+                      class="icon-btn web-loader-icon-btn"
                       style={S.cardIconBtn}
                       onClick={() => props.onOpenExternal(item.url)}
                       title="Open in System Browser"
@@ -302,7 +302,7 @@ export function QuickDial(props: QuickDialProps) {
                   <div style={{ display: "flex", "align-items": "center", gap: "6px" }} onClick={(e) => e.stopPropagation()}>
                     <button
                       type="button"
-                      class="icon-btn"
+                      class="icon-btn web-loader-icon-btn"
                       style={S.cardIconBtn}
                       onClick={() => props.onNewTab(item.url)}
                       title="Open in New Tab"
@@ -311,7 +311,7 @@ export function QuickDial(props: QuickDialProps) {
                     </button>
                     <button
                       type="button"
-                      class="icon-btn"
+                      class="icon-btn web-loader-icon-btn"
                       style={S.cardIconBtn}
                       onClick={() => props.onOpenInWebviewWindow(item.url)}
                       title="Open in Dedicated Native WebviewWindow"
@@ -320,7 +320,7 @@ export function QuickDial(props: QuickDialProps) {
                     </button>
                     <button
                       type="button"
-                      class="icon-btn"
+                      class="icon-btn web-loader-icon-btn"
                       style={S.cardIconBtn}
                       onClick={() => props.onOpenExternal(item.url)}
                       title="Open in System Browser"
@@ -370,7 +370,7 @@ export function QuickDial(props: QuickDialProps) {
                     <div style={{ display: "flex", "align-items": "center", gap: "6px" }} onClick={(e) => e.stopPropagation()}>
                       <button
                         type="button"
-                        class="icon-btn"
+                        class="icon-btn web-loader-icon-btn"
                         style={S.cardIconBtn}
                         onClick={() => props.onNewTab(b.url)}
                         title="Open in New Tab"
@@ -379,7 +379,7 @@ export function QuickDial(props: QuickDialProps) {
                       </button>
                       <button
                         type="button"
-                        class="icon-btn"
+                        class="icon-btn web-loader-icon-btn"
                         style={S.cardIconBtn}
                         onClick={() => props.onOpenInWebviewWindow(b.url)}
                         title="Open in Dedicated Native WebviewWindow"
@@ -388,7 +388,7 @@ export function QuickDial(props: QuickDialProps) {
                       </button>
                       <button
                         type="button"
-                        class="icon-btn"
+                        class="icon-btn web-loader-icon-btn"
                         style={S.cardIconBtn}
                         onClick={() => props.onOpenExternal(b.url)}
                         title="Open in System Browser"
@@ -397,7 +397,7 @@ export function QuickDial(props: QuickDialProps) {
                       </button>
                       <button
                         type="button"
-                        class="icon-btn"
+                        class="icon-btn web-loader-icon-btn"
                         style={S.cardIconBtn}
                         onClick={() => props.onRemoveBookmark(b.id)}
                         title="Remove Bookmark"

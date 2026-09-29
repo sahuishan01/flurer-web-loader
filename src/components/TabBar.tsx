@@ -33,7 +33,7 @@ export function TabBar(props: TabBarProps) {
               <span style={S.tabTitle}>{tab.title || "New Tab"}</span>
               <button
                 type="button"
-                class="icon-btn"
+                class="icon-btn web-loader-icon-btn"
                 style={S.tabCloseBtn}
                 title="Close Tab"
                 onClick={(e) => {
@@ -50,7 +50,7 @@ export function TabBar(props: TabBarProps) {
 
       <button
         type="button"
-        class="icon-btn"
+        class="icon-btn web-loader-icon-btn"
         style={{
           ...S.iconBtn,
           width: "34px",

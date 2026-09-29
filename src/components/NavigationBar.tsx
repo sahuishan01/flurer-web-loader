@@ -9,6 +9,7 @@ import {
   ExternalIcon,
   StarIcon,
   LockIcon,
+  CloseIcon,
 } from "../icons";
 import { Tab, SearchEngine } from "../types";
 import { normalizeUrl, getModifierKey, getPlatformEngineName } from "../utils";
@@ -53,7 +54,7 @@ export function NavigationBar(props: NavigationBarProps) {
       {/* History & Reload Controls */}
       <button
         type="button"
-        class="icon-btn"
+        class="icon-btn web-loader-icon-btn"
         style={S.iconBtn}
         onClick={props.onReload}
         title={`Reload Page (F5 / ${mod}+R)`}
@@ -63,7 +64,7 @@ export function NavigationBar(props: NavigationBarProps) {
 
       <button
         type="button"
-        class="icon-btn"
+        class="icon-btn web-loader-icon-btn"
         style={S.iconBtn}
         onClick={props.onGoHome}
         title="Go to Home"
@@ -97,7 +98,7 @@ export function NavigationBar(props: NavigationBarProps) {
         {inputValue() && (
           <button
             type="button"
-            class="icon-btn"
+            class="icon-btn web-loader-icon-btn"
             style={{
               ...S.iconBtn,
               width: "24px",
@@ -119,7 +120,7 @@ export function NavigationBar(props: NavigationBarProps) {
       {/* Bookmark Star */}
       <button
         type="button"
-        class="icon-btn"
+        class="icon-btn web-loader-icon-btn"
         style={{
           ...S.iconBtn,
           ...(props.isBookmarked ? { color: "#eab308" } : {}),
@@ -134,7 +135,7 @@ export function NavigationBar(props: NavigationBarProps) {
       <div style={{ display: "flex", "align-items": "center", gap: "2px" }}>
         <button
           type="button"
-          class="icon-btn"
+          class="icon-btn web-loader-icon-btn"
           style={{ ...S.iconBtn, width: "30px", height: "34px", "font-family": "Space Mono, monospace", "font-size": "16px", "font-weight": 700 }}
           onClick={props.onZoomOut}
           title="Zoom Out"
@@ -143,7 +144,7 @@ export function NavigationBar(props: NavigationBarProps) {
         </button>
         <button
           type="button"
-          class="icon-btn"
+          class="icon-btn web-loader-icon-btn"
           style={{
             ...S.iconBtn,
             width: "56px",
@@ -160,7 +161,7 @@ export function NavigationBar(props: NavigationBarProps) {
         </button>
         <button
           type="button"
-          class="icon-btn"
+          class="icon-btn web-loader-icon-btn"
           style={{ ...S.iconBtn, width: "30px", height: "34px", "font-family": "Space Mono, monospace", "font-size": "16px", "font-weight": 700 }}
           onClick={props.onZoomIn}
           title="Zoom In"
@@ -172,7 +173,7 @@ export function NavigationBar(props: NavigationBarProps) {
       {/* Pop out to Dedicated Native WebviewWindow */}
       <button
         type="button"
-        class="icon-btn"
+        class="icon-btn web-loader-icon-btn"
         style={{
           ...S.iconBtn,
           background: "rgba(var(--accent-rgb, 56, 189, 248), 0.15)",
@@ -188,7 +189,7 @@ export function NavigationBar(props: NavigationBarProps) {
       {/* Open in OS Default External Browser */}
       <button
         type="button"
-        class="icon-btn"
+        class="icon-btn web-loader-icon-btn"
         style={S.iconBtn}
         onClick={props.onOpenExternal}
         title="Open in System Default Browser"

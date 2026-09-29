@@ -1,6 +1,6 @@
 {
-  "0": "WebViewport.tsx",
-  "1": "NavigationBar.tsx",
+  "0": "NavigationBar.tsx",
+  "1": "types.ts",
   "2": "compilerOptions",
   "3": "package.json",
   "4": "index.tsx",
@@ -9,7 +9,5 @@
   "7": "sync-version.cjs",
   "8": "vite.config.ts",
   "9": "rules/graphify.md",
-  "10": "workflows/graphify.md",
-  "11": "types.ts",
-  "12": "TabBar.tsx"
+  "10": "workflows/graphify.md"
 }

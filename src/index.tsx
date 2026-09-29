@@ -21,6 +21,29 @@ import {
 
 declare const __VERSION__: string;
 
+const STYLE_ID = "flurer-web-loader-styles";
+if (typeof document !== "undefined" && !document.getElementById(STYLE_ID)) {
+  const styleEl = document.createElement("style");
+  styleEl.id = STYLE_ID;
+  styleEl.textContent = `
+    .web-loader-icon-btn {
+      padding: 0 !important;
+      box-sizing: border-box !important;
+      display: inline-flex !important;
+      align-items: center !important;
+      justify-content: center !important;
+      flex-shrink: 0 !important;
+      line-height: 1 !important;
+    }
+    .web-loader-icon-btn svg {
+      display: block !important;
+      flex-shrink: 0 !important;
+      pointer-events: none;
+    }
+  `;
+  document.head.appendChild(styleEl);
+}
+
 let tabCounter = 0;
 
 function createNewTab(url: string = "about:blank", title: string = "New Tab"): Tab {
@@ -287,7 +310,7 @@ function WebBrowserPanel(props: MainPanelProps) {
   id: "web-loader",
   name: "Web Loader",
   description: "High-performance browser and WebviewWindow loader for modern websites and local web apps.",
-  version: typeof __VERSION__ !== "undefined" ? __VERSION__ : "0.1.4",
+  version: typeof __VERSION__ !== "undefined" ? __VERSION__ : "0.1.5",
   author: "Algosculptor",
   hasCustomAppearanceSettings: true,
   viewRailButton: (props: any) => (

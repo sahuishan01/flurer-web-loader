@@ -2,7 +2,7 @@ import { Show, createSignal } from "solid-js";
 import { Tab, Bookmark } from "../types";
 import { S } from "../styles";
 import { QuickDial } from "./QuickDial";
-import { PopoutIcon, ExternalIcon, GlobeIcon, NewTabIcon } from "../icons";
+import { PopoutIcon, ExternalIcon, GlobeIcon, NewTabIcon, CloseIcon } from "../icons";
 import { isKnownFrameRestricted, getDomain, getPlatformEngineName } from "../utils";
 
 interface WebViewportProps {
@@ -72,7 +72,7 @@ export function WebViewport(props: WebViewportProps) {
               class="icon-btn"
               style={{
                 ...S.actionBtn,
-                padding: "4px 10px !important",
+                padding: "4px 10px",
                 "font-size": "11px",
                 display: "inline-flex",
                 "align-items": "center",
@@ -85,15 +85,18 @@ export function WebViewport(props: WebViewportProps) {
             </button>
             <button
               type="button"
-              class="icon-btn"
+              class="icon-btn web-loader-icon-btn"
               style={{
                 background: "transparent",
                 border: "none",
                 color: "var(--text-muted, #94a3b8)",
                 cursor: "pointer",
-                padding: "2px !important",
+                padding: "0",
+                width: "22px",
+                height: "22px",
                 display: "inline-flex",
                 "align-items": "center",
+                "justify-content": "center",
               }}
               onClick={() => {
                 if (props.activeTab) {
@@ -117,7 +120,6 @@ export function WebViewport(props: WebViewportProps) {
             width: `${100 / props.activeTab!.zoom}%`,
             height: `${100 / props.activeTab!.zoom}%`,
           }}
-          sandbox="allow-scripts allow-same-origin allow-forms allow-popups allow-modals allow-downloads"
           allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share; fullscreen"
         />
       </Show>
