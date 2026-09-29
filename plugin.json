@@ -1,0 +1,9 @@
+{
+  "id": "web-loader",
+  "name": "Web Loader",
+  "description": "High-performance web browser and WebviewWindow loader for modern websites and local web apps.",
+  "version": "0.1.0",
+  "author": "Algosculptor",
+  "entry": "index.js",
+  "repo": "sahuishan01/flurer-web-loader-plugin"
+}
