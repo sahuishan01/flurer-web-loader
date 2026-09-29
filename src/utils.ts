@@ -1,4 +1,4 @@
-import { SearchEngine } from "./types";
+import { SearchEngine, Bookmark } from "./types";
 
 export type Platform = "windows" | "macos" | "linux";
 
@@ -177,3 +177,58 @@ export async function openInExternalBrowser(url: string): Promise<void> {
   }
   window.open(url, "_blank");
 }
+
+const TABS_KEY = "flurer-web-loader-tabs";
+const ACTIVE_TAB_KEY = "flurer-web-loader-active-tab";
+const BOOKMARKS_KEY = "flurer-web-loader-bookmarks";
+
+export function getSavedTabs(): { title: string; url: string }[] {
+  try {
+    const raw = localStorage.getItem(TABS_KEY);
+    if (!raw) return [];
+    return JSON.parse(raw);
+  } catch {
+    return [];
+  }
+}
+
+export function saveTabs(tabs: { title: string; url: string }[]): void {
+  try {
+    localStorage.setItem(TABS_KEY, JSON.stringify(tabs));
+  } catch {}
+}
+
+export function getSavedActiveTab(): string | null {
+  try {
+    return localStorage.getItem(ACTIVE_TAB_KEY);
+  } catch {
+    return null;
+  }
+}
+
+export function saveActiveTab(url: string | null): void {
+  try {
+    if (url) {
+      localStorage.setItem(ACTIVE_TAB_KEY, url);
+    } else {
+      localStorage.removeItem(ACTIVE_TAB_KEY);
+    }
+  } catch {}
+}
+
+export function getSavedBookmarks(): Bookmark[] {
+  try {
+    const raw = localStorage.getItem(BOOKMARKS_KEY);
+    if (!raw) return [];
+    return JSON.parse(raw);
+  } catch {
+    return [];
+  }
+}
+
+export function saveBookmarks(bookmarks: Bookmark[]): void {
+  try {
+    localStorage.setItem(BOOKMARKS_KEY, JSON.stringify(bookmarks));
+  } catch {}
+}
+

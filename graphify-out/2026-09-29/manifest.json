@@ -6,10 +6,10 @@
     "semantic_hash": "5f01df85bf0e9ac9aa1fd49229debb63"
   },
   "plugin.json": {
-    "mtime": 1790666458.7661333,
-    "seen": 1790666479.6569798,
-    "ast_hash": "2cce7afde6a1ee7a1e4f5c8523d3977d",
-    "semantic_hash": "2cce7afde6a1ee7a1e4f5c8523d3977d"
+    "mtime": 1790666666.1270273,
+    "seen": 1790666678.3600907,
+    "ast_hash": "5804ee75db4a9fbafab51107d50561e4",
+    "semantic_hash": ""
   },
   "scripts/sync-version.cjs": {
     "mtime": 1790663642.3422873,
@@ -102,9 +102,9 @@
     "semantic_hash": ""
   },
   ".github/workflows/release.yml": {
-    "mtime": 1790663830.5830312,
-    "seen": 1790663950.6490893,
-    "ast_hash": "b0698dcbd966074b052c9afc858da3c8",
+    "mtime": 1790666657.4589906,
+    "seen": 1790666678.3601143,
+    "ast_hash": "a3d54704b19c91a397acb3022bb21a6c",
     "semantic_hash": ""
   },
   "README.md": {

@@ -1,12 +1,22 @@
-import { createSignal, createRoot, createEffect, onMount } from "solid-js";
-import { MainPanelProps, Tab, Bookmark, WebPluginSettings } from "./types";
+import { createSignal, createRoot } from "solid-js";
+import { MainPanelProps, Tab, Bookmark } from "./types";
 import { S } from "./styles";
 import { GlobeIcon } from "./icons";
 import { TabBar } from "./components/TabBar";
 import { NavigationBar } from "./components/NavigationBar";
 import { WebViewport } from "./components/WebViewport";
 import { SettingsPanel } from "./components/SettingsPanel";
-import { openInWebviewWindow, openInExternalBrowser, getDomain } from "./utils";
+import {
+  openInWebviewWindow,
+  openInExternalBrowser,
+  getDomain,
+  getSavedTabs,
+  saveTabs,
+  getSavedActiveTab,
+  saveActiveTab,
+  getSavedBookmarks,
+  saveBookmarks,
+} from "./utils";
 
 declare const __VERSION__: string;
 
@@ -25,71 +35,78 @@ function createNewTab(url: string = "about:blank", title: string = "New Tab"): T
   };
 }
 
+function initRestoredTabs(): { tabs: Tab[]; activeId: string } {
+  const saved = getSavedTabs();
+  const savedActive = getSavedActiveTab();
+  if (saved.length > 0) {
+    const restored = saved.map((s) => createNewTab(s.url, s.title));
+    const match = restored.find((t) => t.url === savedActive);
+    return {
+      tabs: restored,
+      activeId: match ? match.id : restored[0].id,
+    };
+  }
+  const defaultTab = createNewTab();
+  return {
+    tabs: [defaultTab],
+    activeId: defaultTab.id,
+  };
+}
+
 // Module-level reactive state that survives unmount/remount across Flurer views
-const [tabs, setTabs] = createRoot(() => createSignal<Tab[]>([createNewTab()]));
-const [activeTabId, setActiveTabId] = createRoot(() => createSignal<string>(tabs()[0].id));
-const [bookmarks, setBookmarks] = createRoot(() => createSignal<Bookmark[]>([]));
+const initialTabsState = initRestoredTabs();
+const [tabs, setTabs] = createRoot(() => createSignal<Tab[]>(initialTabsState.tabs));
+const [activeTabId, setActiveTabId] = createRoot(() => createSignal<string>(initialTabsState.activeId));
+const [bookmarks, setBookmarks] = createRoot(() => createSignal<Bookmark[]>(getSavedBookmarks()));
 
 function WebBrowserPanel(props: MainPanelProps) {
-  // Restore persisted state from pluginSettings on initial load
-  onMount(() => {
-    if (props.pluginSettings?.bookmarks && Array.isArray(props.pluginSettings.bookmarks)) {
-      setBookmarks(props.pluginSettings.bookmarks);
-    }
-
-    if (props.pluginSettings?.persistTabs && props.pluginSettings.savedTabs?.length) {
-      const restored = props.pluginSettings.savedTabs.map((saved) =>
-        createNewTab(saved.url, saved.title)
-      );
-      if (restored.length > 0) {
-        setTabs(restored);
-        const match = restored.find((t) => t.url === props.pluginSettings.savedActiveTabUrl);
-        setActiveTabId(match ? match.id : restored[0].id);
-      }
-    }
-  });
-
-  // Sync state changes back to pluginSettings for persistence
-  createEffect(() => {
-    const currentTabs = tabs();
-    const activeId = activeTabId();
-    const activeTab = currentTabs.find((t) => t.id === activeId);
-
-    props.onPluginSettingsChange({
-      bookmarks: bookmarks(),
-      savedTabs: currentTabs.map((t) => ({ title: t.title, url: t.url })),
-      savedActiveTabUrl: activeTab ? activeTab.url : undefined,
-    });
-  });
-
   const activeTab = () => tabs().find((t) => t.id === activeTabId()) || tabs()[0];
+
+  const persistCurrentTabs = (currentTabs: Tab[], activeUrl?: string) => {
+    saveTabs(currentTabs.map((t) => ({ title: t.title, url: t.url })));
+    if (activeUrl !== undefined) {
+      saveActiveTab(activeUrl === "about:blank" ? null : activeUrl);
+    }
+  };
 
   const handleSelectTab = (id: string) => {
     setActiveTabId(id);
+    const target = tabs().find((t) => t.id === id);
+    if (target) {
+      saveActiveTab(target.url === "about:blank" ? null : target.url);
+    }
   };
 
   const handleNewTab = (url: string = "about:blank") => {
     const newTab = createNewTab(url, url === "about:blank" ? "New Tab" : getDomain(url));
-    setTabs((prev) => [...prev, newTab]);
+    const nextTabs = [...tabs(), newTab];
+    setTabs(nextTabs);
     setActiveTabId(newTab.id);
+    persistCurrentTabs(nextTabs, newTab.url);
   };
 
   const handleCloseTab = (id: string) => {
     const current = tabs();
     if (current.length === 1) {
       // If closing last tab, reset it to about:blank
-      setTabs([createNewTab()]);
-      setActiveTabId(tabs()[0].id);
+      const fresh = [createNewTab()];
+      setTabs(fresh);
+      setActiveTabId(fresh[0].id);
+      persistCurrentTabs(fresh, fresh[0].url);
       return;
     }
+
     const idx = current.findIndex((t) => t.id === id);
     const updated = current.filter((t) => t.id !== id);
     setTabs(updated);
 
+    let nextActiveUrl: string | undefined;
     if (activeTabId() === id) {
       const nextIdx = Math.max(0, idx - 1);
       setActiveTabId(updated[nextIdx].id);
+      nextActiveUrl = updated[nextIdx].url;
     }
+    persistCurrentTabs(updated, nextActiveUrl);
   };
 
   const handleNavigate = (url: string) => {
@@ -102,9 +119,9 @@ function WebBrowserPanel(props: MainPanelProps) {
       return;
     }
 
-    setTabs((prev) =>
-      prev.map((t) => (t.id === id ? { ...t, url, title: domain } : t))
-    );
+    const nextTabs = tabs().map((t) => (t.id === id ? { ...t, url, title: domain } : t));
+    setTabs(nextTabs);
+    persistCurrentTabs(nextTabs, url);
   };
 
   const handleReload = () => {
@@ -153,8 +170,9 @@ function WebBrowserPanel(props: MainPanelProps) {
     const current = activeTab();
     if (!current || current.url === "about:blank") return;
 
+    let updated: Bookmark[];
     if (isCurrentBookmarked()) {
-      setBookmarks((prev) => prev.filter((b) => b.url !== current.url));
+      updated = bookmarks().filter((b) => b.url !== current.url);
     } else {
       const newBookmark: Bookmark = {
         id: `bm-${Date.now()}`,
@@ -162,8 +180,10 @@ function WebBrowserPanel(props: MainPanelProps) {
         url: current.url,
         category: "custom",
       };
-      setBookmarks((prev) => [...prev, newBookmark]);
+      updated = [...bookmarks(), newBookmark];
     }
+    setBookmarks(updated);
+    saveBookmarks(updated);
   };
 
   const handleAddBookmark = (title: string, url: string, category: "dev" | "docs" | "ai" | "custom") => {
@@ -173,11 +193,15 @@ function WebBrowserPanel(props: MainPanelProps) {
       url,
       category,
     };
-    setBookmarks((prev) => [...prev, newBookmark]);
+    const updated = [...bookmarks(), newBookmark];
+    setBookmarks(updated);
+    saveBookmarks(updated);
   };
 
   const handleRemoveBookmark = (id: string) => {
-    setBookmarks((prev) => prev.filter((b) => b.id !== id));
+    const updated = bookmarks().filter((b) => b.id !== id);
+    setBookmarks(updated);
+    saveBookmarks(updated);
   };
 
   const handleZoom = (delta: number) => {
@@ -252,7 +276,7 @@ function WebBrowserPanel(props: MainPanelProps) {
   id: "web-loader",
   name: "Web Loader",
   description: "High-performance browser and WebviewWindow loader for modern websites and local web apps.",
-  version: typeof __VERSION__ !== "undefined" ? __VERSION__ : "0.1.0",
+  version: typeof __VERSION__ !== "undefined" ? __VERSION__ : "0.1.1",
   author: "Algosculptor",
   hasCustomAppearanceSettings: true,
   viewRailButton: (props: any) => (
