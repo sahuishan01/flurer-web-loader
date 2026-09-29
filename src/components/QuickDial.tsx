@@ -94,10 +94,11 @@ export function QuickDial(props: QuickDialProps) {
 
         <button
           type="button"
+          class="icon-btn"
           style={S.secondaryBtn}
           onClick={() => setShowAddForm(!showAddForm())}
         >
-          <PlusIcon size={16} />
+          <PlusIcon size={18} />
           {showAddForm() ? "Cancel" : "Add Bookmark"}
         </button>
       </div>
@@ -162,30 +163,33 @@ export function QuickDial(props: QuickDialProps) {
               >
                 <div style={{ display: "flex", "align-items": "center", "justify-content": "space-between" }}>
                   <span style={{ "font-weight": 600, "font-size": "14px" }}>{item.title}</span>
-                  <div style={{ display: "flex", "align-items": "center", gap: "4px" }} onClick={(e) => e.stopPropagation()}>
+                  <div style={{ display: "flex", "align-items": "center", gap: "6px" }} onClick={(e) => e.stopPropagation()}>
                     <button
                       type="button"
-                      style={{ ...S.iconBtn, width: "28px", height: "28px" }}
+                      class="icon-btn"
+                      style={S.cardIconBtn}
                       onClick={() => props.onNewTab(item.url)}
                       title="Open in New Tab"
                     >
-                      <NewTabIcon size={16} />
+                      <NewTabIcon size={18} />
                     </button>
                     <button
                       type="button"
-                      style={{ ...S.iconBtn, width: "28px", height: "28px" }}
+                      class="icon-btn"
+                      style={S.cardIconBtn}
                       onClick={() => props.onOpenInWebviewWindow(item.url)}
                       title="Open in Dedicated Native WebviewWindow"
                     >
-                      <PopoutIcon size={16} />
+                      <PopoutIcon size={18} />
                     </button>
                     <button
                       type="button"
-                      style={{ ...S.iconBtn, width: "28px", height: "28px" }}
+                      class="icon-btn"
+                      style={S.cardIconBtn}
                       onClick={() => props.onOpenExternal(item.url)}
                       title="Open in System Browser"
                     >
-                      <ExternalIcon size={16} />
+                      <ExternalIcon size={18} />
                     </button>
                   </div>
                 </div>
@@ -227,30 +231,33 @@ export function QuickDial(props: QuickDialProps) {
               >
                 <div style={{ display: "flex", "align-items": "center", "justify-content": "space-between" }}>
                   <span style={{ "font-weight": 600, "font-size": "14px" }}>{item.title}</span>
-                  <div style={{ display: "flex", "align-items": "center", gap: "4px" }} onClick={(e) => e.stopPropagation()}>
+                  <div style={{ display: "flex", "align-items": "center", gap: "6px" }} onClick={(e) => e.stopPropagation()}>
                     <button
                       type="button"
-                      style={{ ...S.iconBtn, width: "28px", height: "28px" }}
+                      class="icon-btn"
+                      style={S.cardIconBtn}
                       onClick={() => props.onNewTab(item.url)}
                       title="Open in New Tab"
                     >
-                      <NewTabIcon size={16} />
+                      <NewTabIcon size={18} />
                     </button>
                     <button
                       type="button"
-                      style={{ ...S.iconBtn, width: "28px", height: "28px" }}
+                      class="icon-btn"
+                      style={S.cardIconBtn}
                       onClick={() => props.onOpenInWebviewWindow(item.url)}
                       title="Open in Dedicated Native WebviewWindow"
                     >
-                      <PopoutIcon size={16} />
+                      <PopoutIcon size={18} />
                     </button>
                     <button
                       type="button"
-                      style={{ ...S.iconBtn, width: "28px", height: "28px" }}
+                      class="icon-btn"
+                      style={S.cardIconBtn}
                       onClick={() => props.onOpenExternal(item.url)}
                       title="Open in System Browser"
                     >
-                      <ExternalIcon size={16} />
+                      <ExternalIcon size={18} />
                     </button>
                   </div>
                 </div>
@@ -292,30 +299,33 @@ export function QuickDial(props: QuickDialProps) {
               >
                 <div style={{ display: "flex", "align-items": "center", "justify-content": "space-between" }}>
                   <span style={{ "font-weight": 600, "font-size": "14px" }}>{item.title}</span>
-                  <div style={{ display: "flex", "align-items": "center", gap: "4px" }} onClick={(e) => e.stopPropagation()}>
+                  <div style={{ display: "flex", "align-items": "center", gap: "6px" }} onClick={(e) => e.stopPropagation()}>
                     <button
                       type="button"
-                      style={{ ...S.iconBtn, width: "28px", height: "28px" }}
+                      class="icon-btn"
+                      style={S.cardIconBtn}
                       onClick={() => props.onNewTab(item.url)}
                       title="Open in New Tab"
                     >
-                      <NewTabIcon size={16} />
+                      <NewTabIcon size={18} />
                     </button>
                     <button
                       type="button"
-                      style={{ ...S.iconBtn, width: "28px", height: "28px" }}
+                      class="icon-btn"
+                      style={S.cardIconBtn}
                       onClick={() => props.onOpenInWebviewWindow(item.url)}
                       title="Open in Dedicated Native WebviewWindow"
                     >
-                      <PopoutIcon size={16} />
+                      <PopoutIcon size={18} />
                     </button>
                     <button
                       type="button"
-                      style={{ ...S.iconBtn, width: "28px", height: "28px" }}
+                      class="icon-btn"
+                      style={S.cardIconBtn}
                       onClick={() => props.onOpenExternal(item.url)}
                       title="Open in System Browser"
                     >
-                      <ExternalIcon size={16} />
+                      <ExternalIcon size={18} />
                     </button>
                   </div>
                 </div>
@@ -357,38 +367,42 @@ export function QuickDial(props: QuickDialProps) {
                 >
                   <div style={{ display: "flex", "align-items": "center", "justify-content": "space-between" }}>
                     <span style={{ "font-weight": 600, "font-size": "14px" }}>{b.title}</span>
-                    <div style={{ display: "flex", "align-items": "center", gap: "4px" }} onClick={(e) => e.stopPropagation()}>
+                    <div style={{ display: "flex", "align-items": "center", gap: "6px" }} onClick={(e) => e.stopPropagation()}>
                       <button
                         type="button"
-                        style={{ ...S.iconBtn, width: "28px", height: "28px" }}
+                        class="icon-btn"
+                        style={S.cardIconBtn}
                         onClick={() => props.onNewTab(b.url)}
                         title="Open in New Tab"
                       >
-                        <NewTabIcon size={16} />
+                        <NewTabIcon size={18} />
                       </button>
                       <button
                         type="button"
-                        style={{ ...S.iconBtn, width: "28px", height: "28px" }}
+                        class="icon-btn"
+                        style={S.cardIconBtn}
                         onClick={() => props.onOpenInWebviewWindow(b.url)}
                         title="Open in Dedicated Native WebviewWindow"
                       >
-                        <PopoutIcon size={16} />
+                        <PopoutIcon size={18} />
                       </button>
                       <button
                         type="button"
-                        style={{ ...S.iconBtn, width: "28px", height: "28px" }}
+                        class="icon-btn"
+                        style={S.cardIconBtn}
                         onClick={() => props.onOpenExternal(b.url)}
                         title="Open in System Browser"
                       >
-                        <ExternalIcon size={16} />
+                        <ExternalIcon size={18} />
                       </button>
                       <button
                         type="button"
-                        style={{ ...S.iconBtn, width: "28px", height: "28px" }}
+                        class="icon-btn"
+                        style={S.cardIconBtn}
                         onClick={() => props.onRemoveBookmark(b.id)}
                         title="Remove Bookmark"
                       >
-                        <CloseIcon size={15} />
+                        <CloseIcon size={16} />
                       </button>
                     </div>
                   </div>

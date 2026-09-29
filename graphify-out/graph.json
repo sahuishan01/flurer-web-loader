@@ -1631,31 +1631,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "src/components/WebViewport.tsx",
-      "source_location": "L23",
-      "weight": 1.0
-    },
-    {
-      "source": "src_components_webviewport_webviewport",
-      "target": "src_utils_getdomain",
-      "relation": "calls",
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "context": "call",
-      "source_file": "src/components/WebViewport.tsx",
-      "source_location": "L71",
-      "weight": 1.0
-    },
-    {
-      "source": "src_components_webviewport_webviewport",
-      "target": "src_utils_getplatformenginename",
-      "relation": "calls",
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "context": "call",
-      "source_file": "src/components/WebViewport.tsx",
-      "source_location": "L84",
+      "source_location": "L21",
       "weight": 1.0
     },
     {
@@ -4421,5 +4397,5 @@
     }
   ],
   "hyperedges": [],
-  "built_at_commit": "60a9c0e54e78d86d5578b22b808ed1f4b69f1a38"
+  "built_at_commit": "baf0f263a13ca934b1b48c14e309d3eb6b19ee38"
 }

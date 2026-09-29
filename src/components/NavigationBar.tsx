@@ -53,20 +53,22 @@ export function NavigationBar(props: NavigationBarProps) {
       {/* History & Reload Controls */}
       <button
         type="button"
+        class="icon-btn"
         style={S.iconBtn}
         onClick={props.onReload}
         title={`Reload Page (F5 / ${mod}+R)`}
       >
-        <ReloadIcon size={18} />
+        <ReloadIcon size={20} />
       </button>
 
       <button
         type="button"
+        class="icon-btn"
         style={S.iconBtn}
         onClick={props.onGoHome}
         title="Go to Home"
       >
-        <HomeIcon size={18} />
+        <HomeIcon size={20} />
       </button>
 
       {/* Smart Omnibox */}
@@ -82,7 +84,7 @@ export function NavigationBar(props: NavigationBarProps) {
             : {}),
         }}
       >
-        <LockIcon size={15} />
+        <LockIcon size={16} />
         <input
           type="text"
           style={S.omniboxInput}
@@ -95,18 +97,21 @@ export function NavigationBar(props: NavigationBarProps) {
         {inputValue() && (
           <button
             type="button"
+            class="icon-btn"
             style={{
-              background: "transparent",
+              ...S.iconBtn,
+              width: "24px",
+              height: "24px",
+              "min-width": "24px",
+              "min-height": "24px",
               border: "none",
+              background: "transparent",
               color: "var(--text-muted, #94a3b8)",
-              cursor: "pointer",
-              "font-size": "14px",
-              padding: "0 4px",
             }}
             onClick={() => setInputValue("")}
             title="Clear input"
           >
-            ✕
+            <CloseIcon size={14} />
           </button>
         )}
       </form>
@@ -114,6 +119,7 @@ export function NavigationBar(props: NavigationBarProps) {
       {/* Bookmark Star */}
       <button
         type="button"
+        class="icon-btn"
         style={{
           ...S.iconBtn,
           ...(props.isBookmarked ? { color: "#eab308" } : {}),
@@ -121,14 +127,15 @@ export function NavigationBar(props: NavigationBarProps) {
         onClick={props.onToggleBookmark}
         title={props.isBookmarked ? "Remove Bookmark" : "Bookmark this Page"}
       >
-        <StarIcon size={18} filled={props.isBookmarked} />
+        <StarIcon size={20} filled={props.isBookmarked} />
       </button>
 
       {/* Zoom Controls */}
       <div style={{ display: "flex", "align-items": "center", gap: "2px" }}>
         <button
           type="button"
-          style={{ ...S.iconBtn, width: "28px", height: "32px", "font-family": "Space Mono, monospace", "font-size": "15px", "font-weight": 600 }}
+          class="icon-btn"
+          style={{ ...S.iconBtn, width: "30px", height: "34px", "font-family": "Space Mono, monospace", "font-size": "16px", "font-weight": 700 }}
           onClick={props.onZoomOut}
           title="Zoom Out"
         >
@@ -136,12 +143,14 @@ export function NavigationBar(props: NavigationBarProps) {
         </button>
         <button
           type="button"
+          class="icon-btn"
           style={{
             ...S.iconBtn,
-            width: "52px",
-            height: "32px",
+            width: "56px",
+            height: "34px",
             "font-family": "Space Mono, monospace",
             "font-size": "12px",
+            "font-weight": 600,
             padding: "0 4px",
           }}
           onClick={props.onResetZoom}
@@ -151,7 +160,8 @@ export function NavigationBar(props: NavigationBarProps) {
         </button>
         <button
           type="button"
-          style={{ ...S.iconBtn, width: "28px", height: "32px", "font-family": "Space Mono, monospace", "font-size": "15px", "font-weight": 600 }}
+          class="icon-btn"
+          style={{ ...S.iconBtn, width: "30px", height: "34px", "font-family": "Space Mono, monospace", "font-size": "16px", "font-weight": 700 }}
           onClick={props.onZoomIn}
           title="Zoom In"
         >
@@ -162,6 +172,7 @@ export function NavigationBar(props: NavigationBarProps) {
       {/* Pop out to Dedicated Native WebviewWindow */}
       <button
         type="button"
+        class="icon-btn"
         style={{
           ...S.iconBtn,
           background: "rgba(var(--accent-rgb, 56, 189, 248), 0.15)",
@@ -171,17 +182,18 @@ export function NavigationBar(props: NavigationBarProps) {
         onClick={props.onPopoutWebviewWindow}
         title={`Open in Dedicated Native WebviewWindow (${engineName})`}
       >
-        <PopoutIcon size={18} />
+        <PopoutIcon size={20} />
       </button>
 
       {/* Open in OS Default External Browser */}
       <button
         type="button"
+        class="icon-btn"
         style={S.iconBtn}
         onClick={props.onOpenExternal}
         title="Open in System Default Browser"
       >
-        <ExternalIcon size={18} />
+        <ExternalIcon size={20} />
       </button>
     </div>
   );

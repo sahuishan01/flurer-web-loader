@@ -9,5 +9,7 @@
   "7": "sync-version.cjs",
   "8": "vite.config.ts",
   "9": "rules/graphify.md",
-  "10": "workflows/graphify.md"
+  "10": "workflows/graphify.md",
+  "11": "types.ts",
+  "12": "TabBar.tsx"
 }

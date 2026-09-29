@@ -1,7 +1,7 @@
 export function GlobeIcon(props: { size?: number }) {
-  const s = () => props.size || 18;
+  const s = () => props.size || 20;
   return (
-    <svg width={s()} height={s()} viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+    <svg width={s()} height={s()} viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" style={{ "flex-shrink": "0", display: "block" }}>
       <circle cx="12" cy="12" r="10" />
       <line x1="2" y1="12" x2="22" y2="12" />
       <path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z" />
@@ -10,9 +10,9 @@ export function GlobeIcon(props: { size?: number }) {
 }
 
 export function ArrowLeftIcon(props: { size?: number }) {
-  const s = () => props.size || 18;
+  const s = () => props.size || 20;
   return (
-    <svg width={s()} height={s()} viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+    <svg width={s()} height={s()} viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" style={{ "flex-shrink": "0", display: "block" }}>
       <line x1="19" y1="12" x2="5" y2="12" />
       <polyline points="12 19 5 12 12 5" />
     </svg>
@@ -20,9 +20,9 @@ export function ArrowLeftIcon(props: { size?: number }) {
 }
 
 export function ArrowRightIcon(props: { size?: number }) {
-  const s = () => props.size || 18;
+  const s = () => props.size || 20;
   return (
-    <svg width={s()} height={s()} viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+    <svg width={s()} height={s()} viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" style={{ "flex-shrink": "0", display: "block" }}>
       <line x1="5" y1="12" x2="19" y2="12" />
       <polyline points="12 5 19 12 12 19" />
     </svg>
@@ -30,18 +30,18 @@ export function ArrowRightIcon(props: { size?: number }) {
 }
 
 export function ReloadIcon(props: { size?: number }) {
-  const s = () => props.size || 18;
+  const s = () => props.size || 20;
   return (
-    <svg width={s()} height={s()} viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+    <svg width={s()} height={s()} viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" style={{ "flex-shrink": "0", display: "block" }}>
       <path d="M21.5 2v6h-6M21.34 15.57a10 10 0 1 1-.57-8.38l6.73-6.19" />
     </svg>
   );
 }
 
 export function HomeIcon(props: { size?: number }) {
-  const s = () => props.size || 18;
+  const s = () => props.size || 20;
   return (
-    <svg width={s()} height={s()} viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+    <svg width={s()} height={s()} viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" style={{ "flex-shrink": "0", display: "block" }}>
       <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z" />
       <polyline points="9 22 9 12 15 12 15 22" />
     </svg>
@@ -49,9 +49,9 @@ export function HomeIcon(props: { size?: number }) {
 }
 
 export function PopoutIcon(props: { size?: number }) {
-  const s = () => props.size || 18;
+  const s = () => props.size || 20;
   return (
-    <svg width={s()} height={s()} viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+    <svg width={s()} height={s()} viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" style={{ "flex-shrink": "0", display: "block" }}>
       <polyline points="15 3 21 3 21 9" />
       <polyline points="9 21 3 21 3 15" />
       <line x1="21" y1="3" x2="14" y2="10" />
@@ -61,9 +61,9 @@ export function PopoutIcon(props: { size?: number }) {
 }
 
 export function ExternalIcon(props: { size?: number }) {
-  const s = () => props.size || 18;
+  const s = () => props.size || 20;
   return (
-    <svg width={s()} height={s()} viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+    <svg width={s()} height={s()} viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" style={{ "flex-shrink": "0", display: "block" }}>
       <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6" />
       <polyline points="15 3 21 3 21 9" />
       <line x1="10" y1="14" x2="21" y2="3" />
@@ -72,9 +72,9 @@ export function ExternalIcon(props: { size?: number }) {
 }
 
 export function NewTabIcon(props: { size?: number }) {
-  const s = () => props.size || 18;
+  const s = () => props.size || 20;
   return (
-    <svg width={s()} height={s()} viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+    <svg width={s()} height={s()} viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" style={{ "flex-shrink": "0", display: "block" }}>
       <path d="M19 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V7a2 2 0 0 1 2-2h6" />
       <line x1="13" y1="11" x2="21" y2="11" />
       <line x1="17" y1="7" x2="17" y2="15" />
@@ -83,9 +83,9 @@ export function NewTabIcon(props: { size?: number }) {
 }
 
 export function PlusIcon(props: { size?: number }) {
-  const s = () => props.size || 18;
+  const s = () => props.size || 20;
   return (
-    <svg width={s()} height={s()} viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+    <svg width={s()} height={s()} viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" style={{ "flex-shrink": "0", display: "block" }}>
       <line x1="12" y1="5" x2="12" y2="19" />
       <line x1="5" y1="12" x2="19" y2="12" />
     </svg>
@@ -95,7 +95,7 @@ export function PlusIcon(props: { size?: number }) {
 export function CloseIcon(props: { size?: number }) {
   const s = () => props.size || 16;
   return (
-    <svg width={s()} height={s()} viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+    <svg width={s()} height={s()} viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" style={{ "flex-shrink": "0", display: "block" }}>
       <line x1="18" y1="6" x2="6" y2="18" />
       <line x1="6" y1="6" x2="18" y2="18" />
     </svg>
@@ -103,18 +103,18 @@ export function CloseIcon(props: { size?: number }) {
 }
 
 export function StarIcon(props: { size?: number; filled?: boolean }) {
-  const s = () => props.size || 18;
+  const s = () => props.size || 20;
   return (
-    <svg width={s()} height={s()} viewBox="0 0 24 24" fill={props.filled ? "currentColor" : "none"} stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+    <svg width={s()} height={s()} viewBox="0 0 24 24" fill={props.filled ? "currentColor" : "none"} stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" style={{ "flex-shrink": "0", display: "block" }}>
       <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2" />
     </svg>
   );
 }
 
 export function LockIcon(props: { size?: number }) {
-  const s = () => props.size || 15;
+  const s = () => props.size || 16;
   return (
-    <svg width={s()} height={s()} viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+    <svg width={s()} height={s()} viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" style={{ "flex-shrink": "0", display: "block" }}>
       <rect x="3" y="11" width="18" height="11" rx="2" ry="2" />
       <path d="M7 11V7a5 5 0 0 1 10 0v4" />
     </svg>

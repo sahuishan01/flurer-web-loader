@@ -1,16 +1,16 @@
 # Graph Report - flurer-web-loader-plugin  (2026-09-29)
 
 ## Corpus Check
-- 19 files · ~8,597 words
+- 19 files · ~8,545 words
 - Verdict: corpus is large enough that graph structure adds value.
 
 ## Summary
-- 131 nodes · 249 edges · 10 communities (7 shown, 3 thin omitted)
+- 131 nodes · 247 edges · 10 communities (7 shown, 3 thin omitted)
 - Extraction: 100% EXTRACTED · 0% INFERRED · 0% AMBIGUOUS
 - Token cost: 0 input · 0 output
 
 ## Graph Freshness
-- Built from commit: `60a9c0e5`
+- Built from commit: `baf0f263`
 - Run `git rev-parse HEAD` and compare to check if the graph is stale.
 - Run `graphify update .` after code changes (no API cost).
 
@@ -31,12 +31,12 @@
 2. `WebBrowserPanel()` - 9 edges
 3. `Tab` - 8 edges
 4. `Bookmark` - 7 edges
-5. `getDomain()` - 7 edges
-6. `openInWebviewWindow()` - 7 edges
-7. `S` - 6 edges
-8. `getEffectiveThemeStyles()` - 6 edges
-9. `getModifierKey()` - 6 edges
-10. `getPlatformEngineName()` - 6 edges
+5. `openInWebviewWindow()` - 7 edges
+6. `S` - 6 edges
+7. `getEffectiveThemeStyles()` - 6 edges
+8. `getModifierKey()` - 6 edges
+9. `getDomain()` - 6 edges
+10. `NavigationBar()` - 5 edges
 
 ## Surprising Connections (you probably didn't know these)
 - `NavigationBarProps` --references--> `Tab`  [EXTRACTED]
@@ -100,6 +100,6 @@ _Questions this graph is uniquely positioned to answer:_
 - **Should `package.json` be split into smaller, more focused modules?**
   _Cohesion score 0.1 - nodes in this community are weakly interconnected._
 - **Should `index.tsx` be split into smaller, more focused modules?**
-  _Cohesion score 0.13978494623655913 - nodes in this community are weakly interconnected._
+  _Cohesion score 0.13548387096774195 - nodes in this community are weakly interconnected._
 - **Should `SettingsPanel.tsx` be split into smaller, more focused modules?**
   _Cohesion score 0.1422924901185771 - nodes in this community are weakly interconnected._
