@@ -3,7 +3,7 @@ import { Tab, Bookmark } from "../types";
 import { S } from "../styles";
 import { QuickDial } from "./QuickDial";
 import { PopoutIcon, ExternalIcon, GlobeIcon } from "../icons";
-import { isKnownFrameRestricted, getDomain } from "../utils";
+import { isKnownFrameRestricted, getDomain, getPlatformEngineName } from "../utils";
 
 interface WebViewportProps {
   activeTab: Tab | undefined;
@@ -71,7 +71,7 @@ export function WebViewport(props: WebViewportProps) {
                   This modern website enforces strict security policies (<code>X-Frame-Options: SAMEORIGIN</code> or CSP frame-ancestors) that block embedded iframes.
                   <br />
                   <br />
-                  Launch it in an unrestricted <strong>Native WebviewWindow</strong> powered by Microsoft Edge WebView2 for full compatibility, WebGL, streaming media, and authenticated sessions.
+                  Launch it in an unrestricted <strong>Native WebviewWindow</strong> powered by {getPlatformEngineName()} for full compatibility, WebGL, streaming media, and authenticated sessions.
                 </p>
               </div>
 

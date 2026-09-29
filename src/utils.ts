@@ -1,5 +1,31 @@
 import { SearchEngine } from "./types";
 
+export type Platform = "windows" | "macos" | "linux";
+
+export function getPlatform(): Platform {
+  if (typeof navigator === "undefined") return "windows";
+  const p = (navigator.platform || navigator.userAgent || "").toLowerCase();
+  if (p.includes("mac") || p.includes("darwin")) return "macos";
+  if (p.includes("linux") || p.includes("x11") || p.includes("bsd")) return "linux";
+  return "windows";
+}
+
+export function getModifierKey(): string {
+  return getPlatform() === "macos" ? "⌘" : "Ctrl";
+}
+
+export function getPlatformEngineName(): string {
+  switch (getPlatform()) {
+    case "macos":
+      return "Apple WebKit (WKWebView)";
+    case "linux":
+      return "WebKitGTK";
+    case "windows":
+    default:
+      return "Microsoft Edge WebView2 (Chromium)";
+  }
+}
+
 declare global {
   interface Window {
     TauriCore?: {
@@ -103,18 +129,25 @@ export async function openInWebviewWindow(url: string, title?: string): Promise<
   }
 
   try {
+    const platform = getPlatform();
+    const windowOptions: Record<string, any> = {
+      label,
+      url,
+      title: windowTitle,
+      width: 1200,
+      height: 800,
+      decorations: true,
+      transparent: false,
+      center: true,
+      focus: true,
+    };
+
+    if (platform === "macos") {
+      windowOptions.hiddenTitle = true;
+    }
+
     await window.TauriCore.invoke("plugin:webview|create_webview_window", {
-      options: {
-        label,
-        url,
-        title: windowTitle,
-        width: 1200,
-        height: 800,
-        decorations: true,
-        transparent: false,
-        center: true,
-        focus: true,
-      },
+      options: windowOptions,
     });
     return { success: true };
   } catch (err: any) {

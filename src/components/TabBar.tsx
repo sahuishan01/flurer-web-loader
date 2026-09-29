@@ -2,6 +2,7 @@ import { For } from "solid-js";
 import { Tab } from "../types";
 import { S } from "../styles";
 import { PlusIcon, CloseIcon, GlobeIcon } from "../icons";
+import { getModifierKey } from "../utils";
 
 interface TabBarProps {
   tabs: Tab[];
@@ -12,6 +13,8 @@ interface TabBarProps {
 }
 
 export function TabBar(props: TabBarProps) {
+  const mod = getModifierKey();
+
   return (
     <div style={S.tabRow}>
       <For each={props.tabs}>
@@ -52,7 +55,7 @@ export function TabBar(props: TabBarProps) {
           height: "28px",
         }}
         onClick={props.onNewTab}
-        title="Open New Tab (Ctrl+T)"
+        title={`Open New Tab (${mod}+T)`}
       >
         <PlusIcon size={14} />
       </button>

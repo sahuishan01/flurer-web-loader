@@ -11,7 +11,7 @@ import {
   LockIcon,
 } from "../icons";
 import { Tab, SearchEngine } from "../types";
-import { normalizeUrl } from "../utils";
+import { normalizeUrl, getModifierKey, getPlatformEngineName } from "../utils";
 
 interface NavigationBarProps {
   activeTab: Tab | undefined;
@@ -30,6 +30,8 @@ interface NavigationBarProps {
 }
 
 export function NavigationBar(props: NavigationBarProps) {
+  const mod = getModifierKey();
+  const engineName = getPlatformEngineName();
   const [inputValue, setInputValue] = createSignal("");
   const [isFocused, setIsFocused] = createSignal(false);
 
@@ -53,7 +55,7 @@ export function NavigationBar(props: NavigationBarProps) {
         type="button"
         style={S.iconBtn}
         onClick={props.onReload}
-        title="Reload Page (F5 / Ctrl+R)"
+        title={`Reload Page (F5 / ${mod}+R)`}
       >
         <ReloadIcon size={15} />
       </button>
@@ -166,7 +168,7 @@ export function NavigationBar(props: NavigationBarProps) {
           "border-color": "rgba(var(--accent-rgb, 56, 189, 248), 0.35)",
         }}
         onClick={props.onPopoutWebviewWindow}
-        title="Open in Dedicated Native WebviewWindow (Full Unrestricted Chromium Engine)"
+        title={`Open in Dedicated Native WebviewWindow (${engineName})`}
       >
         <PopoutIcon size={15} />
       </button>
