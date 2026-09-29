@@ -259,20 +259,41 @@ export async function openInWebviewWindow(
 export async function openInExternalBrowser(url: string): Promise<void> {
   const sanitized = sanitizeUrl(url);
   const targetUrl = sanitized.isSafe ? sanitized.url : "about:blank";
+  if (!targetUrl || targetUrl === "about:blank") return;
 
-  if (window.TauriShell?.open) {
-    await window.TauriShell.open(targetUrl);
-    return;
-  }
+  // 1. Try Tauri v2 Opener plugin (allowed via opener:default in Flurer capabilities)
   if (window.TauriCore) {
     try {
       await window.TauriCore.invoke("plugin:opener|open_url", { url: targetUrl });
       return;
-    } catch {
-      // Ignore
+    } catch (openerErr) {
+      console.warn("plugin:opener|open_url failed, trying open_path fallback:", openerErr);
+    }
+
+    try {
+      await window.TauriCore.invoke("plugin:opener|open_path", { path: targetUrl });
+      return;
+    } catch (pathErr) {
+      console.warn("plugin:opener|open_path failed, trying shell fallback:", pathErr);
     }
   }
-  window.open(targetUrl, "_blank");
+
+  // 2. Try TauriShell.open with defensive error boundary
+  if (window.TauriShell?.open) {
+    try {
+      await window.TauriShell.open(targetUrl);
+      return;
+    } catch (shellErr) {
+      console.warn("window.TauriShell.open failed, trying window.open fallback:", shellErr);
+    }
+  }
+
+  // 3. Fallback to standard window.open
+  try {
+    window.open(targetUrl, "_blank");
+  } catch (err) {
+    console.error("All external browser openers failed:", err);
+  }
 }
 
 export async function clearAllBrowsingData(): Promise<{ success: boolean; error?: string }> {

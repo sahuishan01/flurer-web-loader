@@ -1,6 +1,6 @@
 {
   "0": "NavigationBar.tsx",
-  "1": "types.ts",
+  "1": "WebViewport.tsx",
   "2": "compilerOptions",
   "3": "package.json",
   "4": "index.tsx",
@@ -9,5 +9,12 @@
   "7": "sync-version.cjs",
   "8": "vite.config.ts",
   "9": "rules/graphify.md",
-  "10": "workflows/graphify.md"
+  "10": "workflows/graphify.md",
+  "11": "utils.ts",
+  "12": "QuickDial.tsx",
+  "13": "getModifierKey",
+  "14": "TabBar.tsx",
+  "15": "addHistoryItem",
+  "16": "getDomain",
+  "17": "openInWebviewWindow"
 }
