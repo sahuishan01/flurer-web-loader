@@ -6,6 +6,7 @@ import { TabBar } from "./components/TabBar";
 import { NavigationBar } from "./components/NavigationBar";
 import { WebViewport } from "./components/WebViewport";
 import { SettingsPanel } from "./components/SettingsPanel";
+import { themeConfig, getEffectiveThemeStyles } from "./theme";
 import {
   openInWebviewWindow,
   openInExternalBrowser,
@@ -223,13 +224,22 @@ function WebBrowserPanel(props: MainPanelProps) {
   const opacity = () => Math.max(0.4, props.pluginSettings?.surfaceOpacity ?? props.baseSurfaceOpacity ?? 0.75);
   const blur = () => props.pluginSettings?.surfaceBlur ?? props.baseSurfaceBlur ?? 12;
 
+  const effectiveTheme = () =>
+    getEffectiveThemeStyles(
+      themeConfig(),
+      props.dataBgLightness,
+      opacity(),
+      blur()
+    );
+
   return (
     <div
       style={{
         ...S.container,
-        background: `rgba(var(--panel-rgb, 15, 23, 42), ${opacity()})`,
-        "backdrop-filter": `blur(${blur()}px)`,
-        "-webkit-backdrop-filter": `blur(${blur()}px)`,
+        ...effectiveTheme(),
+        background: `rgba(var(--panel-rgb, 15, 23, 42), var(--plugin-surface-opacity, ${opacity()}))`,
+        "backdrop-filter": `blur(var(--surface-blur, ${blur()}px))`,
+        "-webkit-backdrop-filter": `blur(var(--surface-blur, ${blur()}px))`,
       }}
     >
       <div style={S.topBar}>
@@ -276,7 +286,7 @@ function WebBrowserPanel(props: MainPanelProps) {
   id: "web-loader",
   name: "Web Loader",
   description: "High-performance browser and WebviewWindow loader for modern websites and local web apps.",
-  version: typeof __VERSION__ !== "undefined" ? __VERSION__ : "0.1.1",
+  version: typeof __VERSION__ !== "undefined" ? __VERSION__ : "0.1.2",
   author: "Algosculptor",
   hasCustomAppearanceSettings: true,
   viewRailButton: (props: any) => (
