@@ -757,10 +757,6 @@ export function ContextOrbitDeck(props: ContextOrbitDeckProps) {
                           return (
                             <div
                               class="web-loader-card"
-                              draggable={true}
-                              onDragStart={(e) => {
-                                e.dataTransfer?.setData("text/plain", tab.id);
-                              }}
                               style={{
                                 display: "flex",
                                 "flex-direction": "column",
@@ -768,18 +764,20 @@ export function ContextOrbitDeck(props: ContextOrbitDeckProps) {
                                 padding: "10px",
                                 "border-radius": "8px",
                                 background: isActive()
-                                  ? "rgba(56, 189, 248, 0.12)"
-                                  : "rgba(255, 255, 255, 0.04)",
+                                  ? "rgba(56, 189, 248, 0.16)"
+                                  : "rgba(255, 255, 255, 0.05)",
                                 border: isActive()
-                                  ? "1px solid rgba(56, 189, 248, 0.4)"
+                                  ? "1px solid rgba(56, 189, 248, 0.5)"
                                   : "1px solid rgba(255, 255, 255, 0.08)",
                                 "box-shadow": isActive()
-                                  ? "0 0 16px rgba(56, 189, 248, 0.2)"
+                                  ? "0 0 16px rgba(56, 189, 248, 0.25)"
                                   : "none",
                                 cursor: "pointer",
                                 transition: "all 0.18s cubic-bezier(0.16, 1, 0.3, 1)",
                               }}
-                              onClick={() => {
+                              onClick={(e) => {
+                                e.preventDefault();
+                                e.stopPropagation();
                                 props.onSelectTab(tab.id);
                                 props.onClose();
                               }}
@@ -1179,18 +1177,23 @@ export function ContextOrbitDeck(props: ContextOrbitDeckProps) {
                       "box-shadow": isActive()
                         ? `0 0 24px rgba(56, 189, 248, 0.35)`
                         : "0 6px 18px rgba(0, 0, 0, 0.3)",
-                      cursor: "move",
+                      cursor: "pointer",
                       "z-index": isActive() ? 5 : 2,
                     }}
-                    onPointerDown={(e) => handleNodePointerDown(tab.id, e)}
-                    onClick={() => {
+                    onClick={(e) => {
+                      e.preventDefault();
+                      e.stopPropagation();
                       props.onSelectTab(tab.id);
                       props.onClose();
                     }}
                   >
                     {/* Node Header */}
                     <div style={{ display: "flex", "align-items": "center", "justify-content": "space-between", gap: "6px" }}>
-                      <div style={{ display: "flex", "align-items": "center", gap: "6px", "min-width": 0 }}>
+                      <div
+                        style={{ display: "flex", "align-items": "center", gap: "6px", "min-width": 0, cursor: "grab" }}
+                        onPointerDown={(e) => handleNodePointerDown(tab.id, e)}
+                        title="Drag to reposition card on canvas"
+                      >
                         <GripIcon size={12} />
                         <span
                           style={{

@@ -21,6 +21,7 @@ interface WebViewportProps {
   history?: HistoryItem[];
   active?: boolean;
   dockedChildWebview?: boolean;
+  isOverlayOpen?: boolean;
   onOpenUrl: (url: string) => void;
   onNewTab: (url: string) => void;
   onOpenInWebviewWindow: (url: string) => void;
@@ -59,7 +60,7 @@ export function WebViewport(props: WebViewportProps) {
   };
 
   const syncDockedBounds = () => {
-    if (!containerRef) return;
+    if (!containerRef || props.isOverlayOpen) return;
     const rect = containerRef.getBoundingClientRect();
     if (rect.width <= 0 || rect.height <= 0) return;
 
@@ -129,14 +130,14 @@ export function WebViewport(props: WebViewportProps) {
     }
   };
 
-  // Watch URL changes and active tab to manage docked webview lifecycle
+  // Watch URL changes, active tab, and overlay state to manage docked webview lifecycle
   createEffect(() => {
     const tabId = props.activeTab?.id;
     const url = props.activeTab?.url;
     const isPanelActive = props.active !== false;
 
-    // 1. If blank tab (New Tab / Home Page) or panel inactive: close docked webview immediately!
-    if (isBlank() || !url || !isPanelActive) {
+    // 1. If blank tab (New Tab / Home Page), panel inactive, OR overlay is open: close docked webview immediately!
+    if (isBlank() || !url || !isPanelActive || props.isOverlayOpen) {
       handleCloseDocked();
       return;
     }

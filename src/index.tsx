@@ -351,6 +351,7 @@ function WebBrowserPanel(props: MainPanelProps) {
   };
 
   const handleSelectTab = (id: string) => {
+    setOrbitDeckOpen(false);
     if (id !== activeTabId()) {
       closeDockedWebview();
     }
@@ -688,6 +689,7 @@ function WebBrowserPanel(props: MainPanelProps) {
         bookmarks={bookmarks()}
         history={history()}
         active={props.active}
+        isOverlayOpen={orbitDeckOpen()}
         dockedChildWebview={props.pluginSettings?.dockedChildWebview !== false}
         onOpenUrl={handleNavigate}
         onNewTab={(url) => handleNewTab(url, activeTab()?.id, currentWorkspace().id)}
@@ -714,7 +716,7 @@ function WebBrowserPanel(props: MainPanelProps) {
   id: "web-loader",
   name: "Web Loader",
   description: "High-performance browser and WebviewWindow loader for modern websites and local web apps.",
-  version: typeof __VERSION__ !== "undefined" ? __VERSION__ : "0.1.15",
+  version: typeof __VERSION__ !== "undefined" ? __VERSION__ : "0.1.16",
   author: "Algosculptor",
   hasCustomAppearanceSettings: true,
   viewRailButton: (props: any) => (
