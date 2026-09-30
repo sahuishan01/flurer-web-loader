@@ -26,7 +26,9 @@ import {
   INTENT_COLORS,
   INTENT_LABELS,
   classifyHeuristic,
-  routeTabViaLaya,
+  routeTab,
+  isLayaOfflineDownloaded,
+  downloadAndSetupLayaOffline,
 } from "../smartRouter";
 
 interface ContextOrbitDeckProps {
@@ -64,6 +66,9 @@ export function ContextOrbitDeck(props: ContextOrbitDeckProps) {
   const [testUrlInput, setTestUrlInput] = createSignal("https://docs.rs/tauri");
   const [testRouteResult, setTestRouteResult] = createSignal<string | null>(null);
   const [isTestingRoute, setIsTestingRoute] = createSignal(false);
+  const [isLayaOfflineReady, setIsLayaOfflineReady] = createSignal(isLayaOfflineDownloaded());
+  const [isDownloadingLaya, setIsDownloadingLaya] = createSignal(false);
+  const [layaDownloadPct, setLayaDownloadPct] = createSignal(0);
 
   // Dragging state for Spatial Canvas
   const [draggingTabId, setDraggingTabId] = createSignal<string | null>(null);
@@ -243,11 +248,30 @@ export function ContextOrbitDeck(props: ContextOrbitDeckProps) {
     setIsPanningCanvas(false);
   };
 
+  const handleDownloadLaya = async () => {
+    setIsDownloadingLaya(true);
+    setLayaDownloadPct(0);
+    try {
+      const ok = await downloadAndSetupLayaOffline((pct) => {
+        setLayaDownloadPct(pct);
+      });
+      if (ok) {
+        setIsLayaOfflineReady(true);
+        props.onUpdateSmartRouter({
+          isLayaDownloaded: true,
+          provider: "laya-offline",
+        });
+      }
+    } finally {
+      setIsDownloadingLaya(false);
+    }
+  };
+
   const handleTestRoute = async () => {
     setIsTestingRoute(true);
     setTestRouteResult(null);
     try {
-      const decision = await routeTabViaLaya(
+      const decision = await routeTab(
         testUrlInput(),
         getDomain(testUrlInput()),
         props.smartRouterConfig,
@@ -255,8 +279,10 @@ export function ContextOrbitDeck(props: ContextOrbitDeckProps) {
       );
       const ws = props.workspaces.find((w) => w.id === decision.projectId);
       setTestRouteResult(
-        `Routed to Workspace [${ws?.name || decision.projectId}] with Intent [${INTENT_LABELS[decision.intent]}] via ${decision.engineUsed} (Confidence: ${Math.round(decision.confidence * 100)}%)`
+        `[${decision.engineUsed.toUpperCase()}] → Workspace: ${ws?.name || decision.projectId} | Intent: ${INTENT_LABELS[decision.intent]} (${Math.round(decision.confidence * 100)}% conf). ${decision.reason || ""}`
       );
+    } catch (e: any) {
+      setTestRouteResult(`Error: ${e?.message || "Route failed"}`);
     } finally {
       setIsTestingRoute(false);
     }
@@ -495,9 +521,11 @@ export function ContextOrbitDeck(props: ContextOrbitDeckProps) {
           >
             <SparklesIcon size={14} />
             <span>
-              {props.smartRouterConfig?.provider === "laya-local"
-                ? "Laya AI: Active"
-                : "Smart Router"}
+              {props.smartRouterConfig?.provider === "openai-compatible"
+                ? "OpenAPI Router"
+                : props.smartRouterConfig?.provider === "laya-offline"
+                ? "Laya Offline"
+                : "Heuristic Router"}
             </span>
           </button>
 
@@ -537,7 +565,7 @@ export function ContextOrbitDeck(props: ContextOrbitDeckProps) {
             <div style={{ display: "flex", "align-items": "center", gap: "8px" }}>
               <SparklesIcon size={18} />
               <span style={{ "font-size": "13px", "font-weight": 600, color: "#a855f7", "font-family": "Space Mono, monospace" }}>
-                LAYA ON-DEVICE ROUTER & CATEGORY ENGINE
+                SMART ROUTING ENGINE
               </span>
             </div>
             <button
@@ -550,7 +578,7 @@ export function ContextOrbitDeck(props: ContextOrbitDeckProps) {
           </div>
 
           <p style={{ margin: 0, "font-size": "12px", color: "var(--text-secondary, #94a3b8)", "line-height": 1.5 }}>
-            Laya routes new web pages automatically to the right workspace and intent (Dev, Docs, AI, Research, Leisure) or dynamically suggests new categories.
+            Routes web pages automatically into project workspaces and category intents. Select your preferred engine below.
           </p>
 
           <div style={{ display: "flex", "align-items": "center", gap: "12px", "flex-wrap": "wrap" }}>
@@ -573,10 +601,31 @@ export function ContextOrbitDeck(props: ContextOrbitDeckProps) {
                   "font-size": "12px",
                 }}
               >
-                <option value="heuristic">Zero-Latency Heuristic (Built-in, 0ms, Offline)</option>
-                <option value="laya-local">On-Device Laya Model (Ollama / Local LLM at 127.0.0.1:11434)</option>
+                <option value="heuristic">Option 1: Built-in Heuristic (0ms, 100% Offline)</option>
+                <option value="openai-compatible">Option 2: OpenAPI Endpoint (Online / Offline)</option>
+                <option value="laya-offline">Option 3: Laya Completely Offline (On-Device)</option>
               </select>
             </label>
+
+            {/* If Laya Offline and not downloaded, show quick download button */}
+            <Show when={props.smartRouterConfig?.provider === "laya-offline" && !isLayaOfflineReady()}>
+              <button
+                type="button"
+                onClick={handleDownloadLaya}
+                disabled={isDownloadingLaya()}
+                style={{
+                  padding: "4px 10px",
+                  "border-radius": "6px",
+                  background: "rgba(168, 85, 247, 0.2)",
+                  border: "1px solid rgba(168, 85, 247, 0.5)",
+                  color: "#a855f7",
+                  "font-size": "11px",
+                  cursor: "pointer",
+                }}
+              >
+                {isDownloadingLaya() ? `Downloading (${layaDownloadPct()}%)...` : "Download Laya Offline (4.8 MB)"}
+              </button>
+            </Show>
 
             {/* Test Route Bar */}
             <div style={{ display: "flex", "align-items": "center", gap: "6px", flex: "1 1 300px" }}>

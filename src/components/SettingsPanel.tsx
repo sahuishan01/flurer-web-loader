@@ -21,7 +21,14 @@ import {
   BranchIcon,
   LayersIcon,
 } from "../icons";
-import { DEFAULT_WORKSPACES } from "../smartRouter";
+import {
+  DEFAULT_WORKSPACES,
+  isLayaOfflineDownloaded,
+  downloadAndSetupLayaOffline,
+  clearLayaOfflineStorage,
+  getLayaOfflineMetadata,
+  routeTab,
+} from "../smartRouter";
 import {
   clearAllBrowsingData,
   clearHistory,
@@ -65,10 +72,73 @@ export function SettingsPanel(props: SettingsPanelProps) {
     props.pluginSettings.smartRouter ?? {
       enabled: true,
       provider: "heuristic",
-      localEndpointUrl: "http://127.0.0.1:11434",
-      modelName: "laya-router",
+      apiEndpointUrl: "http://127.0.0.1:1234/v1",
+      modelName: "laya",
       autoCreateCategories: true,
     };
+
+  const [isDownloadingLaya, setIsDownloadingLaya] = createSignal(false);
+  const [layaDownloadProgress, setLayaDownloadProgress] = createSignal(0);
+  const [layaDownloadStage, setLayaDownloadStage] = createSignal("");
+  const [layaOfflineReady, setLayaOfflineReady] = createSignal(isLayaOfflineDownloaded());
+  const [testEndpointResult, setTestEndpointResult] = createSignal<string | null>(null);
+  const [isTestingEndpoint, setIsTestingEndpoint] = createSignal(false);
+  const [testEndpointUrl, setTestEndpointUrl] = createSignal("https://news.ycombinator.com");
+
+  const handleDownloadLaya = async () => {
+    setIsDownloadingLaya(true);
+    setLayaDownloadProgress(0);
+    setLayaDownloadStage("Initializing download...");
+    try {
+      const ok = await downloadAndSetupLayaOffline((pct, text) => {
+        setLayaDownloadProgress(pct);
+        setLayaDownloadStage(text);
+      });
+      if (ok) {
+        setLayaOfflineReady(true);
+        props.onPluginSettingsChange({
+          smartRouter: {
+            ...currentSmartRouter(),
+            isLayaDownloaded: true,
+            provider: "laya-offline",
+          },
+        });
+      }
+    } finally {
+      setIsDownloadingLaya(false);
+    }
+  };
+
+  const handleClearLaya = () => {
+    clearLayaOfflineStorage();
+    setLayaOfflineReady(false);
+    props.onPluginSettingsChange({
+      smartRouter: {
+        ...currentSmartRouter(),
+        isLayaDownloaded: false,
+      },
+    });
+  };
+
+  const handleTestEndpoint = async () => {
+    setIsTestingEndpoint(true);
+    setTestEndpointResult(null);
+    try {
+      const decision = await routeTab(
+        testEndpointUrl(),
+        "Sample Page",
+        currentSmartRouter(),
+        currentWorkspaces()
+      );
+      setTestEndpointResult(
+        `✓ [${decision.engineUsed.toUpperCase()}] Routed to Workspace: ${decision.projectId} (${decision.intent}) - ${Math.round(decision.confidence * 100)}% confidence. ${decision.reason || ""}`
+      );
+    } catch (e: any) {
+      setTestEndpointResult(`✗ Error: ${e?.message || "Failed to reach endpoint"}`);
+    } finally {
+      setIsTestingEndpoint(false);
+    }
+  };
 
   const [newWsName, setNewWsName] = createSignal("");
   const [newWsColor, setNewWsColor] = createSignal("#38bdf8");
@@ -665,10 +735,10 @@ export function SettingsPanel(props: SettingsPanelProps) {
             </label>
           </div>
 
-          <div style={{ display: "grid", "grid-template-columns": "repeat(auto-fit, minmax(240px, 1fr))", gap: "12px" }}>
+          <div style={{ display: "flex", "flex-direction": "column", gap: "12px" }}>
             <div>
-              <label style={{ "font-size": "12px", color: "var(--text-secondary, #94a3b8)", display: "block", "margin-bottom": "4px" }}>
-                Routing Engine Provider
+              <label style={{ "font-size": "12px", color: "var(--text-secondary, #94a3b8)", display: "block", "margin-bottom": "6px" }}>
+                Select Smart Router Engine
               </label>
               <select
                 value={currentSmartRouter().provider}
@@ -690,98 +760,325 @@ export function SettingsPanel(props: SettingsPanelProps) {
                   "font-size": "12px",
                 }}
               >
-                <option value="heuristic">Zero-Latency Heuristic (Built-in, 0ms, Offline)</option>
-                <option value="laya-local">On-Device Laya Model (Ollama / Local LLM at 127.0.0.1:11434)</option>
+                <option value="heuristic">Option 1: Built-in Zero-Latency Heuristic (Instant, 0ms, 100% Offline)</option>
+                <option value="openai-compatible">Option 2: Connect with OpenAPI/OpenAI-compatible Endpoint (Online or Offline)</option>
+                <option value="laya-offline">Option 3: Download & Setup Laya Completely Offline (On-Device, Zero Setup)</option>
               </select>
             </div>
 
-            <Show when={currentSmartRouter().provider === "laya-local"}>
-              <div>
-                <label style={{ "font-size": "12px", color: "var(--text-secondary, #94a3b8)", display: "block", "margin-bottom": "4px" }}>
-                  Local Model Endpoint URL
-                </label>
-                <input
-                  type="text"
-                  value={currentSmartRouter().localEndpointUrl || "http://127.0.0.1:11434"}
-                  onInput={(e) =>
-                    props.onPluginSettingsChange({
-                      smartRouter: {
-                        ...currentSmartRouter(),
-                        localEndpointUrl: e.currentTarget.value,
-                      },
-                    })
-                  }
-                  style={{
-                    width: "100%",
-                    padding: "8px 10px",
-                    background: "rgba(0, 0, 0, 0.4)",
-                    border: "1px solid rgba(255, 255, 255, 0.15)",
-                    color: "#f8fafc",
-                    "border-radius": "6px",
-                    "font-size": "12px",
-                    "font-family": "Space Mono, monospace",
-                  }}
-                />
-              </div>
-
-              <div>
-                <label style={{ "font-size": "12px", color: "var(--text-secondary, #94a3b8)", display: "block", "margin-bottom": "4px" }}>
-                  Model Tag / Name
-                </label>
-                <input
-                  type="text"
-                  value={currentSmartRouter().modelName || "laya-router"}
-                  onInput={(e) =>
-                    props.onPluginSettingsChange({
-                      smartRouter: {
-                        ...currentSmartRouter(),
-                        modelName: e.currentTarget.value,
-                      },
-                    })
-                  }
-                  placeholder="e.g. laya-router or llama3.2:1b"
-                  style={{
-                    width: "100%",
-                    padding: "8px 10px",
-                    background: "rgba(0, 0, 0, 0.4)",
-                    border: "1px solid rgba(255, 255, 255, 0.15)",
-                    color: "#f8fafc",
-                    "border-radius": "6px",
-                    "font-size": "12px",
-                    "font-family": "Space Mono, monospace",
-                  }}
-                />
+            {/* OPTION 1: Built-in Heuristic */}
+            <Show when={currentSmartRouter().provider === "heuristic"}>
+              <div
+                style={{
+                  padding: "10px 12px",
+                  "border-radius": "6px",
+                  background: "rgba(5, 255, 176, 0.06)",
+                  border: "1px solid rgba(5, 255, 176, 0.2)",
+                  "font-size": "12px",
+                  "line-height": 1.5,
+                  color: "var(--text-secondary, #cbd5e1)",
+                }}
+              >
+                <div style={{ display: "flex", "align-items": "center", gap: "6px", "margin-bottom": "4px", color: "#05ffb0", "font-weight": 600 }}>
+                  <span>✓ Built-in Fast Heuristic Router Active</span>
+                </div>
+                Deterministic pattern, domain, and keyword classification. Zero network traffic, zero external servers, and instantaneous 0ms response time.
               </div>
             </Show>
-          </div>
 
-          {/* Quick Setup Instructions for Local Laya Model */}
-          <div
-            style={{
-              padding: "10px 12px",
-              "border-radius": "6px",
-              background: "rgba(168, 85, 247, 0.08)",
-              border: "1px solid rgba(168, 85, 247, 0.2)",
-              "font-size": "11px",
-              "line-height": 1.5,
-              color: "var(--text-secondary, #cbd5e1)",
-            }}
-          >
-            <strong>On-Device Laya Model Setup:</strong> To run Laya locally on your device with Ollama, start the local server:
-            <code
-              style={{
-                display: "block",
-                margin: "4px 0",
-                padding: "4px 8px",
-                background: "rgba(0, 0, 0, 0.4)",
-                "border-radius": "4px",
-                "font-family": "Space Mono, monospace",
-                color: "#05ffb0",
-              }}
-            >
-              ollama pull llama3.2:1b && ollama cp llama3.2:1b laya-router
-            </code>
-            If unreachable or offline, Web Loader automatically falls back to the zero-latency heuristic engine with zero user disruption.
+            {/* OPTION 2: OpenAPI-compatible Endpoint */}
+            <Show when={currentSmartRouter().provider === "openai-compatible"}>
+              <div
+                style={{
+                  display: "flex",
+                  "flex-direction": "column",
+                  gap: "12px",
+                  padding: "12px",
+                  "border-radius": "6px",
+                  background: "rgba(56, 189, 248, 0.05)",
+                  border: "1px solid rgba(56, 189, 248, 0.25)",
+                }}
+              >
+                <div style={{ "font-size": "12px", color: "#38bdf8", "font-weight": 600 }}>
+                  OpenAPI / OpenAI-Compatible Endpoint Configuration
+                </div>
+                <div style={{ "font-size": "11px", color: "var(--text-secondary, #94a3b8)" }}>
+                  Connect to local offline backends (LM Studio, vLLM, LocalAI, Ollama /v1) or online APIs (OpenRouter, OpenAI, Groq).
+                </div>
+
+                <div style={{ display: "grid", "grid-template-columns": "repeat(auto-fit, minmax(220px, 1fr))", gap: "10px" }}>
+                  <div>
+                    <label style={{ "font-size": "11px", color: "var(--text-secondary, #94a3b8)", display: "block", "margin-bottom": "4px" }}>
+                      API Base / Chat URL
+                    </label>
+                    <input
+                      type="text"
+                      value={currentSmartRouter().apiEndpointUrl || "http://127.0.0.1:1234/v1"}
+                      onInput={(e) =>
+                        props.onPluginSettingsChange({
+                          smartRouter: {
+                            ...currentSmartRouter(),
+                            apiEndpointUrl: e.currentTarget.value,
+                          },
+                        })
+                      }
+                      placeholder="http://127.0.0.1:1234/v1 or https://openrouter.ai/api/v1"
+                      style={{
+                        width: "100%",
+                        padding: "7px 10px",
+                        background: "rgba(0, 0, 0, 0.4)",
+                        border: "1px solid rgba(255, 255, 255, 0.15)",
+                        color: "#f8fafc",
+                        "border-radius": "6px",
+                        "font-size": "12px",
+                        "font-family": "Space Mono, monospace",
+                      }}
+                    />
+                  </div>
+
+                  <div>
+                    <label style={{ "font-size": "11px", color: "var(--text-secondary, #94a3b8)", display: "block", "margin-bottom": "4px" }}>
+                      API Key (Optional / Bearer Token)
+                    </label>
+                    <input
+                      type="password"
+                      value={currentSmartRouter().apiKey || ""}
+                      onInput={(e) =>
+                        props.onPluginSettingsChange({
+                          smartRouter: {
+                            ...currentSmartRouter(),
+                            apiKey: e.currentTarget.value,
+                          },
+                        })
+                      }
+                      placeholder="Leave blank for local offline endpoints"
+                      style={{
+                        width: "100%",
+                        padding: "7px 10px",
+                        background: "rgba(0, 0, 0, 0.4)",
+                        border: "1px solid rgba(255, 255, 255, 0.15)",
+                        color: "#f8fafc",
+                        "border-radius": "6px",
+                        "font-size": "12px",
+                        "font-family": "Space Mono, monospace",
+                      }}
+                    />
+                  </div>
+
+                  <div>
+                    <label style={{ "font-size": "11px", color: "var(--text-secondary, #94a3b8)", display: "block", "margin-bottom": "4px" }}>
+                      Model Name / Identifier
+                    </label>
+                    <input
+                      type="text"
+                      value={currentSmartRouter().modelName || "laya"}
+                      onInput={(e) =>
+                        props.onPluginSettingsChange({
+                          smartRouter: {
+                            ...currentSmartRouter(),
+                            modelName: e.currentTarget.value,
+                          },
+                        })
+                      }
+                      placeholder="e.g. laya, qwen2.5, gpt-4o-mini"
+                      style={{
+                        width: "100%",
+                        padding: "7px 10px",
+                        background: "rgba(0, 0, 0, 0.4)",
+                        border: "1px solid rgba(255, 255, 255, 0.15)",
+                        color: "#f8fafc",
+                        "border-radius": "6px",
+                        "font-size": "12px",
+                        "font-family": "Space Mono, monospace",
+                      }}
+                    />
+                  </div>
+                </div>
+
+                {/* Connection Test Bar */}
+                <div style={{ display: "flex", "align-items": "center", gap: "8px", "margin-top": "4px", "flex-wrap": "wrap" }}>
+                  <input
+                    type="text"
+                    value={testEndpointUrl()}
+                    onInput={(e) => setTestEndpointUrl(e.currentTarget.value)}
+                    placeholder="Test URL (e.g. https://news.ycombinator.com)"
+                    style={{
+                      flex: "1 1 240px",
+                      padding: "6px 10px",
+                      background: "rgba(0, 0, 0, 0.4)",
+                      border: "1px solid rgba(255, 255, 255, 0.15)",
+                      color: "#f8fafc",
+                      "border-radius": "6px",
+                      "font-size": "12px",
+                    }}
+                  />
+                  <button
+                    type="button"
+                    onClick={handleTestEndpoint}
+                    disabled={isTestingEndpoint()}
+                    style={{
+                      padding: "6px 14px",
+                      background: "rgba(56, 189, 248, 0.2)",
+                      border: "1px solid rgba(56, 189, 248, 0.5)",
+                      color: "#38bdf8",
+                      "border-radius": "6px",
+                      "font-size": "11px",
+                      "font-family": "Space Mono, monospace",
+                      cursor: "pointer",
+                    }}
+                  >
+                    {isTestingEndpoint() ? "Testing Connection..." : "Test Endpoint"}
+                  </button>
+                </div>
+
+                <Show when={testEndpointResult()}>
+                  <div
+                    style={{
+                      padding: "8px 10px",
+                      "border-radius": "6px",
+                      background: "rgba(0, 0, 0, 0.5)",
+                      border: "1px solid rgba(255, 255, 255, 0.1)",
+                      "font-size": "11px",
+                      "font-family": "Space Mono, monospace",
+                      color: testEndpointResult()?.startsWith("✓") ? "#05ffb0" : "#ef4444",
+                    }}
+                  >
+                    {testEndpointResult()}
+                  </div>
+                </Show>
+              </div>
+            </Show>
+
+            {/* OPTION 3: Download & Setup Laya Completely Offline */}
+            <Show when={currentSmartRouter().provider === "laya-offline"}>
+              <div
+                style={{
+                  display: "flex",
+                  "flex-direction": "column",
+                  gap: "12px",
+                  padding: "12px",
+                  "border-radius": "6px",
+                  background: "rgba(168, 85, 247, 0.06)",
+                  border: "1px solid rgba(168, 85, 247, 0.25)",
+                }}
+              >
+                <div style={{ display: "flex", "align-items": "center", "justify-content": "space-between" }}>
+                  <div style={{ "font-size": "12px", color: "#a855f7", "font-weight": 600 }}>
+                    Download & Setup Laya Completely Offline
+                  </div>
+                  <Show
+                    when={layaOfflineReady()}
+                    fallback={
+                      <span
+                        style={{
+                          padding: "2px 8px",
+                          "border-radius": "12px",
+                          background: "rgba(245, 158, 11, 0.15)",
+                          color: "#f59e0b",
+                          "font-size": "10px",
+                          "font-family": "Space Mono, monospace",
+                        }}
+                      >
+                        Not Downloaded
+                      </span>
+                    }
+                  >
+                    <span
+                      style={{
+                        padding: "2px 8px",
+                        "border-radius": "12px",
+                        background: "rgba(5, 255, 176, 0.15)",
+                        color: "#05ffb0",
+                        "font-size": "10px",
+                        "font-family": "Space Mono, monospace",
+                      }}
+                    >
+                      ✓ Offline Engine Cached
+                    </span>
+                  </Show>
+                </div>
+
+                <p style={{ margin: 0, "font-size": "11px", color: "var(--text-secondary, #94a3b8)", "line-height": 1.5 }}>
+                  Laya Offline downloads lightweight quantized semantic vector tables (4.8 MB) directly into client storage. It runs 100% on-device inside Flurer without requiring any local daemon, background server, or active internet connection.
+                </p>
+
+                <Show when={isDownloadingLaya()}>
+                  <div style={{ display: "flex", "flex-direction": "column", gap: "6px" }}>
+                    <div style={{ display: "flex", "justify-content": "space-between", "font-size": "11px", "font-family": "Space Mono, monospace" }}>
+                      <span style={{ color: "#a855f7" }}>{layaDownloadStage()}</span>
+                      <span style={{ color: "#f8fafc" }}>{layaDownloadProgress()}%</span>
+                    </div>
+                    <div style={{ height: "6px", width: "100%", background: "rgba(255, 255, 255, 0.1)", "border-radius": "3px", overflow: "hidden" }}>
+                      <div
+                        style={{
+                          height: "100%",
+                          width: `${layaDownloadProgress()}%`,
+                          background: "linear-gradient(90deg, #a855f7, #38bdf8)",
+                          transition: "width 0.2s ease-out",
+                        }}
+                      />
+                    </div>
+                  </div>
+                </Show>
+
+                <div style={{ display: "flex", "align-items": "center", gap: "10px", "flex-wrap": "wrap" }}>
+                  <Show
+                    when={layaOfflineReady()}
+                    fallback={
+                      <button
+                        type="button"
+                        onClick={handleDownloadLaya}
+                        disabled={isDownloadingLaya()}
+                        style={{
+                          padding: "8px 16px",
+                          background: "linear-gradient(135deg, rgba(168, 85, 247, 0.3), rgba(56, 189, 248, 0.3))",
+                          border: "1px solid rgba(168, 85, 247, 0.6)",
+                          color: "#f8fafc",
+                          "border-radius": "6px",
+                          "font-size": "12px",
+                          "font-weight": 600,
+                          cursor: "pointer",
+                        }}
+                      >
+                        {isDownloadingLaya() ? "Downloading & Setting Up..." : "Download & Setup Laya Offline (4.8 MB)"}
+                      </button>
+                    }
+                  >
+                    <button
+                      type="button"
+                      onClick={handleDownloadLaya}
+                      disabled={isDownloadingLaya()}
+                      style={{
+                        padding: "6px 12px",
+                        background: "rgba(255, 255, 255, 0.08)",
+                        border: "1px solid rgba(255, 255, 255, 0.2)",
+                        color: "#f8fafc",
+                        "border-radius": "6px",
+                        "font-size": "11px",
+                        cursor: "pointer",
+                      }}
+                    >
+                      Re-download / Verify Offline Weights
+                    </button>
+                    <button
+                      type="button"
+                      onClick={handleClearLaya}
+                      style={{
+                        padding: "6px 12px",
+                        background: "rgba(239, 68, 68, 0.15)",
+                        border: "1px solid rgba(239, 68, 68, 0.3)",
+                        color: "#ef4444",
+                        "border-radius": "6px",
+                        "font-size": "11px",
+                        cursor: "pointer",
+                      }}
+                    >
+                      Clear Offline Storage
+                    </button>
+                  </Show>
+                </div>
+              </div>
+            </Show>
           </div>
         </div>
 

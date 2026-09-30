@@ -16,7 +16,7 @@ import { ContextOrbitDeck } from "./components/ContextOrbitDeck";
 import { WebViewport } from "./components/WebViewport";
 import { SettingsPanel } from "./components/SettingsPanel";
 import { themeConfig, getEffectiveThemeStyles } from "./theme";
-import { DEFAULT_WORKSPACES, classifyHeuristic } from "./smartRouter";
+import { DEFAULT_WORKSPACES, classifyHeuristic, routeTab } from "./smartRouter";
 import {
   openInWebviewWindow,
   openInExternalBrowser,
@@ -447,6 +447,31 @@ function WebBrowserPanel(props: MainPanelProps) {
     );
     setTabs(nextTabs);
     persistCurrentTabs(nextTabs, url);
+
+    if (props.pluginSettings?.smartRouter?.enabled && props.pluginSettings.smartRouter.provider !== "heuristic") {
+      routeTab(url, domain, props.pluginSettings.smartRouter, workspaces(), cur?.projectId)
+        .then((asyncDecision) => {
+          if (asyncDecision.projectId !== decision.projectId || asyncDecision.intent !== decision.intent) {
+            setTabs((prev) => {
+              const updated = prev.map((t) =>
+                t.id === id
+                  ? {
+                      ...t,
+                      projectId: asyncDecision.projectId,
+                      intent: asyncDecision.intent,
+                    }
+                  : t
+              );
+              persistCurrentTabs(updated, url);
+              return updated;
+            });
+          }
+        })
+        .catch(() => {
+          // Keep heuristic categorization on any async failure
+        });
+    }
+
     if (url && url !== "about:blank") {
       setHistory(addHistoryItem(domain, url));
     }
@@ -676,8 +701,8 @@ function WebBrowserPanel(props: MainPanelProps) {
           const current = props.pluginSettings?.smartRouter || {
             enabled: true,
             provider: "heuristic",
-            localEndpointUrl: "http://127.0.0.1:11434",
-            modelName: "laya-router",
+            apiEndpointUrl: "http://127.0.0.1:1234/v1",
+            modelName: "laya",
             autoCreateCategories: true,
           };
           props.onPluginSettingsChange?.({ smartRouter: { ...current, ...patch } });
@@ -716,7 +741,7 @@ function WebBrowserPanel(props: MainPanelProps) {
   id: "web-loader",
   name: "Web Loader",
   description: "High-performance browser and WebviewWindow loader for modern websites and local web apps.",
-  version: typeof __VERSION__ !== "undefined" ? __VERSION__ : "0.1.16",
+  version: typeof __VERSION__ !== "undefined" ? __VERSION__ : "0.1.17",
   author: "Algosculptor",
   hasCustomAppearanceSettings: true,
   viewRailButton: (props: any) => (

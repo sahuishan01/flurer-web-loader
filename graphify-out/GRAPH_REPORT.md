@@ -1,21 +1,21 @@
 # Graph Report - flurer-web-loader-plugin  (2026-09-30)
 
 ## Corpus Check
-- 22 files · ~22,037 words
+- 22 files · ~23,730 words
 - Verdict: corpus is large enough that graph structure adds value.
 
 ## Summary
-- 186 nodes · 472 edges · 13 communities (10 shown, 3 thin omitted)
+- 193 nodes · 501 edges · 12 communities (9 shown, 3 thin omitted)
 - Extraction: 100% EXTRACTED · 0% INFERRED · 0% AMBIGUOUS
 - Token cost: 0 input · 0 output
 
 ## Graph Freshness
-- Built from commit: `ea5cca7d`
+- Built from commit: `39e4f0d9`
 - Run `git rev-parse HEAD` and compare to check if the graph is stale.
 - Run `graphify update .` after code changes (no API cost).
 
 ## Community Hubs (Navigation)
-- ContextCapsuleBar.tsx
+- ContextOrbitDeck.tsx
 - compilerOptions
 - package.json
 - index.tsx
@@ -27,40 +27,39 @@
 - workflows/graphify.md
 - utils.ts
 - types.ts
-- QuickDial.tsx
 
 ## God Nodes (most connected - your core abstractions)
-1. `WebBrowserPanel()` - 17 edges
-2. `getDomain()` - 16 edges
+1. `WebBrowserPanel()` - 18 edges
+2. `getDomain()` - 18 edges
 3. `Tab` - 12 edges
-4. `getModifierKey()` - 10 edges
-5. `compilerOptions` - 10 edges
-6. `WebViewport()` - 9 edges
-7. `invoke()` - 9 edges
-8. `openInWebviewWindow()` - 9 edges
-9. `S` - 8 edges
-10. `ProjectWorkspace` - 8 edges
+4. `SettingsPanel()` - 11 edges
+5. `routeTab()` - 10 edges
+6. `getModifierKey()` - 10 edges
+7. `compilerOptions` - 10 edges
+8. `WebViewport()` - 9 edges
+9. `classifyHeuristic()` - 9 edges
+10. `invoke()` - 9 edges
 
 ## Surprising Connections (you probably didn't know these)
-- `ContextOrbitDeck()` --calls--> `getDomain()`  [EXTRACTED]
+- `ContextOrbitDeck()` --calls--> `downloadAndSetupLayaOffline()`  [EXTRACTED]
+  src/components/ContextOrbitDeck.tsx → src/smartRouter.ts
+- `ContextOrbitDeck()` --calls--> `isLayaOfflineDownloaded()`  [EXTRACTED]
+  src/components/ContextOrbitDeck.tsx → src/smartRouter.ts
+- `ContextOrbitDeck()` --calls--> `getModifierKey()`  [EXTRACTED]
   src/components/ContextOrbitDeck.tsx → src/utils.ts
-- `SettingsPanel()` --calls--> `saveThemeConfig()`  [EXTRACTED]
-  src/components/SettingsPanel.tsx → src/theme.ts
-- `SettingsPanel()` --calls--> `clearAllBrowsingData()`  [EXTRACTED]
-  src/components/SettingsPanel.tsx → src/utils.ts
+- `SettingsPanel()` --calls--> `routeTab()`  [EXTRACTED]
+  src/components/SettingsPanel.tsx → src/smartRouter.ts
 - `TabBarProps` --references--> `Tab`  [EXTRACTED]
   src/components/TabBar.tsx → src/types.ts
-- `WebViewportProps` --references--> `Tab`  [EXTRACTED]
-  src/components/WebViewport.tsx → src/types.ts
 
 ## Import Cycles
 - None detected.
 
-## Communities (13 total, 3 thin omitted)
+## Communities (12 total, 3 thin omitted)
 
-### Community 0 - "ContextCapsuleBar.tsx"
-Cohesion: 0.15
-Nodes (30): ContextCapsuleBar(), ContextOrbitDeck(), NavigationBar(), TabBar(), ArrowLeftIcon(), ArrowRightIcon(), BranchIcon(), CloseIcon() (+22 more)
+### Community 0 - "ContextOrbitDeck.tsx"
+Cohesion: 0.16
+Nodes (28): ContextCapsuleBarProps, ContextOrbitDeckProps, NavigationBarProps, TabBarProps, ArrowLeftIcon(), ArrowRightIcon(), BranchIcon(), CloseIcon() (+20 more)
 
 ### Community 2 - "compilerOptions"
 Cohesion: 0.15
@@ -71,12 +70,12 @@ Cohesion: 0.10
 Nodes (19): devDependencies, solid-js, @tauri-apps/api, typescript, vite, vite-plugin-solid, name, private (+11 more)
 
 ### Community 4 - "index.tsx"
-Cohesion: 0.15
-Nodes (26): SettingsPanel(), [activeTabId, setActiveTabId], [bookmarks, setBookmarks], createNewTab(), [history, setHistory], initialTabsState, initRestoredTabs(), [tabs, setTabs] (+18 more)
+Cohesion: 0.16
+Nodes (27): ContextOrbitDeck(), [activeTabId, setActiveTabId], [bookmarks, setBookmarks], createNewTab(), [history, setHistory], initialTabsState, initRestoredTabs(), [tabs, setTabs] (+19 more)
 
 ### Community 5 - "SettingsPanel.tsx"
-Cohesion: 0.16
-Nodes (15): QUICK_ACCENTS, QUICK_PANELS, IncognitoIcon(), ShieldIcon(), getSavedThemeConfig(), PRESET_THEMES, PresetDef, PresetThemeId (+7 more)
+Cohesion: 0.12
+Nodes (27): QUICK_ACCENTS, QUICK_PANELS, SettingsPanel(), IncognitoIcon(), ShieldIcon(), clearLayaOfflineStorage(), DEFAULT_WORKSPACES, downloadAndSetupLayaOffline() (+19 more)
 
 ### Community 6 - "Flurer Web Loader Plugin (`web-loader`)"
 Cohesion: 0.50
@@ -87,34 +86,32 @@ Cohesion: 0.33
 Nodes (5): fs, path, pkg, plugin, pluginPath
 
 ### Community 11 - "utils.ts"
-Cohesion: 0.18
-Nodes (20): WebViewport(), clearAllBrowsingData(), closeDockedWebview(), createDockedWebview(), DOCKED_WEBVIEW_PREFIX, getDomain(), getDomainSlug(), getIframeEmbedUrl() (+12 more)
+Cohesion: 0.13
+Nodes (27): ContextCapsuleBar(), NavigationBar(), TabBar(), WebViewport(), CHROME_DESKTOP_USER_AGENT, closeDockedWebview(), createDockedWebview(), DEFAULT_DESKTOP_USER_AGENT (+19 more)
 
 ### Community 12 - "types.ts"
-Cohesion: 0.16
-Nodes (17): ContextCapsuleBarProps, ContextOrbitDeckProps, NavigationBarProps, TabBarProps, DEFAULT_WORKSPACES, RouteDecision, MainPanelProps, NavDesignMode (+9 more)
-
-### Community 15 - "QuickDial.tsx"
-Cohesion: 0.21
-Nodes (11): DEFAULT_AI_TARGETS, DEFAULT_DEV_TARGETS, DEFAULT_DOC_TARGETS, QuickDial(), QuickDialProps, WebViewportProps, HistoryIcon(), NewTabIcon() (+3 more)
+Cohesion: 0.13
+Nodes (17): DEFAULT_AI_TARGETS, DEFAULT_DEV_TARGETS, DEFAULT_DOC_TARGETS, QuickDial(), QuickDialProps, WebViewportProps, HistoryIcon(), NewTabIcon() (+9 more)
 
 ## Knowledge Gaps
-- **49 isolated node(s):** `name`, `version`, `private`, `type`, `prebuild` (+44 more)
+- **50 isolated node(s):** `name`, `version`, `private`, `type`, `prebuild` (+45 more)
   These have ≤1 connection - possible missing edges or undocumented components.
 - **3 thin communities (<3 nodes) omitted from report** — run `graphify query` to explore isolated nodes.
 
 ## Suggested Questions
 _Questions this graph is uniquely positioned to answer:_
 
-- **Why does `Tab` connect `types.ts` to `ContextCapsuleBar.tsx`, `utils.ts`, `index.tsx`, `QuickDial.tsx`?**
+- **Why does `getDomain()` connect `index.tsx` to `ContextOrbitDeck.tsx`, `utils.ts`, `SettingsPanel.tsx`?**
+  _High betweenness centrality (0.013) - this node is a cross-community bridge._
+- **Why does `Tab` connect `ContextOrbitDeck.tsx` to `utils.ts`, `types.ts`, `index.tsx`?**
   _High betweenness centrality (0.010) - this node is a cross-community bridge._
-- **Why does `getDomain()` connect `utils.ts` to `ContextCapsuleBar.tsx`, `index.tsx`, `types.ts`?**
-  _High betweenness centrality (0.008) - this node is a cross-community bridge._
 - **What connects `name`, `version`, `private` to the rest of the system?**
-  _49 weakly-connected nodes found - possible documentation gaps or missing edges._
-- **Should `ContextCapsuleBar.tsx` be split into smaller, more focused modules?**
-  _Cohesion score 0.14564564564564564 - nodes in this community are weakly interconnected._
+  _50 weakly-connected nodes found - possible documentation gaps or missing edges._
 - **Should `package.json` be split into smaller, more focused modules?**
   _Cohesion score 0.1 - nodes in this community are weakly interconnected._
-- **Should `index.tsx` be split into smaller, more focused modules?**
-  _Cohesion score 0.1452991452991453 - nodes in this community are weakly interconnected._
+- **Should `SettingsPanel.tsx` be split into smaller, more focused modules?**
+  _Cohesion score 0.11954022988505747 - nodes in this community are weakly interconnected._
+- **Should `utils.ts` be split into smaller, more focused modules?**
+  _Cohesion score 0.1310483870967742 - nodes in this community are weakly interconnected._
+- **Should `types.ts` be split into smaller, more focused modules?**
+  _Cohesion score 0.13450292397660818 - nodes in this community are weakly interconnected._

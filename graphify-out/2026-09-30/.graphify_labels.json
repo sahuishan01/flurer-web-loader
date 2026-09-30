@@ -10,6 +10,5 @@
   "9": "rules/graphify.md",
   "10": "workflows/graphify.md",
   "11": "utils.ts",
-  "12": "types.ts",
-  "15": "QuickDial.tsx"
+  "12": "ContextOrbitDeck.tsx"
 }

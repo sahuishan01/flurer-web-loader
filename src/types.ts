@@ -53,13 +53,23 @@ export interface HistoryItem {
 export type NavDesignMode = "context-orbit" | "standard-tabs";
 export type OrbitLayoutMode = "matrix" | "spatial";
 
+export type SmartRouterProvider = "heuristic" | "openai-compatible" | "laya-offline";
+
 export interface SmartRouterConfig {
   enabled: boolean;
-  provider: "heuristic" | "laya-local" | "custom-endpoint";
-  localEndpointUrl?: string; // e.g. "http://127.0.0.1:11434"
-  modelName?: string; // e.g. "laya-router", "llama3.2:1b"
+  provider: SmartRouterProvider;
+
+  // 1. OpenAI-compatible endpoint (online or offline)
+  apiEndpointUrl?: string; // e.g. "http://127.0.0.1:1234/v1", "http://localhost:11434/v1", or online
+  apiKey?: string; // optional API key / bearer token
+  modelName?: string; // e.g. "laya", "qwen2.5", "gpt-4o-mini"
+
+  // 2. Download and setup Laya completely offline
+  isLayaDownloaded?: boolean;
+  layaModelVariant?: string;
+  downloadProgress?: number;
+
   autoCreateCategories: boolean;
-  isModelDownloaded?: boolean;
 }
 
 export interface SavedTabRecord {

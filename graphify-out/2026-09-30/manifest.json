@@ -1,14 +1,14 @@
 {
   "package.json": {
-    "mtime": 1790753446.50618,
-    "seen": 1790753472.8877974,
-    "ast_hash": "2f07b6c123766b0a4da18dc1a4d55ab4",
+    "mtime": 1790754908.0282736,
+    "seen": 1790754934.765965,
+    "ast_hash": "ee695a25bf4b6a4a89b667e562f20c27",
     "semantic_hash": ""
   },
   "plugin.json": {
-    "mtime": 1790753461.1982424,
-    "seen": 1790753472.8878,
-    "ast_hash": "3c4c2c16153f07ad7c8f12567495b2a8",
+    "mtime": 1790754923.7083397,
+    "seen": 1790754934.7659688,
+    "ast_hash": "ad36ba9e4b620f12b375990288f8d9ab",
     "semantic_hash": ""
   },
   "scripts/sync-version.cjs": {
@@ -42,9 +42,9 @@
     "semantic_hash": ""
   },
   "src/components/WebViewport.tsx": {
-    "mtime": 1790748795.9142032,
-    "seen": 1790748887.5969715,
-    "ast_hash": "4ecfee65d7e905d080d5f37043473fec",
+    "mtime": 1790754785.1077583,
+    "seen": 1790754934.7659838,
+    "ast_hash": "2133e8a03a5b1e9d40b4d39441491e27",
     "semantic_hash": ""
   },
   "src/icons.tsx": {
@@ -54,9 +54,9 @@
     "semantic_hash": ""
   },
   "src/index.tsx": {
-    "mtime": 1790753456.8102238,
-    "seen": 1790753472.8878174,
-    "ast_hash": "f7b11e7b8c738454bc377db004513151",
+    "mtime": 1790754920.0763245,
+    "seen": 1790754934.765987,
+    "ast_hash": "ecaf258da003b8fe42987733f1d2a3b4",
     "semantic_hash": ""
   },
   "src/styles.ts": {
@@ -120,15 +120,15 @@
     "semantic_hash": ""
   },
   "src/components/ContextCapsuleBar.tsx": {
-    "mtime": 1790750909.2672944,
-    "seen": 1790751145.1516705,
-    "ast_hash": "5a1d12bd857aaecfcf3f99ad0dc3b5e3",
+    "mtime": 1790754888.4281907,
+    "seen": 1790754934.7659743,
+    "ast_hash": "8a29f4a952813dff900c4e92df0dcb75",
     "semantic_hash": ""
   },
   "src/components/ContextOrbitDeck.tsx": {
-    "mtime": 1790750949.2714734,
-    "seen": 1790751145.1516721,
-    "ast_hash": "18ee4465d61a371d8a4488ea28c56373",
+    "mtime": 1790754872.6561244,
+    "seen": 1790754934.7659757,
+    "ast_hash": "bc883688f4ce081973484329e88db92d",
     "semantic_hash": ""
   },
   "src/smartRouter.ts": {
