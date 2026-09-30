@@ -21,6 +21,7 @@ import {
   addHistoryItem,
   removeHistoryItem,
   clearHistory,
+  closeDockedWebview,
 } from "./utils";
 
 declare const __VERSION__: string;
@@ -105,6 +106,9 @@ function WebBrowserPanel(props: MainPanelProps) {
   };
 
   const handleSelectTab = (id: string) => {
+    if (id !== activeTabId()) {
+      closeDockedWebview();
+    }
     setActiveTabId(id);
     const target = tabs().find((t) => t.id === id);
     if (target) {
@@ -113,6 +117,7 @@ function WebBrowserPanel(props: MainPanelProps) {
   };
 
   const handleNewTab = (url: string = "about:blank") => {
+    closeDockedWebview();
     const newTab = createNewTab(url, url === "about:blank" ? "New Tab" : getDomain(url));
     const nextTabs = [...tabs(), newTab];
     setTabs(nextTabs);
@@ -121,6 +126,9 @@ function WebBrowserPanel(props: MainPanelProps) {
   };
 
   const handleCloseTab = (id: string) => {
+    if (id === activeTabId()) {
+      closeDockedWebview();
+    }
     const current = tabs();
     if (current.length === 1) {
       // If closing last tab, reset it to about:blank
@@ -183,6 +191,7 @@ function WebBrowserPanel(props: MainPanelProps) {
   };
 
   const handleGoHome = () => {
+    closeDockedWebview();
     const home = props.pluginSettings?.homeUrl || "about:blank";
     handleNavigate(home);
   };
@@ -190,6 +199,7 @@ function WebBrowserPanel(props: MainPanelProps) {
   const handlePopoutWebviewWindow = () => {
     const current = activeTab();
     if (current && current.url !== "about:blank") {
+      closeDockedWebview();
       openInWebviewWindow(current.url, current.title, getLaunchOptions());
       setHistory(addHistoryItem(current.title || getDomain(current.url), current.url));
     }
@@ -340,7 +350,7 @@ function WebBrowserPanel(props: MainPanelProps) {
   id: "web-loader",
   name: "Web Loader",
   description: "High-performance browser and WebviewWindow loader for modern websites and local web apps.",
-  version: typeof __VERSION__ !== "undefined" ? __VERSION__ : "0.1.11",
+  version: typeof __VERSION__ !== "undefined" ? __VERSION__ : "0.1.12",
   author: "Algosculptor",
   hasCustomAppearanceSettings: true,
   viewRailButton: (props: any) => (

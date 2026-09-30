@@ -60,10 +60,17 @@ export function WebViewport(props: WebViewportProps) {
         height: rect.height,
       });
     } else {
-      // If docked webview was waiting for initial layout dimensions, mount now
+      // If docked webview was waiting for initial layout dimensions, mount now for restricted URLs
       const url = props.activeTab?.url;
       const isPanelActive = props.active !== false;
-      if (!isBlank() && url && isPanelActive && props.dockedChildWebview !== false && !forceEmbedTabs()[props.activeTab!.id]) {
+      if (
+        !isBlank() &&
+        url &&
+        isPanelActive &&
+        isRestricted() &&
+        props.dockedChildWebview !== false &&
+        !forceEmbedTabs()[props.activeTab!.id]
+      ) {
         tryMountDockedWebview(url);
       }
     }
@@ -71,12 +78,16 @@ export function WebViewport(props: WebViewportProps) {
 
   const tryMountDockedWebview = async (targetUrl: string) => {
     if (!containerRef || props.dockedChildWebview === false) {
+      await closeDockedWebview();
       setDockedActive(false);
       setDockedFailed(true);
       return;
     }
     const rect = containerRef.getBoundingClientRect();
     if (rect.width <= 0 || rect.height <= 0) return;
+
+    // Cleanly close any existing docked webview before creating new one
+    await closeDockedWebview();
 
     const res = await createDockedWebview(targetUrl, {
       x: rect.left,
@@ -97,20 +108,22 @@ export function WebViewport(props: WebViewportProps) {
 
   // Watch URL changes and active tab to manage docked webview lifecycle
   createEffect(() => {
+    const tabId = props.activeTab?.id;
     const url = props.activeTab?.url;
     const isPanelActive = props.active !== false;
 
+    // 1. If blank tab (New Tab / Home Page) or panel inactive: close docked webview immediately!
     if (isBlank() || !url || !isPanelActive) {
-      if (dockedActive()) {
-        hideDockedWebview();
-        setDockedActive(false);
-      }
+      closeDockedWebview();
+      setDockedActive(false);
       return;
     }
 
-    if (props.dockedChildWebview !== false && !forceEmbedTabs()[props.activeTab!.id]) {
+    // 2. If frame-restricted site (ChatGPT, Claude, etc.) and docked child webview enabled:
+    if (isRestricted() && props.dockedChildWebview !== false && !forceEmbedTabs()[tabId || ""]) {
       tryMountDockedWebview(url);
     } else {
+      // Standard sites (Google with igu=1, Wikipedia, etc.) render via iframe seamlessly
       closeDockedWebview();
       setDockedActive(false);
     }

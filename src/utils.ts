@@ -81,6 +81,24 @@ export function normalizeUrl(input: string, searchEngine: SearchEngine = "duckdu
     return `https://duckduckgo.com/?q=${encodeURIComponent(trimmed)}`;
   }
 
+  const lower = trimmed.toLowerCase();
+
+  // Direct Google domain mapping with igu=1 (disables X-Frame-Options)
+  if (
+    lower === "google.com" ||
+    lower === "www.google.com" ||
+    lower === "https://google.com" ||
+    lower === "https://www.google.com" ||
+    lower === "https://google.com/" ||
+    lower === "https://www.google.com/" ||
+    lower === "http://google.com" ||
+    lower === "http://www.google.com" ||
+    lower === "http://google.com/" ||
+    lower === "http://www.google.com/"
+  ) {
+    return "https://www.google.com/search?igu=1";
+  }
+
   // Protocol already provided
   if (/^[a-zA-Z][a-zA-Z0-9+.-]*:\/\//.test(trimmed)) {
     return trimmed;
@@ -95,18 +113,6 @@ export function normalizeUrl(input: string, searchEngine: SearchEngine = "duckdu
     /^10\.\d+\.\d+\.\d+/.test(trimmed)
   ) {
     return `http://${trimmed}`;
-  }
-
-  // Direct Google domain mapping with igu=1 (disables X-Frame-Options)
-  if (
-    trimmed === "google.com" ||
-    trimmed === "www.google.com" ||
-    trimmed === "https://google.com" ||
-    trimmed === "https://www.google.com" ||
-    trimmed === "http://google.com" ||
-    trimmed === "http://www.google.com"
-  ) {
-    return "https://www.google.com/search?igu=1";
   }
 
   // Looks like a domain (e.g., github.com, algosculptor.com, sub.domain.org/path)
@@ -394,7 +400,17 @@ export async function createDockedWebview(
     return { success: false, error: sanitized.warning || "Unsafe URL blocked" };
   }
 
-  const previousLabel = activeDockedLabel;
+  // Ensure any previous docked child webview is fully closed and destroyed first
+  if (activeDockedLabel) {
+    const oldLabel = activeDockedLabel;
+    activeDockedLabel = null;
+    try {
+      await window.TauriCore.invoke("plugin:webview|webview_close", {
+        label: oldLabel,
+      });
+    } catch {}
+  }
+
   const newLabel = `${DOCKED_WEBVIEW_PREFIX}-${Date.now().toString(36)}-${(++dockedCounter).toString(36)}`;
 
   try {
@@ -410,7 +426,6 @@ export async function createDockedWebview(
       y,
       width,
       height,
-      userAgent: DEFAULT_DESKTOP_USER_AGENT,
     };
 
     await window.TauriCore.invoke("plugin:webview|create_webview", {
@@ -420,25 +435,11 @@ export async function createDockedWebview(
 
     activeDockedLabel = newLabel;
     dockedWebviewSupported = true;
-
-    // Cleanly close previous docked webview once the new one is mounted
-    if (previousLabel) {
-      try {
-        await window.TauriCore.invoke("plugin:webview|webview_close", {
-          label: previousLabel,
-        });
-      } catch {}
-    }
-
     return { success: true };
   } catch (err: any) {
     const errStr = String(err?.message || err);
     console.warn("create_webview error:", errStr);
-    if (
-      errStr.includes("UnstableFeatureNotSupported") ||
-      errStr.includes("not supported") ||
-      errStr.includes("not allowed")
-    ) {
+    if (errStr.includes("UnstableFeatureNotSupported")) {
       dockedWebviewSupported = false;
     }
     return { success: false, error: errStr };
@@ -485,12 +486,9 @@ export async function closeDockedWebview(): Promise<void> {
 }
 
 export async function hideDockedWebview(): Promise<void> {
-  if (!window.TauriCore || !activeDockedLabel) return;
-  try {
-    await window.TauriCore.invoke("plugin:webview|webview_hide", {
-      label: activeDockedLabel,
-    });
-  } catch {}
+  // On Windows, destroying the child HWND via close is the only reliable way to prevent
+  // the old webview from sitting on top of the parent window's DirectComposition surface
+  return closeDockedWebview();
 }
 
 export async function showDockedWebview(): Promise<void> {
