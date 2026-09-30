@@ -94,7 +94,7 @@ function WebBrowserPanel(props: MainPanelProps) {
   const getLaunchOptions = () => ({
     incognito: props.pluginSettings?.incognitoMode,
     userAgent: props.pluginSettings?.customUserAgent,
-    reuseExisting: props.pluginSettings?.singleWindowPerDomain ?? true,
+    reuseExisting: props.pluginSettings?.singleWindowPerDomain ?? false,
   });
 
   const persistCurrentTabs = (currentTabs: Tab[], activeUrl?: string) => {
@@ -340,7 +340,7 @@ function WebBrowserPanel(props: MainPanelProps) {
   id: "web-loader",
   name: "Web Loader",
   description: "High-performance browser and WebviewWindow loader for modern websites and local web apps.",
-  version: typeof __VERSION__ !== "undefined" ? __VERSION__ : "0.1.9",
+  version: typeof __VERSION__ !== "undefined" ? __VERSION__ : "0.1.10",
   author: "Algosculptor",
   hasCustomAppearanceSettings: true,
   viewRailButton: (props: any) => (

@@ -12,6 +12,7 @@ import {
   closeDockedWebview,
   hideDockedWebview,
   showDockedWebview,
+  getIframeEmbedUrl,
 } from "../utils";
 
 interface WebViewportProps {
@@ -284,7 +285,7 @@ export function WebViewport(props: WebViewportProps) {
             }
           >
             <iframe
-              src={props.activeTab!.url}
+              src={getIframeEmbedUrl(props.activeTab!.url)}
               title={props.activeTab!.title || "Web View"}
               style={{
                 ...S.iframe,

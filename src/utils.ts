@@ -97,8 +97,23 @@ export function normalizeUrl(input: string, searchEngine: SearchEngine = "duckdu
     return `http://${trimmed}`;
   }
 
+  // Direct Google domain mapping with igu=1 (disables X-Frame-Options)
+  if (
+    trimmed === "google.com" ||
+    trimmed === "www.google.com" ||
+    trimmed === "https://google.com" ||
+    trimmed === "https://www.google.com" ||
+    trimmed === "http://google.com" ||
+    trimmed === "http://www.google.com"
+  ) {
+    return "https://www.google.com/search?igu=1";
+  }
+
   // Looks like a domain (e.g., github.com, algosculptor.com, sub.domain.org/path)
   if (/^[a-zA-Z0-9-]+(\.[a-zA-Z0-9-]+)+([/?#].*)?$/.test(trimmed) && !trimmed.includes(" ")) {
+    if (trimmed.includes("google.") && !trimmed.includes("igu=1")) {
+      return `https://${trimmed}/search?igu=1`;
+    }
     return `https://${trimmed}`;
   }
 
@@ -106,7 +121,7 @@ export function normalizeUrl(input: string, searchEngine: SearchEngine = "duckdu
   const query = encodeURIComponent(trimmed);
   switch (searchEngine) {
     case "google":
-      return `https://www.google.com/search?q=${query}`;
+      return `https://www.google.com/search?q=${query}&igu=1`;
     case "bing":
       return `https://www.bing.com/search?q=${query}`;
     case "brave":
@@ -126,10 +141,25 @@ export function getDomain(url: string): string {
   }
 }
 
+export function getIframeEmbedUrl(url: string): string {
+  try {
+    if (!url || url === "about:blank") return url;
+    const fullUrl = url.startsWith("http://") || url.startsWith("https://") ? url : `https://${url}`;
+    const domain = getDomain(fullUrl).toLowerCase();
+    if (domain.includes("google.") && !fullUrl.includes("igu=1")) {
+      const parsed = new URL(fullUrl);
+      if (parsed.pathname === "/" || parsed.pathname === "") {
+        const query = parsed.search ? parsed.search.slice(1) + "&" : "";
+        return `https://${parsed.hostname}/search?${query}igu=1`;
+      }
+      const sep = fullUrl.includes("?") ? "&" : "?";
+      return `${fullUrl}${sep}igu=1`;
+    }
+  } catch {}
+  return url;
+}
+
 export const KNOWN_FRAME_RESTRICTED_DOMAINS = [
-  "google.com",
-  "duckduckgo.com",
-  "bing.com",
   "youtube.com",
   "github.com",
   "twitter.com",
@@ -149,9 +179,12 @@ export const KNOWN_FRAME_RESTRICTED_DOMAINS = [
 
 export function isKnownFrameRestricted(url: string): boolean {
   try {
+    // Google with igu=1 explicitly permits iframe embedding without X-Frame-Options
+    if (url.includes("igu=1") || getDomain(url).toLowerCase().includes("google.")) {
+      return false;
+    }
     const domain = getDomain(url).toLowerCase();
     return (
-      domain.includes("google.") ||
       domain.includes("youtube.") ||
       KNOWN_FRAME_RESTRICTED_DOMAINS.some(
         (blocked) => domain === blocked || domain.endsWith("." + blocked)
@@ -199,13 +232,14 @@ export async function openInWebviewWindow(
   }
 
   const isIncognito = Boolean(options?.incognito);
-  const reuseExisting = options?.reuseExisting !== false && !isIncognito;
+  const reuseExisting = Boolean(options?.reuseExisting) && !isIncognito;
   const slug = getDomainSlug(targetUrl);
+  const uniqueSuffix = `${Date.now().toString(36)}-${(++windowCounter).toString(36)}`;
   const label = isIncognito
-    ? `web-incog-${Date.now()}`
-    : (reuseExisting ? `web-${slug}` : `web-${Date.now()}-${++windowCounter}`);
+    ? `web-incog-${uniqueSuffix}`
+    : (reuseExisting ? `web-${slug}` : `web-${slug}-${uniqueSuffix}`);
 
-  // If single window per service is active, re-focus existing window if already open
+  // If single window per service is explicitly requested, re-focus existing window if already open
   if (reuseExisting) {
     try {
       await window.TauriCore.invoke("plugin:window|show", { label });
@@ -248,6 +282,26 @@ export async function openInWebviewWindow(
         await window.TauriCore.invoke("plugin:window|show", { label });
         await window.TauriCore.invoke("plugin:window|set_focus", { label });
         return { success: true, reused: true };
+      } catch {}
+      // If focusing the existing label failed, retry with a fresh unique label
+      try {
+        const retryLabel = `web-${slug}-${Date.now().toString(36)}-${(++windowCounter).toString(36)}`;
+        await window.TauriCore.invoke("plugin:webview|create_webview_window", {
+          options: {
+            label: retryLabel,
+            url: targetUrl,
+            title: windowTitle,
+            width: 1200,
+            height: 800,
+            decorations: true,
+            transparent: false,
+            center: true,
+            focus: true,
+            incognito: isIncognito,
+            userAgent: options?.userAgent || DEFAULT_DESKTOP_USER_AGENT,
+          },
+        });
+        return { success: true };
       } catch {}
     }
     // Graceful fallback to default system browser if window creation capability failed
@@ -315,12 +369,18 @@ export async function clearAllBrowsingData(): Promise<{ success: boolean; error?
 
 export const DOCKED_WEBVIEW_LABEL = "web-docked-view";
 
+let dockedWebviewSupported: boolean | null = null;
+
 export async function createDockedWebview(
   url: string,
   rect: { x: number; y: number; width: number; height: number },
   windowLabel?: string
 ): Promise<{ success: boolean; error?: string }> {
+  if (dockedWebviewSupported === false) {
+    return { success: false, error: "Docked child webview not supported by host runtime" };
+  }
   if (!window.TauriCore) {
+    dockedWebviewSupported = false;
     return { success: false, error: "TauriCore not available" };
   }
   const targetWindowLabel =
@@ -360,9 +420,18 @@ export async function createDockedWebview(
       },
     });
 
+    dockedWebviewSupported = true;
     return { success: true };
   } catch (err: any) {
-    return { success: false, error: String(err?.message || err) };
+    const errStr = String(err?.message || err);
+    if (
+      errStr.includes("UnstableFeatureNotSupported") ||
+      errStr.includes("not supported") ||
+      errStr.includes("not allowed")
+    ) {
+      dockedWebviewSupported = false;
+    }
+    return { success: false, error: errStr };
   }
 }
 
