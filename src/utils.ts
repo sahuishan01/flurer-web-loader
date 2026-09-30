@@ -367,8 +367,9 @@ export async function clearAllBrowsingData(): Promise<{ success: boolean; error?
   }
 }
 
-export const DOCKED_WEBVIEW_LABEL = "web-docked-view";
-
+export const DOCKED_WEBVIEW_PREFIX = "web-docked";
+let activeDockedLabel: string | null = null;
+let dockedCounter = 0;
 let dockedWebviewSupported: boolean | null = null;
 
 export async function createDockedWebview(
@@ -393,37 +394,46 @@ export async function createDockedWebview(
     return { success: false, error: sanitized.warning || "Unsafe URL blocked" };
   }
 
-  try {
-    // Attempt closing existing docked view first to cleanly remount with new URL
-    try {
-      await window.TauriCore.invoke("plugin:webview|webview_close", {
-        label: DOCKED_WEBVIEW_LABEL,
-      });
-    } catch {}
+  const previousLabel = activeDockedLabel;
+  const newLabel = `${DOCKED_WEBVIEW_PREFIX}-${Date.now().toString(36)}-${(++dockedCounter).toString(36)}`;
 
+  try {
     const x = Math.max(0, Math.round(rect.x));
     const y = Math.max(0, Math.round(rect.y));
     const width = Math.max(100, Math.round(rect.width));
     const height = Math.max(100, Math.round(rect.height));
 
+    const windowOptions: Record<string, any> = {
+      label: newLabel,
+      url: sanitized.url,
+      x,
+      y,
+      width,
+      height,
+      userAgent: DEFAULT_DESKTOP_USER_AGENT,
+    };
+
     await window.TauriCore.invoke("plugin:webview|create_webview", {
       windowLabel: targetWindowLabel,
-      options: {
-        label: DOCKED_WEBVIEW_LABEL,
-        url: sanitized.url,
-        x,
-        y,
-        width,
-        height,
-        autoResize: true,
-        userAgent: DEFAULT_DESKTOP_USER_AGENT,
-      },
+      options: windowOptions,
     });
 
+    activeDockedLabel = newLabel;
     dockedWebviewSupported = true;
+
+    // Cleanly close previous docked webview once the new one is mounted
+    if (previousLabel) {
+      try {
+        await window.TauriCore.invoke("plugin:webview|webview_close", {
+          label: previousLabel,
+        });
+      } catch {}
+    }
+
     return { success: true };
   } catch (err: any) {
     const errStr = String(err?.message || err);
+    console.warn("create_webview error:", errStr);
     if (
       errStr.includes("UnstableFeatureNotSupported") ||
       errStr.includes("not supported") ||
@@ -441,7 +451,7 @@ export async function updateDockedWebviewBounds(rect: {
   width: number;
   height: number;
 }): Promise<void> {
-  if (!window.TauriCore) return;
+  if (!window.TauriCore || !activeDockedLabel) return;
   try {
     const x = Math.max(0, Math.round(rect.x));
     const y = Math.max(0, Math.round(rect.y));
@@ -449,13 +459,13 @@ export async function updateDockedWebviewBounds(rect: {
     const height = Math.max(100, Math.round(rect.height));
 
     await window.TauriCore.invoke("plugin:webview|set_webview_position", {
-      label: DOCKED_WEBVIEW_LABEL,
+      label: activeDockedLabel,
       value: {
         Logical: { x, y },
       },
     });
     await window.TauriCore.invoke("plugin:webview|set_webview_size", {
-      label: DOCKED_WEBVIEW_LABEL,
+      label: activeDockedLabel,
       value: {
         Logical: { width, height },
       },
@@ -464,31 +474,35 @@ export async function updateDockedWebviewBounds(rect: {
 }
 
 export async function closeDockedWebview(): Promise<void> {
-  if (!window.TauriCore) return;
+  if (!window.TauriCore || !activeDockedLabel) return;
+  const targetLabel = activeDockedLabel;
+  activeDockedLabel = null;
   try {
     await window.TauriCore.invoke("plugin:webview|webview_close", {
-      label: DOCKED_WEBVIEW_LABEL,
+      label: targetLabel,
     });
   } catch {}
 }
 
 export async function hideDockedWebview(): Promise<void> {
-  if (!window.TauriCore) return;
+  if (!window.TauriCore || !activeDockedLabel) return;
   try {
     await window.TauriCore.invoke("plugin:webview|webview_hide", {
-      label: DOCKED_WEBVIEW_LABEL,
+      label: activeDockedLabel,
     });
   } catch {}
 }
 
 export async function showDockedWebview(): Promise<void> {
-  if (!window.TauriCore) return;
+  if (!window.TauriCore || !activeDockedLabel) return;
   try {
     await window.TauriCore.invoke("plugin:webview|webview_show", {
-      label: DOCKED_WEBVIEW_LABEL,
+      label: activeDockedLabel,
     });
   } catch {}
 }
+
+
 
 const TABS_KEY = "flurer-web-loader-tabs";
 const ACTIVE_TAB_KEY = "flurer-web-loader-active-tab";

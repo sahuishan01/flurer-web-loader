@@ -48,15 +48,24 @@ export function WebViewport(props: WebViewportProps) {
   };
 
   const syncDockedBounds = () => {
-    if (!containerRef || !dockedActive()) return;
+    if (!containerRef) return;
     const rect = containerRef.getBoundingClientRect();
-    if (rect.width > 0 && rect.height > 0) {
+    if (rect.width <= 0 || rect.height <= 0) return;
+
+    if (dockedActive()) {
       updateDockedWebviewBounds({
         x: rect.left,
         y: rect.top,
         width: rect.width,
         height: rect.height,
       });
+    } else {
+      // If docked webview was waiting for initial layout dimensions, mount now
+      const url = props.activeTab?.url;
+      const isPanelActive = props.active !== false;
+      if (!isBlank() && url && isPanelActive && props.dockedChildWebview !== false && !forceEmbedTabs()[props.activeTab!.id]) {
+        tryMountDockedWebview(url);
+      }
     }
   };
 

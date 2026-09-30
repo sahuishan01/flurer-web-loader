@@ -488,7 +488,7 @@
       "file_type": "code",
       "norm_label": "closedockedwebview()",
       "source_file": "src/utils.ts",
-      "source_location": "L466"
+      "source_location": "L476"
     },
     {
       "id": "src_utils_createdockedwebview",
@@ -500,7 +500,7 @@
       "file_type": "code",
       "norm_label": "createdockedwebview()",
       "source_file": "src/utils.ts",
-      "source_location": "L374"
+      "source_location": "L375"
     },
     {
       "id": "src_utils_getdomain",
@@ -584,7 +584,7 @@
       "file_type": "code",
       "norm_label": "hidedockedwebview()",
       "source_file": "src/utils.ts",
-      "source_location": "L475"
+      "source_location": "L487"
     },
     {
       "id": "src_utils_invoke",
@@ -680,7 +680,7 @@
       "file_type": "code",
       "norm_label": "showdockedwebview()",
       "source_file": "src/utils.ts",
-      "source_location": "L484"
+      "source_location": "L496"
     },
     {
       "id": "src_utils_updatedockedwebviewbounds",
@@ -692,7 +692,7 @@
       "file_type": "code",
       "norm_label": "updatedockedwebviewbounds()",
       "source_file": "src/utils.ts",
-      "source_location": "L438"
+      "source_location": "L448"
     },
     {
       "id": "src_components_tabbar_tabbar",
@@ -752,7 +752,7 @@
       "file_type": "code",
       "norm_label": "addhistoryitem()",
       "source_file": "src/utils.ts",
-      "source_location": "L564"
+      "source_location": "L578"
     },
     {
       "id": "src_utils_getsavedactivetab",
@@ -764,7 +764,7 @@
       "file_type": "code",
       "norm_label": "getsavedactivetab()",
       "source_file": "src/utils.ts",
-      "source_location": "L514"
+      "source_location": "L528"
     },
     {
       "id": "src_utils_getsavedbookmarks",
@@ -776,7 +776,7 @@
       "file_type": "code",
       "norm_label": "getsavedbookmarks()",
       "source_file": "src/utils.ts",
-      "source_location": "L532"
+      "source_location": "L546"
     },
     {
       "id": "src_utils_getsavedhistory",
@@ -788,7 +788,7 @@
       "file_type": "code",
       "norm_label": "getsavedhistory()",
       "source_file": "src/utils.ts",
-      "source_location": "L548"
+      "source_location": "L562"
     },
     {
       "id": "src_utils_getsavedtabs",
@@ -800,7 +800,7 @@
       "file_type": "code",
       "norm_label": "getsavedtabs()",
       "source_file": "src/utils.ts",
-      "source_location": "L498"
+      "source_location": "L512"
     },
     {
       "id": "src_utils_removehistoryitem",
@@ -812,7 +812,7 @@
       "file_type": "code",
       "norm_label": "removehistoryitem()",
       "source_file": "src/utils.ts",
-      "source_location": "L579"
+      "source_location": "L593"
     },
     {
       "id": "src_utils_saveactivetab",
@@ -824,7 +824,7 @@
       "file_type": "code",
       "norm_label": "saveactivetab()",
       "source_file": "src/utils.ts",
-      "source_location": "L522"
+      "source_location": "L536"
     },
     {
       "id": "src_utils_savebookmarks",
@@ -836,7 +836,7 @@
       "file_type": "code",
       "norm_label": "savebookmarks()",
       "source_file": "src/utils.ts",
-      "source_location": "L542"
+      "source_location": "L556"
     },
     {
       "id": "src_utils_savehistory",
@@ -848,7 +848,7 @@
       "file_type": "code",
       "norm_label": "savehistory()",
       "source_file": "src/utils.ts",
-      "source_location": "L558"
+      "source_location": "L572"
     },
     {
       "id": "src_utils_savetabs",
@@ -860,7 +860,7 @@
       "file_type": "code",
       "norm_label": "savetabs()",
       "source_file": "src/utils.ts",
-      "source_location": "L508"
+      "source_location": "L522"
     },
     {
       "id": "src_components_settingspanel_settingspanel",
@@ -944,7 +944,7 @@
       "file_type": "code",
       "norm_label": "clearhistory()",
       "source_file": "src/utils.ts",
-      "source_location": "L586"
+      "source_location": "L600"
     },
     {
       "id": "src_components_navigationbar",
@@ -1107,13 +1107,13 @@
       "source_location": "L1"
     },
     {
-      "id": "src_utils_docked_webview_label",
-      "label": "DOCKED_WEBVIEW_LABEL",
+      "id": "src_utils_docked_webview_prefix",
+      "label": "DOCKED_WEBVIEW_PREFIX",
       "_origin": "ast",
       "community": 11,
       "community_name": "utils.ts",
       "file_type": "code",
-      "norm_label": "docked_webview_label",
+      "norm_label": "docked_webview_prefix",
       "source_file": "src/utils.ts",
       "source_location": "L370"
     },
@@ -1921,7 +1921,7 @@
     },
     {
       "source": "src_components_webviewport_webviewport",
-      "target": "src_utils_closedockedwebview",
+      "target": "src_utils_hidedockedwebview",
       "relation": "calls",
       "_origin": "ast",
       "confidence": "EXTRACTED",
@@ -1933,6 +1933,18 @@
     },
     {
       "source": "src_components_webviewport_webviewport",
+      "target": "src_utils_closedockedwebview",
+      "relation": "calls",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "call",
+      "source_file": "src/components/WebViewport.tsx",
+      "source_location": "L114",
+      "weight": 1.0
+    },
+    {
+      "source": "src_components_webviewport_webviewport",
       "target": "src_utils_getdomain",
       "relation": "calls",
       "_origin": "ast",
@@ -1940,7 +1952,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "src/components/WebViewport.tsx",
-      "source_location": "L229",
+      "source_location": "L238",
       "weight": 1.0
     },
     {
@@ -1952,7 +1964,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "src/components/WebViewport.tsx",
-      "source_location": "L243",
+      "source_location": "L252",
       "weight": 1.0
     },
     {
@@ -1964,7 +1976,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "src/components/WebViewport.tsx",
-      "source_location": "L288",
+      "source_location": "L297",
       "weight": 1.0
     },
     {
@@ -1988,7 +2000,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "src/components/WebViewport.tsx",
-      "source_location": "L54",
+      "source_location": "L56",
       "weight": 1.0
     },
     {
@@ -2000,19 +2012,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "src/components/WebViewport.tsx",
-      "source_location": "L72",
-      "weight": 1.0
-    },
-    {
-      "source": "src_components_webviewport_webviewport",
-      "target": "src_utils_hidedockedwebview",
-      "relation": "calls",
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "context": "call",
-      "source_file": "src/components/WebViewport.tsx",
-      "source_location": "L96",
+      "source_location": "L81",
       "weight": 1.0
     },
     {
@@ -2240,7 +2240,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "src/utils.ts",
-      "source_location": "L565",
+      "source_location": "L579",
       "weight": 1.0
     },
     {
@@ -2252,7 +2252,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "src/utils.ts",
-      "source_location": "L570",
+      "source_location": "L584",
       "weight": 1.0
     },
     {
@@ -2264,7 +2264,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "src/utils.ts",
-      "source_location": "L575",
+      "source_location": "L589",
       "weight": 1.0
     },
     {
@@ -2288,7 +2288,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "src/utils.ts",
-      "source_location": "L469",
+      "source_location": "L481",
       "weight": 1.0
     },
     {
@@ -2300,7 +2300,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "src/utils.ts",
-      "source_location": "L391",
+      "source_location": "L392",
       "weight": 1.0
     },
     {
@@ -2312,7 +2312,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "src/utils.ts",
-      "source_location": "L399",
+      "source_location": "L416",
       "weight": 1.0
     },
     {
@@ -2372,7 +2372,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "src/utils.ts",
-      "source_location": "L478",
+      "source_location": "L490",
       "weight": 1.0
     },
     {
@@ -2504,7 +2504,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "src/utils.ts",
-      "source_location": "L580",
+      "source_location": "L594",
       "weight": 1.0
     },
     {
@@ -2516,7 +2516,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "src/utils.ts",
-      "source_location": "L582",
+      "source_location": "L596",
       "weight": 1.0
     },
     {
@@ -2528,7 +2528,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "src/utils.ts",
-      "source_location": "L487",
+      "source_location": "L499",
       "weight": 1.0
     },
     {
@@ -2540,7 +2540,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "src/utils.ts",
-      "source_location": "L451",
+      "source_location": "L461",
       "weight": 1.0
     },
     {
@@ -5270,7 +5270,7 @@
     },
     {
       "source": "src_utils",
-      "target": "src_utils_docked_webview_label",
+      "target": "src_utils_docked_webview_prefix",
       "relation": "contains",
       "_origin": "ast",
       "confidence": "EXTRACTED",
@@ -5287,7 +5287,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "src/utils.ts",
-      "source_location": "L374",
+      "source_location": "L375",
       "weight": 1.0
     },
     {
@@ -5320,7 +5320,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "src/utils.ts",
-      "source_location": "L438",
+      "source_location": "L448",
       "weight": 1.0
     },
     {
@@ -5342,7 +5342,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "src/utils.ts",
-      "source_location": "L466",
+      "source_location": "L476",
       "weight": 1.0
     },
     {
@@ -5353,7 +5353,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "src/utils.ts",
-      "source_location": "L475",
+      "source_location": "L487",
       "weight": 1.0
     },
     {
@@ -5364,18 +5364,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "src/utils.ts",
-      "source_location": "L484",
-      "weight": 1.0
-    },
-    {
-      "source": "src_utils",
-      "target": "src_utils_getsavedtabs",
-      "relation": "contains",
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "source_file": "src/utils.ts",
-      "source_location": "L498",
+      "source_location": "L496",
       "weight": 1.0
     },
     {
@@ -5391,29 +5380,18 @@
     },
     {
       "source": "src_utils",
+      "target": "src_utils_getsavedtabs",
+      "relation": "contains",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "src/utils.ts",
+      "source_location": "L512",
+      "weight": 1.0
+    },
+    {
+      "source": "src_utils",
       "target": "src_utils_savetabs",
-      "relation": "contains",
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "source_file": "src/utils.ts",
-      "source_location": "L508",
-      "weight": 1.0
-    },
-    {
-      "source": "src_utils",
-      "target": "src_utils_getsavedactivetab",
-      "relation": "contains",
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "source_file": "src/utils.ts",
-      "source_location": "L514",
-      "weight": 1.0
-    },
-    {
-      "source": "src_utils",
-      "target": "src_utils_saveactivetab",
       "relation": "contains",
       "_origin": "ast",
       "confidence": "EXTRACTED",
@@ -5424,13 +5402,35 @@
     },
     {
       "source": "src_utils",
+      "target": "src_utils_getsavedactivetab",
+      "relation": "contains",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "src/utils.ts",
+      "source_location": "L528",
+      "weight": 1.0
+    },
+    {
+      "source": "src_utils",
+      "target": "src_utils_saveactivetab",
+      "relation": "contains",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "src/utils.ts",
+      "source_location": "L536",
+      "weight": 1.0
+    },
+    {
+      "source": "src_utils",
       "target": "src_utils_getsavedbookmarks",
       "relation": "contains",
       "_origin": "ast",
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "src/utils.ts",
-      "source_location": "L532",
+      "source_location": "L546",
       "weight": 1.0
     },
     {
@@ -5441,7 +5441,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "src/utils.ts",
-      "source_location": "L542",
+      "source_location": "L556",
       "weight": 1.0
     },
     {
@@ -5452,7 +5452,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "src/utils.ts",
-      "source_location": "L548",
+      "source_location": "L562",
       "weight": 1.0
     },
     {
@@ -5463,7 +5463,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "src/utils.ts",
-      "source_location": "L558",
+      "source_location": "L572",
       "weight": 1.0
     },
     {
@@ -5474,7 +5474,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "src/utils.ts",
-      "source_location": "L564",
+      "source_location": "L578",
       "weight": 1.0
     },
     {
@@ -5485,7 +5485,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "src/utils.ts",
-      "source_location": "L579",
+      "source_location": "L593",
       "weight": 1.0
     },
     {
@@ -5496,7 +5496,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "src/utils.ts",
-      "source_location": "L586",
+      "source_location": "L600",
       "weight": 1.0
     },
     {
@@ -5655,5 +5655,5 @@
     }
   ],
   "hyperedges": [],
-  "built_at_commit": "a9b31a86b71a9fc64319620940b107df2f2837ec"
+  "built_at_commit": "897ed45c753f82ce06544e1031ba9bccc91528d6"
 }

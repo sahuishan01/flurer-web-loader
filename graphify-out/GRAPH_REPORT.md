@@ -1,7 +1,7 @@
 # Graph Report - flurer-web-loader-plugin  (2026-09-30)
 
 ## Corpus Check
-- 19 files · ~11,915 words
+- 19 files · ~12,003 words
 - Verdict: corpus is large enough that graph structure adds value.
 
 ## Summary
@@ -10,7 +10,7 @@
 - Token cost: 0 input · 0 output
 
 ## Graph Freshness
-- Built from commit: `a9b31a86`
+- Built from commit: `897ed45c`
 - Run `git rev-parse HEAD` and compare to check if the graph is stale.
 - Run `graphify update .` after code changes (no API cost).
 
@@ -86,7 +86,7 @@ Nodes (5): fs, path, pkg, plugin, pluginPath
 
 ### Community 11 - "utils.ts"
 Cohesion: 0.17
-Nodes (24): NavigationBar(), WebViewport(), closeDockedWebview(), createDockedWebview(), DOCKED_WEBVIEW_LABEL, getDomain(), getDomainSlug(), getIframeEmbedUrl() (+16 more)
+Nodes (24): NavigationBar(), WebViewport(), closeDockedWebview(), createDockedWebview(), DOCKED_WEBVIEW_PREFIX, getDomain(), getDomainSlug(), getIframeEmbedUrl() (+16 more)
 
 ## Knowledge Gaps
 - **48 isolated node(s):** `name`, `version`, `private`, `type`, `prebuild` (+43 more)
