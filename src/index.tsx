@@ -22,6 +22,7 @@ import {
   removeHistoryItem,
   clearHistory,
   closeDockedWebview,
+  setDockedWebviewZoom,
 } from "./utils";
 
 declare const __VERSION__: string;
@@ -262,6 +263,7 @@ function WebBrowserPanel(props: MainPanelProps) {
       prev.map((t) => {
         if (t.id !== id) return t;
         const newZoom = Math.min(2.5, Math.max(0.5, Math.round((t.zoom + delta) * 10) / 10));
+        setDockedWebviewZoom(newZoom);
         return { ...t, zoom: newZoom };
       })
     );
@@ -269,6 +271,7 @@ function WebBrowserPanel(props: MainPanelProps) {
 
   const handleResetZoom = () => {
     const id = activeTabId();
+    setDockedWebviewZoom(1.0);
     setTabs((prev) => prev.map((t) => (t.id === id ? { ...t, zoom: 1.0 } : t)));
   };
 
@@ -350,7 +353,7 @@ function WebBrowserPanel(props: MainPanelProps) {
   id: "web-loader",
   name: "Web Loader",
   description: "High-performance browser and WebviewWindow loader for modern websites and local web apps.",
-  version: typeof __VERSION__ !== "undefined" ? __VERSION__ : "0.1.12",
+  version: typeof __VERSION__ !== "undefined" ? __VERSION__ : "0.1.13",
   author: "Algosculptor",
   hasCustomAppearanceSettings: true,
   viewRailButton: (props: any) => (

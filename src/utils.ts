@@ -500,6 +500,16 @@ export async function showDockedWebview(): Promise<void> {
   } catch {}
 }
 
+export async function setDockedWebviewZoom(zoom: number): Promise<void> {
+  if (!window.TauriCore || !activeDockedLabel) return;
+  try {
+    await window.TauriCore.invoke("plugin:webview|set_webview_zoom", {
+      label: activeDockedLabel,
+      value: zoom,
+    });
+  } catch {}
+}
+
 
 
 const TABS_KEY = "flurer-web-loader-tabs";
