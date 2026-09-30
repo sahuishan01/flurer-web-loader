@@ -22,6 +22,7 @@ export function TabBar(props: TabBarProps) {
           const isActive = () => tab.id === props.activeTabId;
           return (
             <div
+              class="web-loader-tab"
               style={{
                 ...S.tab,
                 ...(isActive() ? S.tabActive : {}),
@@ -33,7 +34,7 @@ export function TabBar(props: TabBarProps) {
               <span style={S.tabTitle}>{tab.title || "New Tab"}</span>
               <button
                 type="button"
-                class="icon-btn web-loader-icon-btn"
+                class="icon-btn web-loader-icon-btn web-loader-tab-close"
                 style={S.tabCloseBtn}
                 title="Close Tab"
                 onClick={(e) => {

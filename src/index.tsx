@@ -32,6 +32,27 @@ if (typeof document !== "undefined" && !document.getElementById(STYLE_ID)) {
   const styleEl = document.createElement("style");
   styleEl.id = STYLE_ID;
   styleEl.textContent = `
+    :root {
+      --web-loader-ease-spring: cubic-bezier(0.16, 1, 0.3, 1);
+      --web-loader-ease-smooth: cubic-bezier(0.22, 1, 0.36, 1);
+    }
+
+    @keyframes web-loader-spin {
+      from { transform: rotate(0deg); }
+      to { transform: rotate(360deg); }
+    }
+
+    @keyframes web-loader-card-enter {
+      from {
+        opacity: 0;
+        transform: translateY(6px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
     .web-loader-icon-btn {
       padding: 0 !important;
       box-sizing: border-box !important;
@@ -40,11 +61,136 @@ if (typeof document !== "undefined" && !document.getElementById(STYLE_ID)) {
       justify-content: center !important;
       flex-shrink: 0 !important;
       line-height: 1 !important;
+      transition: transform 0.18s cubic-bezier(0.16, 1, 0.3, 1),
+                  background-color 0.18s ease,
+                  border-color 0.18s ease,
+                  color 0.18s ease,
+                  box-shadow 0.18s ease,
+                  opacity 0.18s ease !important;
+      will-change: transform;
+    }
+    .web-loader-icon-btn:hover {
+      transform: translateY(-1px);
+      background: var(--card-bg-hover, rgba(255, 255, 255, 0.09)) !important;
+      border-color: rgba(var(--accent-rgb, 56, 189, 248), 0.3) !important;
+    }
+    .web-loader-icon-btn:active {
+      transform: scale(0.92) translateY(0px) !important;
     }
     .web-loader-icon-btn svg {
       display: block !important;
       flex-shrink: 0 !important;
       pointer-events: none;
+      transition: transform 0.18s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+
+    .web-loader-spinning svg {
+      animation: web-loader-spin 0.85s linear infinite !important;
+      transform-origin: center center;
+    }
+
+    .web-loader-tab {
+      transition: transform 0.2s cubic-bezier(0.16, 1, 0.3, 1),
+                  background-color 0.2s ease,
+                  border-color 0.2s ease,
+                  color 0.2s ease,
+                  box-shadow 0.2s ease !important;
+      will-change: transform;
+    }
+    .web-loader-tab:hover {
+      transform: translateY(-1px);
+      border-color: rgba(var(--accent-rgb, 56, 189, 248), 0.35) !important;
+      background: rgba(255, 255, 255, 0.08) !important;
+    }
+    .web-loader-tab:active {
+      transform: scale(0.98) translateY(0px) !important;
+    }
+
+    .web-loader-tab-close {
+      transition: opacity 0.15s ease,
+                  background-color 0.15s ease,
+                  transform 0.15s cubic-bezier(0.16, 1, 0.3, 1) !important;
+    }
+    .web-loader-tab-close:hover {
+      opacity: 1 !important;
+      background: rgba(255, 255, 255, 0.12) !important;
+      transform: scale(1.1) !important;
+    }
+    .web-loader-tab-close:active {
+      transform: scale(0.9) !important;
+    }
+
+    .web-loader-omnibox {
+      transition: border-color 0.22s cubic-bezier(0.16, 1, 0.3, 1),
+                  box-shadow 0.22s cubic-bezier(0.16, 1, 0.3, 1),
+                  background-color 0.22s ease !important;
+    }
+    .web-loader-omnibox:focus-within {
+      border-color: var(--accent-default, #38bdf8) !important;
+      box-shadow: 0 0 0 3px rgba(var(--accent-rgb, 56, 189, 248), 0.22),
+                  0 4px 16px rgba(0, 0, 0, 0.25) !important;
+    }
+
+    .web-loader-card {
+      animation: web-loader-card-enter 0.28s cubic-bezier(0.16, 1, 0.3, 1) both;
+      transition: transform 0.22s cubic-bezier(0.16, 1, 0.3, 1),
+                  border-color 0.22s ease,
+                  box-shadow 0.22s ease,
+                  background-color 0.22s ease !important;
+      will-change: transform;
+    }
+    .web-loader-card:hover {
+      transform: translateY(-2px);
+      border-color: rgba(var(--accent-rgb, 56, 189, 248), 0.35) !important;
+      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.25),
+                  0 1px 2px rgba(var(--accent-rgb, 56, 189, 248), 0.1) !important;
+      background: rgba(255, 255, 255, 0.065) !important;
+    }
+    .web-loader-card:active {
+      transform: translateY(0px) scale(0.99) !important;
+    }
+
+    .web-loader-action-btn {
+      transition: transform 0.18s cubic-bezier(0.16, 1, 0.3, 1),
+                  box-shadow 0.18s ease,
+                  opacity 0.18s ease,
+                  background-color 0.18s ease !important;
+    }
+    .web-loader-action-btn:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 4px 14px rgba(var(--accent-rgb, 56, 189, 248), 0.35) !important;
+      opacity: 0.95;
+    }
+    .web-loader-action-btn:active {
+      transform: translateY(0px) scale(0.97) !important;
+    }
+
+    .web-loader-secondary-btn {
+      transition: transform 0.18s cubic-bezier(0.16, 1, 0.3, 1),
+                  border-color 0.18s ease,
+                  box-shadow 0.18s ease,
+                  background-color 0.18s ease !important;
+    }
+    .web-loader-secondary-btn:hover {
+      transform: translateY(-1px);
+      background: rgba(255, 255, 255, 0.12) !important;
+      border-color: rgba(255, 255, 255, 0.25) !important;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2) !important;
+    }
+    .web-loader-secondary-btn:active {
+      transform: translateY(0px) scale(0.97) !important;
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      *, ::before, ::after {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
+        scroll-behavior: auto !important;
+      }
+      .web-loader-card, .web-loader-tab, .web-loader-icon-btn, .web-loader-action-btn, .web-loader-secondary-btn {
+        transform: none !important;
+      }
     }
   `;
   document.head.appendChild(styleEl);
@@ -353,7 +499,7 @@ function WebBrowserPanel(props: MainPanelProps) {
   id: "web-loader",
   name: "Web Loader",
   description: "High-performance browser and WebviewWindow loader for modern websites and local web apps.",
-  version: typeof __VERSION__ !== "undefined" ? __VERSION__ : "0.1.13",
+  version: typeof __VERSION__ !== "undefined" ? __VERSION__ : "0.1.14",
   author: "Algosculptor",
   hasCustomAppearanceSettings: true,
   viewRailButton: (props: any) => (

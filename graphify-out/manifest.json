@@ -1,14 +1,14 @@
 {
   "package.json": {
-    "mtime": 1790745768.5336063,
-    "seen": 1790745814.9497435,
-    "ast_hash": "274467881d66fe9c0a7869b35105f67f",
+    "mtime": 1790749728.6021607,
+    "seen": 1790749753.2396052,
+    "ast_hash": "d19ae09cdc0e156700921df5f2d09f9f",
     "semantic_hash": ""
   },
   "plugin.json": {
-    "mtime": 1790745798.7337284,
-    "seen": 1790745814.9497468,
-    "ast_hash": "b8b6d9c6fa914cb41ec8eaaf2a4a63e9",
+    "mtime": 1790749732.3901768,
+    "seen": 1790749753.239609,
+    "ast_hash": "10efef4a62a3d13681e04a896f09ef17",
     "semantic_hash": ""
   },
   "scripts/sync-version.cjs": {
@@ -18,15 +18,15 @@
     "semantic_hash": "ef96a62f28a8b6ec493bef1c52182fc0"
   },
   "src/components/NavigationBar.tsx": {
-    "mtime": 1790672094.2055392,
-    "seen": 1790672199.5981185,
-    "ast_hash": "cffb4ad81c592cb49a2810c3eb5c2fbb",
+    "mtime": 1790749667.4219043,
+    "seen": 1790749753.2396145,
+    "ast_hash": "4bb0d746f68e32a1a8eb7893cb64fc13",
     "semantic_hash": ""
   },
   "src/components/QuickDial.tsx": {
-    "mtime": 1790676586.6447918,
-    "seen": 1790676668.4264414,
-    "ast_hash": "7c907240da930bf15da398ec120098a4",
+    "mtime": 1790749719.9061236,
+    "seen": 1790749753.239616,
+    "ast_hash": "524cf5a1ac07733cf3a2fa4a004714e6",
     "semantic_hash": ""
   },
   "src/components/SettingsPanel.tsx": {
@@ -36,15 +36,15 @@
     "semantic_hash": ""
   },
   "src/components/TabBar.tsx": {
-    "mtime": 1790672074.2134562,
-    "seen": 1790672199.5981233,
-    "ast_hash": "3f4d289bdc8792c9269c81adbce6697a",
+    "mtime": 1790749650.3178313,
+    "seen": 1790749753.2396197,
+    "ast_hash": "a883ed01b99eef680395f3b86df479ac",
     "semantic_hash": ""
   },
   "src/components/WebViewport.tsx": {
-    "mtime": 1790745757.833563,
-    "seen": 1790745814.9497595,
-    "ast_hash": "89e78bad353918f6a514231724cf4f59",
+    "mtime": 1790748795.9142032,
+    "seen": 1790748887.5969715,
+    "ast_hash": "4ecfee65d7e905d080d5f37043473fec",
     "semantic_hash": ""
   },
   "src/icons.tsx": {
@@ -54,15 +54,15 @@
     "semantic_hash": ""
   },
   "src/index.tsx": {
-    "mtime": 1790745776.9736404,
-    "seen": 1790745814.9497626,
-    "ast_hash": "fed89ce6e27a27def39b8ab43c6054bc",
+    "mtime": 1790749633.8977613,
+    "seen": 1790749753.239625,
+    "ast_hash": "4244578315df02d708ce0e9cd9c968f7",
     "semantic_hash": ""
   },
   "src/styles.ts": {
-    "mtime": 1790673610.8359182,
-    "seen": 1790673638.270573,
-    "ast_hash": "ca5d9c097fe1b872691ff0478c725cc6",
+    "mtime": 1790749591.2855794,
+    "seen": 1790749753.2396266,
+    "ast_hash": "80fdfec61e4b3792f822a8ce47251ba4",
     "semantic_hash": ""
   },
   "src/types.ts": {
@@ -72,9 +72,9 @@
     "semantic_hash": ""
   },
   "src/utils.ts": {
-    "mtime": 1790745795.2857144,
-    "seen": 1790745814.9497702,
-    "ast_hash": "d81c3a0d8ef429a75e49ebc39a3efc40",
+    "mtime": 1790748766.746077,
+    "seen": 1790748887.5969825,
+    "ast_hash": "b8e3da32aea61ad8e2cd55e63c824a18",
     "semantic_hash": ""
   },
   "tsconfig.json": {

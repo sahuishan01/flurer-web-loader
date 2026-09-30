@@ -97,7 +97,7 @@ export function QuickDial(props: QuickDialProps) {
 
         <button
           type="button"
-          class="icon-btn"
+          class="icon-btn web-loader-secondary-btn"
           style={S.secondaryBtn}
           onClick={() => setShowAddForm(!showAddForm())}
         >
@@ -134,7 +134,7 @@ export function QuickDial(props: QuickDialProps) {
             onInput={(e) => setNewUrl(e.currentTarget.value)}
             style={{ ...S.omniboxInput, background: "rgba(0, 0, 0, 0.3)", padding: "8px 12px", "border-radius": "6px", border: "1px solid rgba(255, 255, 255, 0.1)" }}
           />
-          <button type="submit" style={S.actionBtn}>
+          <button type="submit" class="web-loader-action-btn" style={S.actionBtn}>
             Save
           </button>
         </form>
@@ -151,6 +151,7 @@ export function QuickDial(props: QuickDialProps) {
           <For each={DEFAULT_DEV_TARGETS}>
             {(item) => (
               <div
+                class="web-loader-card"
                 style={{
                   display: "flex",
                   "flex-direction": "column",
@@ -160,7 +161,6 @@ export function QuickDial(props: QuickDialProps) {
                   "border-radius": "10px",
                   padding: "14px",
                   cursor: "pointer",
-                  transition: "all 0.2s cubic-bezier(0.22, 1, 0.36, 1)",
                 }}
                 onClick={() => props.onOpenUrl(item.url)}
               >
@@ -219,6 +219,7 @@ export function QuickDial(props: QuickDialProps) {
           <For each={DEFAULT_DOC_TARGETS}>
             {(item) => (
               <div
+                class="web-loader-card"
                 style={{
                   display: "flex",
                   "flex-direction": "column",
@@ -228,7 +229,6 @@ export function QuickDial(props: QuickDialProps) {
                   "border-radius": "10px",
                   padding: "14px",
                   cursor: "pointer",
-                  transition: "all 0.2s cubic-bezier(0.22, 1, 0.36, 1)",
                 }}
                 onClick={() => props.onOpenUrl(item.url)}
               >
@@ -287,6 +287,7 @@ export function QuickDial(props: QuickDialProps) {
           <For each={DEFAULT_AI_TARGETS}>
             {(item) => (
               <div
+                class="web-loader-card"
                 style={{
                   display: "flex",
                   "flex-direction": "column",
@@ -296,7 +297,6 @@ export function QuickDial(props: QuickDialProps) {
                   "border-radius": "10px",
                   padding: "14px",
                   cursor: "pointer",
-                  transition: "all 0.2s cubic-bezier(0.22, 1, 0.36, 1)",
                 }}
                 onClick={() => props.onOpenUrl(item.url)}
               >
@@ -356,6 +356,7 @@ export function QuickDial(props: QuickDialProps) {
             <For each={props.bookmarks}>
               {(b) => (
                 <div
+                  class="web-loader-card"
                   style={{
                     display: "flex",
                     "flex-direction": "column",
@@ -432,7 +433,7 @@ export function QuickDial(props: QuickDialProps) {
             {props.onClearHistory && (
               <button
                 type="button"
-                class="icon-btn web-loader-icon-btn"
+                class="icon-btn web-loader-icon-btn web-loader-secondary-btn"
                 style={{ ...S.secondaryBtn, padding: "4px 10px", "font-size": "11px", "font-family": "Space Mono, monospace", gap: "4px" }}
                 onClick={() => props.onClearHistory?.()}
                 title="Clear all history"
@@ -456,6 +457,7 @@ export function QuickDial(props: QuickDialProps) {
                 };
                 return (
                   <div
+                    class="web-loader-card"
                     style={{
                       display: "flex",
                       "flex-direction": "column",
@@ -465,7 +467,6 @@ export function QuickDial(props: QuickDialProps) {
                       "border-radius": "10px",
                       padding: "14px",
                       cursor: "pointer",
-                      transition: "all 0.2s cubic-bezier(0.22, 1, 0.36, 1)",
                     }}
                     onClick={() => props.onOpenUrl(item.url)}
                   >

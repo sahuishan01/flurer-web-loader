@@ -55,6 +55,7 @@ export function NavigationBar(props: NavigationBarProps) {
       <button
         type="button"
         class="icon-btn web-loader-icon-btn"
+        classList={{ "web-loader-spinning": props.activeTab?.isLoading }}
         style={S.iconBtn}
         onClick={props.onReload}
         title={`Reload Page (F5 / ${mod}+R)`}
@@ -75,12 +76,13 @@ export function NavigationBar(props: NavigationBarProps) {
       {/* Smart Omnibox */}
       <form
         onSubmit={handleSubmit}
+        class="web-loader-omnibox"
         style={{
           ...S.omniboxContainer,
           ...(isFocused()
             ? {
                 "border-color": "var(--accent-default, #38bdf8)",
-                "box-shadow": "0 0 0 2px rgba(var(--accent-rgb, 56, 189, 248), 0.2)",
+                "box-shadow": "0 0 0 3px rgba(var(--accent-rgb, 56, 189, 248), 0.22), 0 4px 16px rgba(0, 0, 0, 0.25)",
               }
             : {}),
         }}

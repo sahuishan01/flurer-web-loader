@@ -38,7 +38,7 @@ export const S = {
     background: "var(--card-bg, rgba(255, 255, 255, 0.04))",
     border: "1px solid var(--card-border, rgba(255, 255, 255, 0.08))",
     cursor: "pointer",
-    transition: "all 0.2s cubic-bezier(0.22, 1, 0.36, 1)",
+    transition: "transform 0.2s cubic-bezier(0.16, 1, 0.3, 1), background 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease, color 0.2s ease",
     "max-width": "220px",
     "min-width": "120px",
     "white-space": "nowrap" as const,
@@ -73,7 +73,7 @@ export const S = {
     color: "inherit",
     cursor: "pointer",
     opacity: 0.7,
-    transition: "opacity 0.15s, background 0.15s",
+    transition: "all 0.15s cubic-bezier(0.16, 1, 0.3, 1)",
     "flex-shrink": 0,
   },
   iconBtn: {
@@ -91,7 +91,7 @@ export const S = {
     background: "var(--card-bg, rgba(255, 255, 255, 0.05))",
     color: "var(--text-primary, #f8fafc)",
     cursor: "pointer",
-    transition: "all 0.2s cubic-bezier(0.22, 1, 0.36, 1)",
+    transition: "transform 0.18s cubic-bezier(0.16, 1, 0.3, 1), background 0.18s ease, border-color 0.18s ease, color 0.18s ease, box-shadow 0.18s ease",
     "flex-shrink": 0,
   },
   cardIconBtn: {
@@ -109,7 +109,7 @@ export const S = {
     background: "var(--card-bg, rgba(255, 255, 255, 0.06))",
     color: "var(--text-primary, #f8fafc)",
     cursor: "pointer",
-    transition: "all 0.2s cubic-bezier(0.22, 1, 0.36, 1)",
+    transition: "transform 0.18s cubic-bezier(0.16, 1, 0.3, 1), background 0.18s ease, border-color 0.18s ease, color 0.18s ease",
     "flex-shrink": 0,
   },
   navRow: {
@@ -128,7 +128,7 @@ export const S = {
     padding: "0 10px",
     gap: "8px",
     height: "36px",
-    transition: "border-color 0.2s, box-shadow 0.2s",
+    transition: "border-color 0.22s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.22s cubic-bezier(0.16, 1, 0.3, 1), background-color 0.22s ease",
   },
   omniboxInput: {
     flex: 1,
@@ -197,7 +197,7 @@ export const S = {
     border: "none",
     "border-radius": "6px",
     cursor: "pointer",
-    transition: "transform 0.15s, opacity 0.15s",
+    transition: "transform 0.18s cubic-bezier(0.16, 1, 0.3, 1), background 0.18s ease, box-shadow 0.18s ease, opacity 0.18s ease",
   },
   secondaryBtn: {
     display: "inline-flex",
@@ -212,6 +212,6 @@ export const S = {
     border: "1px solid var(--border-color, rgba(255, 255, 255, 0.15))",
     "border-radius": "6px",
     cursor: "pointer",
-    transition: "all 0.15s",
+    transition: "transform 0.18s cubic-bezier(0.16, 1, 0.3, 1), background 0.18s ease, border-color 0.18s ease, box-shadow 0.18s ease",
   },
 };

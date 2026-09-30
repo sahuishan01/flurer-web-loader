@@ -1,6 +1,6 @@
 {
   "0": "WebViewport.tsx",
-  "1": "NavigationBar.tsx",
+  "1": "getModifierKey",
   "2": "compilerOptions",
   "3": "package.json",
   "4": "index.tsx",
@@ -11,6 +11,9 @@
   "9": "rules/graphify.md",
   "10": "workflows/graphify.md",
   "11": "utils.ts",
-  "12": "TabBar.tsx",
-  "13": "types.ts"
+  "12": "NavigationBar.tsx",
+  "13": "addHistoryItem",
+  "14": "getDomain",
+  "15": "TabBar.tsx",
+  "16": "types.ts"
 }
