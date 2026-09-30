@@ -291,6 +291,7 @@ function WebBrowserPanel(props: MainPanelProps) {
     DEFAULT_WORKSPACES[0];
 
   const [orbitDeckOpen, setOrbitDeckOpen] = createSignal(false);
+  const [workspaceMenuOpen, setWorkspaceMenuOpen] = createSignal(false);
   const orbitLayoutMode = () => props.pluginSettings?.orbitDeckLayout ?? "matrix";
 
   // Sync currentWorkspaceId with active tab if active tab changes
@@ -352,6 +353,7 @@ function WebBrowserPanel(props: MainPanelProps) {
 
   const handleSelectTab = (id: string) => {
     setOrbitDeckOpen(false);
+    setWorkspaceMenuOpen(false);
     if (id !== activeTabId()) {
       closeDockedWebview();
     }
@@ -611,6 +613,8 @@ function WebBrowserPanel(props: MainPanelProps) {
             homeUrl={props.pluginSettings?.homeUrl ?? ""}
             isBookmarked={isCurrentBookmarked()}
             orbitDeckOpen={orbitDeckOpen()}
+            isWsMenuOpen={workspaceMenuOpen()}
+            onWsMenuToggle={(open) => setWorkspaceMenuOpen(open)}
             onToggleOrbitDeck={() => setOrbitDeckOpen(!orbitDeckOpen())}
             onSelectTab={handleSelectTab}
             onCloseTab={handleCloseTab}
@@ -714,7 +718,7 @@ function WebBrowserPanel(props: MainPanelProps) {
         bookmarks={bookmarks()}
         history={history()}
         active={props.active}
-        isOverlayOpen={orbitDeckOpen()}
+        isOverlayOpen={orbitDeckOpen() || workspaceMenuOpen()}
         dockedChildWebview={props.pluginSettings?.dockedChildWebview !== false}
         onOpenUrl={handleNavigate}
         onNewTab={(url) => handleNewTab(url, activeTab()?.id, currentWorkspace().id)}
@@ -741,7 +745,7 @@ function WebBrowserPanel(props: MainPanelProps) {
   id: "web-loader",
   name: "Web Loader",
   description: "High-performance browser and WebviewWindow loader for modern websites and local web apps.",
-  version: typeof __VERSION__ !== "undefined" ? __VERSION__ : "0.1.17",
+  version: typeof __VERSION__ !== "undefined" ? __VERSION__ : "0.1.18",
   author: "Algosculptor",
   hasCustomAppearanceSettings: true,
   viewRailButton: (props: any) => (

@@ -1,4 +1,4 @@
-import { For, Show, createSignal, createEffect } from "solid-js";
+import { For, Show, createSignal, createEffect, onCleanup } from "solid-js";
 import { Tab, ProjectWorkspace, TabIntent, SearchEngine } from "../types";
 import { S } from "../styles";
 import {
@@ -28,6 +28,8 @@ interface ContextCapsuleBarProps {
   homeUrl: string;
   isBookmarked: boolean;
   orbitDeckOpen: boolean;
+  isWsMenuOpen?: boolean;
+  onWsMenuToggle?: (isOpen: boolean) => void;
   onToggleOrbitDeck: () => void;
   onSelectTab: (id: string) => void;
   onCloseTab: (id: string) => void;
@@ -49,8 +51,24 @@ export function ContextCapsuleBar(props: ContextCapsuleBarProps) {
   const engineName = getPlatformEngineName();
   const [inputValue, setInputValue] = createSignal("");
   const [isFocused, setIsFocused] = createSignal(false);
-  const [showWsMenu, setShowWsMenu] = createSignal(false);
+  const [internalWsMenu, setInternalWsMenu] = createSignal(false);
+  const showWsMenu = () => (props.isWsMenuOpen !== undefined ? props.isWsMenuOpen : internalWsMenu());
+  const setShowWsMenu = (open: boolean) => {
+    setInternalWsMenu(open);
+    props.onWsMenuToggle?.(open);
+  };
   const [showAllWorkspaces, setShowAllWorkspaces] = createSignal(false);
+
+  createEffect(() => {
+    if (!showWsMenu()) return;
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === "Escape") {
+        setShowWsMenu(false);
+      }
+    };
+    window.addEventListener("keydown", handleKeyDown);
+    onCleanup(() => window.removeEventListener("keydown", handleKeyDown));
+  });
 
   // Sync omnibox with active tab's URL unless user is actively typing
   createEffect(() => {
@@ -82,6 +100,8 @@ export function ContextCapsuleBar(props: ContextCapsuleBarProps) {
     <div
       style={{
         ...S.topBar,
+        position: "relative",
+        "z-index": 50,
         gap: "6px",
         padding: "6px 12px",
       }}
@@ -144,6 +164,22 @@ export function ContextCapsuleBar(props: ContextCapsuleBarProps) {
             <span style={{ "font-size": "9px", opacity: 0.8 }}>▾</span>
           </button>
 
+          {/* Backdrop to capture outside clicks and prevent webview click blocking */}
+          <Show when={showWsMenu()}>
+            <div
+              style={{
+                position: "fixed",
+                inset: 0,
+                "z-index": 9998,
+                background: "rgba(0, 0, 0, 0.25)",
+              }}
+              onClick={(e) => {
+                e.stopPropagation();
+                setShowWsMenu(false);
+              }}
+            />
+          </Show>
+
           {/* Workspace Switcher Popover */}
           <Show when={showWsMenu()}>
             <div
@@ -152,17 +188,19 @@ export function ContextCapsuleBar(props: ContextCapsuleBarProps) {
                 top: "100%",
                 left: "0",
                 "margin-top": "6px",
-                "z-index": 1000,
+                "z-index": 9999,
                 background: "rgba(15, 23, 42, 0.98)",
-                "backdrop-filter": "blur(16px)",
-                border: "1px solid rgba(255, 255, 255, 0.18)",
+                "backdrop-filter": "blur(20px)",
+                "-webkit-backdrop-filter": "blur(20px)",
+                border: "1px solid rgba(255, 255, 255, 0.22)",
                 "border-radius": "10px",
-                padding: "6px",
-                "box-shadow": "0 12px 36px rgba(0, 0, 0, 0.5)",
-                "min-width": "200px",
+                padding: "8px",
+                "box-shadow": "0 16px 40px rgba(0, 0, 0, 0.7), 0 0 1px 1px rgba(255, 255, 255, 0.1)",
+                "min-width": "220px",
                 display: "flex",
                 "flex-direction": "column",
                 gap: "4px",
+                animation: "web-loader-card-enter 0.18s cubic-bezier(0.16, 1, 0.3, 1) both",
               }}
             >
               <div

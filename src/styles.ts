@@ -11,6 +11,8 @@ export const S = {
   topBar: {
     display: "flex",
     "flex-direction": "column" as const,
+    position: "relative" as const,
+    "z-index": 50,
     background: "rgba(var(--panel-rgb, 15, 23, 42), var(--plugin-surface-opacity, 0.75))",
     "backdrop-filter": "blur(var(--surface-blur, 12px))",
     "-webkit-backdrop-filter": "blur(var(--surface-blur, 12px))",
