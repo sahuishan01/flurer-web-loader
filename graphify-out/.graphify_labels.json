@@ -1,6 +1,5 @@
 {
-  "0": "WebViewport.tsx",
-  "1": "getModifierKey",
+  "0": "ContextCapsuleBar.tsx",
   "2": "compilerOptions",
   "3": "package.json",
   "4": "index.tsx",
@@ -11,7 +10,6 @@
   "9": "rules/graphify.md",
   "10": "workflows/graphify.md",
   "11": "utils.ts",
-  "12": "openInWebviewWindow",
-  "13": "addHistoryItem",
-  "14": "getDomain"
+  "12": "types.ts",
+  "15": "QuickDial.tsx"
 }

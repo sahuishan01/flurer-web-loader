@@ -1,4 +1,5 @@
-import { SearchEngine, Bookmark, HistoryItem } from "./types";
+import { SearchEngine, Bookmark, HistoryItem, SavedTabRecord, ProjectWorkspace, SmartRouterConfig } from "./types";
+import { DEFAULT_WORKSPACES } from "./smartRouter";
 
 export type Platform = "windows" | "macos" | "linux";
 
@@ -516,8 +517,10 @@ const TABS_KEY = "flurer-web-loader-tabs";
 const ACTIVE_TAB_KEY = "flurer-web-loader-active-tab";
 const BOOKMARKS_KEY = "flurer-web-loader-bookmarks";
 const HISTORY_KEY = "flurer-web-loader-history";
+const WORKSPACES_KEY = "flurer-web-loader-workspaces";
+const ROUTER_CONFIG_KEY = "flurer-web-loader-router-config";
 
-export function getSavedTabs(): { title: string; url: string }[] {
+export function getSavedTabs(): SavedTabRecord[] {
   try {
     const raw = localStorage.getItem(TABS_KEY);
     if (!raw) return [];
@@ -527,9 +530,56 @@ export function getSavedTabs(): { title: string; url: string }[] {
   }
 }
 
-export function saveTabs(tabs: { title: string; url: string }[]): void {
+export function saveTabs(tabs: SavedTabRecord[]): void {
   try {
     localStorage.setItem(TABS_KEY, JSON.stringify(tabs));
+  } catch {}
+}
+
+export function getSavedWorkspaces(): ProjectWorkspace[] {
+  try {
+    const raw = localStorage.getItem(WORKSPACES_KEY);
+    if (!raw) return DEFAULT_WORKSPACES;
+    const parsed = JSON.parse(raw);
+    return Array.isArray(parsed) && parsed.length > 0 ? parsed : DEFAULT_WORKSPACES;
+  } catch {
+    return DEFAULT_WORKSPACES;
+  }
+}
+
+export function saveWorkspaces(workspaces: ProjectWorkspace[]): void {
+  try {
+    localStorage.setItem(WORKSPACES_KEY, JSON.stringify(workspaces));
+  } catch {}
+}
+
+export function getSavedRouterConfig(): SmartRouterConfig {
+  try {
+    const raw = localStorage.getItem(ROUTER_CONFIG_KEY);
+    if (!raw) {
+      return {
+        enabled: true,
+        provider: "heuristic",
+        localEndpointUrl: "http://127.0.0.1:11434",
+        modelName: "laya-router",
+        autoCreateCategories: true,
+      };
+    }
+    return JSON.parse(raw);
+  } catch {
+    return {
+      enabled: true,
+      provider: "heuristic",
+      localEndpointUrl: "http://127.0.0.1:11434",
+      modelName: "laya-router",
+      autoCreateCategories: true,
+    };
+  }
+}
+
+export function saveRouterConfig(cfg: SmartRouterConfig): void {
+  try {
+    localStorage.setItem(ROUTER_CONFIG_KEY, JSON.stringify(cfg));
   } catch {}
 }
 

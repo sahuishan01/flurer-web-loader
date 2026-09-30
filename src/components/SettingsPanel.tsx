@@ -10,8 +10,24 @@ import {
   ThemeMode,
   hexToRgb,
 } from "../theme";
-import { ShieldIcon, TrashIcon, LockIcon, IncognitoIcon } from "../icons";
-import { clearAllBrowsingData, clearHistory, DEFAULT_DESKTOP_USER_AGENT, CHROME_DESKTOP_USER_AGENT } from "../utils";
+import {
+  ShieldIcon,
+  TrashIcon,
+  LockIcon,
+  IncognitoIcon,
+  OrbitIcon,
+  MatrixIcon,
+  SparklesIcon,
+  BranchIcon,
+  LayersIcon,
+} from "../icons";
+import { DEFAULT_WORKSPACES } from "../smartRouter";
+import {
+  clearAllBrowsingData,
+  clearHistory,
+  DEFAULT_DESKTOP_USER_AGENT,
+  CHROME_DESKTOP_USER_AGENT,
+} from "../utils";
 
 const QUICK_ACCENTS = [
   { name: "Cyan", hex: "#00f0ff" },
@@ -41,6 +57,47 @@ export function SettingsPanel(props: SettingsPanelProps) {
   const incognitoMode = () => props.pluginSettings.incognitoMode ?? false;
   const singleWindow = () => props.pluginSettings.singleWindowPerDomain ?? true;
   const customUserAgent = () => props.pluginSettings.customUserAgent ?? DEFAULT_DESKTOP_USER_AGENT;
+
+  const designMode = () => props.pluginSettings.designMode ?? "context-orbit";
+  const orbitLayout = () => props.pluginSettings.orbitDeckLayout ?? "matrix";
+  const currentWorkspaces = () => props.pluginSettings.workspaces ?? DEFAULT_WORKSPACES;
+  const currentSmartRouter = () =>
+    props.pluginSettings.smartRouter ?? {
+      enabled: true,
+      provider: "heuristic",
+      localEndpointUrl: "http://127.0.0.1:11434",
+      modelName: "laya-router",
+      autoCreateCategories: true,
+    };
+
+  const [newWsName, setNewWsName] = createSignal("");
+  const [newWsColor, setNewWsColor] = createSignal("#38bdf8");
+  const [newWsKeywords, setNewWsKeywords] = createSignal("");
+
+  const handleAddWorkspace = () => {
+    if (!newWsName().trim()) return;
+    const kw = newWsKeywords()
+      .split(",")
+      .map((k) => k.trim())
+      .filter(Boolean);
+    const newWs = {
+      id: `ws-${Date.now()}`,
+      name: newWsName().trim(),
+      color: newWsColor(),
+      icon: "✦",
+      keywords: kw,
+    };
+    const updated = [...currentWorkspaces(), newWs];
+    props.onPluginSettingsChange({ workspaces: updated });
+    setNewWsName("");
+    setNewWsKeywords("");
+  };
+
+  const handleRemoveWorkspace = (id: string) => {
+    if (id === "general") return;
+    const updated = currentWorkspaces().filter((w) => w.id !== id);
+    props.onPluginSettingsChange({ workspaces: updated });
+  };
 
   const [securityStatus, setSecurityStatus] = createSignal("");
   const [isWiping, setIsWiping] = createSignal(false);
@@ -427,6 +484,411 @@ export function SettingsPanel(props: SettingsPanelProps) {
               onInput={(e) => updateTheme({ surfaceBlur: parseInt(e.currentTarget.value, 10) })}
               style={{ width: "100%" }}
             />
+          </div>
+        </div>
+      </div>
+
+      {/* WORKSPACE NAVIGATION & THE THIRD DESIGN */}
+      <div
+        style={{
+          display: "flex",
+          "flex-direction": "column",
+          gap: "18px",
+          background: "var(--card-bg, rgba(255, 255, 255, 0.04))",
+          border: "1px solid var(--card-border, rgba(255, 255, 255, 0.08))",
+          padding: "20px",
+          "border-radius": "10px",
+        }}
+      >
+        <div>
+          <span
+            style={{
+              "font-size": "11px",
+              "font-family": "Space Mono, monospace",
+              "text-transform": "uppercase",
+              "letter-spacing": "0.12em",
+              color: "var(--accent-default, #38bdf8)",
+            }}
+          >
+            Tab Architecture & Workspaces
+          </span>
+          <h4 style={{ margin: "4px 0 2px 0", "font-size": "15px", "font-weight": 600 }}>
+            Navigation Paradigm & Smart Router (The Third Design)
+          </h4>
+          <p
+            style={{
+              margin: 0,
+              "font-size": "12px",
+              color: "var(--text-secondary, #94a3b8)",
+              "line-height": 1.45,
+            }}
+          >
+            Replaces conventional horizontal and vertical tabs with a native Context Capsule HUD and an extensible Workspace Orbit Deck with on-device routing.
+          </p>
+        </div>
+
+        {/* Paradigm Selection */}
+        <div style={{ display: "flex", "flex-direction": "column", gap: "8px" }}>
+          <label style={{ "font-size": "13px", "font-weight": 500 }}>
+            Active Navigation Paradigm
+          </label>
+          <div style={{ display: "grid", "grid-template-columns": "repeat(auto-fit, minmax(260px, 1fr))", gap: "10px" }}>
+            <div
+              style={{
+                padding: "14px",
+                "border-radius": "8px",
+                background: designMode() === "context-orbit" ? "rgba(56, 189, 248, 0.12)" : "rgba(255, 255, 255, 0.03)",
+                border: designMode() === "context-orbit" ? "1px solid var(--accent-default, #38bdf8)" : "1px solid rgba(255, 255, 255, 0.08)",
+                cursor: "pointer",
+                transition: "all 0.18s ease",
+              }}
+              onClick={() => props.onPluginSettingsChange({ designMode: "context-orbit" })}
+            >
+              <div style={{ display: "flex", "align-items": "center", gap: "8px", "margin-bottom": "6px" }}>
+                <OrbitIcon size={18} />
+                <span style={{ "font-weight": 600, "font-size": "13px", color: designMode() === "context-orbit" ? "var(--accent-default, #38bdf8)" : "#f8fafc" }}>
+                  Context Orbit & Flow Deck (Third-Gen)
+                </span>
+              </div>
+              <p style={{ margin: 0, "font-size": "11px", color: "var(--text-secondary, #94a3b8)", "line-height": 1.4 }}>
+                HUD Context Capsule with Project Pills, Lineage Breadcrumbs, and instant Workspace Orbit Deck (Matrix & 2D Spatial Canvas).
+              </p>
+            </div>
+
+            <div
+              style={{
+                padding: "14px",
+                "border-radius": "8px",
+                background: designMode() === "standard-tabs" ? "rgba(56, 189, 248, 0.12)" : "rgba(255, 255, 255, 0.03)",
+                border: designMode() === "standard-tabs" ? "1px solid var(--accent-default, #38bdf8)" : "1px solid rgba(255, 255, 255, 0.08)",
+                cursor: "pointer",
+                transition: "all 0.18s ease",
+              }}
+              onClick={() => props.onPluginSettingsChange({ designMode: "standard-tabs" })}
+            >
+              <div style={{ display: "flex", "align-items": "center", gap: "8px", "margin-bottom": "6px" }}>
+                <span style={{ "font-size": "14px" }}>📋</span>
+                <span style={{ "font-weight": 600, "font-size": "13px", color: designMode() === "standard-tabs" ? "var(--accent-default, #38bdf8)" : "#f8fafc" }}>
+                  Classic Horizontal Tab Strip
+                </span>
+              </div>
+              <p style={{ margin: 0, "font-size": "11px", color: "var(--text-secondary, #94a3b8)", "line-height": 1.4 }}>
+                Traditional browser tabs strip docked at the top with tab titles and close buttons.
+              </p>
+            </div>
+          </div>
+        </div>
+
+        {/* Default Orbit Deck Layout */}
+        <div style={{ display: "flex", "flex-direction": "column", gap: "8px" }}>
+          <label style={{ "font-size": "13px", "font-weight": 500 }}>
+            Default Orbit Deck Layout Mode
+          </label>
+          <div style={{ display: "inline-flex", gap: "8px" }}>
+            <button
+              type="button"
+              style={{
+                display: "inline-flex",
+                "align-items": "center",
+                gap: "6px",
+                padding: "6px 14px",
+                "border-radius": "6px",
+                background: orbitLayout() === "matrix" ? "rgba(56, 189, 248, 0.18)" : "rgba(255, 255, 255, 0.05)",
+                border: orbitLayout() === "matrix" ? "1px solid var(--accent-default, #38bdf8)" : "1px solid rgba(255, 255, 255, 0.1)",
+                color: orbitLayout() === "matrix" ? "#38bdf8" : "var(--text-secondary, #cbd5e1)",
+                "font-size": "12px",
+                "font-family": "Space Mono, monospace",
+                cursor: "pointer",
+              }}
+              onClick={() => props.onPluginSettingsChange({ orbitDeckLayout: "matrix" })}
+            >
+              <MatrixIcon size={14} />
+              <span>Structured Cluster Matrix</span>
+            </button>
+
+            <button
+              type="button"
+              style={{
+                display: "inline-flex",
+                "align-items": "center",
+                gap: "6px",
+                padding: "6px 14px",
+                "border-radius": "6px",
+                background: orbitLayout() === "spatial" ? "rgba(56, 189, 248, 0.18)" : "rgba(255, 255, 255, 0.05)",
+                border: orbitLayout() === "spatial" ? "1px solid var(--accent-default, #38bdf8)" : "1px solid rgba(255, 255, 255, 0.1)",
+                color: orbitLayout() === "spatial" ? "#38bdf8" : "var(--text-secondary, #cbd5e1)",
+                "font-size": "12px",
+                "font-family": "Space Mono, monospace",
+                cursor: "pointer",
+              }}
+              onClick={() => props.onPluginSettingsChange({ orbitDeckLayout: "spatial" })}
+            >
+              <OrbitIcon size={14} />
+              <span>Spatial 2D Orbit Canvas</span>
+            </button>
+          </div>
+        </div>
+
+        {/* Smart Router & Laya Local Model Configuration */}
+        <div
+          style={{
+            display: "flex",
+            "flex-direction": "column",
+            gap: "12px",
+            padding: "14px",
+            background: "rgba(0, 0, 0, 0.25)",
+            border: "1px solid rgba(255, 255, 255, 0.08)",
+            "border-radius": "8px",
+          }}
+        >
+          <div style={{ display: "flex", "align-items": "center", "justify-content": "space-between" }}>
+            <div style={{ display: "flex", "align-items": "center", gap: "8px" }}>
+              <SparklesIcon size={18} />
+              <span style={{ "font-size": "13px", "font-weight": 600, color: "#a855f7", "font-family": "Space Mono, monospace" }}>
+                Smart Routing Engine ("Laya")
+              </span>
+            </div>
+            <label style={{ display: "inline-flex", "align-items": "center", gap: "8px", cursor: "pointer", "font-size": "12px" }}>
+              <input
+                type="checkbox"
+                checked={currentSmartRouter().enabled}
+                onChange={(e) =>
+                  props.onPluginSettingsChange({
+                    smartRouter: {
+                      ...currentSmartRouter(),
+                      enabled: e.currentTarget.checked,
+                    },
+                  })
+                }
+              />
+              <span>Enable Smart Routing</span>
+            </label>
+          </div>
+
+          <div style={{ display: "grid", "grid-template-columns": "repeat(auto-fit, minmax(240px, 1fr))", gap: "12px" }}>
+            <div>
+              <label style={{ "font-size": "12px", color: "var(--text-secondary, #94a3b8)", display: "block", "margin-bottom": "4px" }}>
+                Routing Engine Provider
+              </label>
+              <select
+                value={currentSmartRouter().provider}
+                onChange={(e) =>
+                  props.onPluginSettingsChange({
+                    smartRouter: {
+                      ...currentSmartRouter(),
+                      provider: e.currentTarget.value as any,
+                    },
+                  })
+                }
+                style={{
+                  width: "100%",
+                  padding: "8px 10px",
+                  background: "rgba(0, 0, 0, 0.4)",
+                  border: "1px solid rgba(255, 255, 255, 0.15)",
+                  color: "#f8fafc",
+                  "border-radius": "6px",
+                  "font-size": "12px",
+                }}
+              >
+                <option value="heuristic">Zero-Latency Heuristic (Built-in, 0ms, Offline)</option>
+                <option value="laya-local">On-Device Laya Model (Ollama / Local LLM at 127.0.0.1:11434)</option>
+              </select>
+            </div>
+
+            <Show when={currentSmartRouter().provider === "laya-local"}>
+              <div>
+                <label style={{ "font-size": "12px", color: "var(--text-secondary, #94a3b8)", display: "block", "margin-bottom": "4px" }}>
+                  Local Model Endpoint URL
+                </label>
+                <input
+                  type="text"
+                  value={currentSmartRouter().localEndpointUrl || "http://127.0.0.1:11434"}
+                  onInput={(e) =>
+                    props.onPluginSettingsChange({
+                      smartRouter: {
+                        ...currentSmartRouter(),
+                        localEndpointUrl: e.currentTarget.value,
+                      },
+                    })
+                  }
+                  style={{
+                    width: "100%",
+                    padding: "8px 10px",
+                    background: "rgba(0, 0, 0, 0.4)",
+                    border: "1px solid rgba(255, 255, 255, 0.15)",
+                    color: "#f8fafc",
+                    "border-radius": "6px",
+                    "font-size": "12px",
+                    "font-family": "Space Mono, monospace",
+                  }}
+                />
+              </div>
+
+              <div>
+                <label style={{ "font-size": "12px", color: "var(--text-secondary, #94a3b8)", display: "block", "margin-bottom": "4px" }}>
+                  Model Tag / Name
+                </label>
+                <input
+                  type="text"
+                  value={currentSmartRouter().modelName || "laya-router"}
+                  onInput={(e) =>
+                    props.onPluginSettingsChange({
+                      smartRouter: {
+                        ...currentSmartRouter(),
+                        modelName: e.currentTarget.value,
+                      },
+                    })
+                  }
+                  placeholder="e.g. laya-router or llama3.2:1b"
+                  style={{
+                    width: "100%",
+                    padding: "8px 10px",
+                    background: "rgba(0, 0, 0, 0.4)",
+                    border: "1px solid rgba(255, 255, 255, 0.15)",
+                    color: "#f8fafc",
+                    "border-radius": "6px",
+                    "font-size": "12px",
+                    "font-family": "Space Mono, monospace",
+                  }}
+                />
+              </div>
+            </Show>
+          </div>
+
+          {/* Quick Setup Instructions for Local Laya Model */}
+          <div
+            style={{
+              padding: "10px 12px",
+              "border-radius": "6px",
+              background: "rgba(168, 85, 247, 0.08)",
+              border: "1px solid rgba(168, 85, 247, 0.2)",
+              "font-size": "11px",
+              "line-height": 1.5,
+              color: "var(--text-secondary, #cbd5e1)",
+            }}
+          >
+            <strong>On-Device Laya Model Setup:</strong> To run Laya locally on your device with Ollama, start the local server:
+            <code
+              style={{
+                display: "block",
+                margin: "4px 0",
+                padding: "4px 8px",
+                background: "rgba(0, 0, 0, 0.4)",
+                "border-radius": "4px",
+                "font-family": "Space Mono, monospace",
+                color: "#05ffb0",
+              }}
+            >
+              ollama pull llama3.2:1b && ollama cp llama3.2:1b laya-router
+            </code>
+            If unreachable or offline, Web Loader automatically falls back to the zero-latency heuristic engine with zero user disruption.
+          </div>
+        </div>
+
+        {/* Project Workspaces Manager */}
+        <div style={{ display: "flex", "flex-direction": "column", gap: "10px" }}>
+          <div style={{ display: "flex", "align-items": "center", "justify-content": "space-between" }}>
+            <label style={{ "font-size": "13px", "font-weight": 500 }}>
+              Configured Project Workspaces ({currentWorkspaces().length})
+            </label>
+          </div>
+
+          <div style={{ display: "flex", "flex-wrap": "wrap", gap: "8px" }}>
+            <For each={currentWorkspaces()}>
+              {(ws) => (
+                <div
+                  style={{
+                    display: "inline-flex",
+                    "align-items": "center",
+                    gap: "6px",
+                    padding: "4px 10px",
+                    "border-radius": "6px",
+                    background: "rgba(255, 255, 255, 0.05)",
+                    border: `1px solid ${ws.color}55`,
+                    color: "var(--text-primary, #f8fafc)",
+                    "font-size": "12px",
+                  }}
+                >
+                  <span style={{ color: ws.color }}>{ws.icon || "✦"}</span>
+                  <span style={{ "font-weight": 600 }}>{ws.name}</span>
+                  {ws.id !== "general" && (
+                    <button
+                      type="button"
+                      style={{
+                        background: "transparent",
+                        border: "none",
+                        color: "var(--text-muted, #94a3b8)",
+                        cursor: "pointer",
+                        padding: "0 2px",
+                        "font-size": "11px",
+                      }}
+                      onClick={() => handleRemoveWorkspace(ws.id)}
+                      title={`Delete ${ws.name} workspace`}
+                    >
+                      ✕
+                    </button>
+                  )}
+                </div>
+              )}
+            </For>
+          </div>
+
+          {/* Inline Add Workspace */}
+          <div
+            style={{
+              display: "flex",
+              gap: "8px",
+              "align-items": "center",
+              "flex-wrap": "wrap",
+              "margin-top": "4px",
+            }}
+          >
+            <input
+              type="text"
+              placeholder="New workspace name..."
+              value={newWsName()}
+              onInput={(e) => setNewWsName(e.currentTarget.value)}
+              style={{
+                padding: "6px 10px",
+                background: "rgba(0, 0, 0, 0.3)",
+                border: "1px solid rgba(255, 255, 255, 0.15)",
+                color: "#f8fafc",
+                "border-radius": "6px",
+                "font-size": "12px",
+                flex: "1 1 140px",
+              }}
+            />
+            <input
+              type="text"
+              placeholder="Keywords (comma separated)..."
+              value={newWsKeywords()}
+              onInput={(e) => setNewWsKeywords(e.currentTarget.value)}
+              style={{
+                padding: "6px 10px",
+                background: "rgba(0, 0, 0, 0.3)",
+                border: "1px solid rgba(255, 255, 255, 0.15)",
+                color: "#f8fafc",
+                "border-radius": "6px",
+                "font-size": "12px",
+                flex: "2 1 200px",
+              }}
+            />
+            <button
+              type="button"
+              style={{
+                padding: "6px 14px",
+                background: "rgba(56, 189, 248, 0.2)",
+                border: "1px solid rgba(56, 189, 248, 0.4)",
+                color: "#38bdf8",
+                "border-radius": "6px",
+                "font-size": "12px",
+                "font-family": "Space Mono, monospace",
+                cursor: "pointer",
+              }}
+              onClick={handleAddWorkspace}
+            >
+              + Add Workspace
+            </button>
           </div>
         </div>
       </div>

@@ -1,12 +1,22 @@
-import { createSignal, createRoot } from "solid-js";
-import { MainPanelProps, Tab, Bookmark, HistoryItem } from "./types";
+import { createSignal, createRoot, Show, onMount, onCleanup, createEffect } from "solid-js";
+import {
+  MainPanelProps,
+  Tab,
+  Bookmark,
+  HistoryItem,
+  ProjectWorkspace,
+  OrbitLayoutMode,
+} from "./types";
 import { S } from "./styles";
 import { GlobeIcon } from "./icons";
 import { TabBar } from "./components/TabBar";
 import { NavigationBar } from "./components/NavigationBar";
+import { ContextCapsuleBar } from "./components/ContextCapsuleBar";
+import { ContextOrbitDeck } from "./components/ContextOrbitDeck";
 import { WebViewport } from "./components/WebViewport";
 import { SettingsPanel } from "./components/SettingsPanel";
 import { themeConfig, getEffectiveThemeStyles } from "./theme";
+import { DEFAULT_WORKSPACES, classifyHeuristic } from "./smartRouter";
 import {
   openInWebviewWindow,
   openInExternalBrowser,
@@ -23,6 +33,8 @@ import {
   clearHistory,
   closeDockedWebview,
   setDockedWebviewZoom,
+  getSavedWorkspaces,
+  saveWorkspaces,
 } from "./utils";
 
 declare const __VERSION__: string;
@@ -198,16 +210,34 @@ if (typeof document !== "undefined" && !document.getElementById(STYLE_ID)) {
 
 let tabCounter = 0;
 
-function createNewTab(url: string = "about:blank", title: string = "New Tab"): Tab {
+function createNewTab(
+  url: string = "about:blank",
+  title: string = "New Tab",
+  parentId?: string,
+  parentTitle?: string,
+  projectId?: string
+): Tab {
+  const domain = url === "about:blank" ? "" : getDomain(url);
+  const decision = classifyHeuristic(url, title || domain, getSavedWorkspaces(), projectId);
   return {
     id: `tab-${++tabCounter}`,
-    title,
+    title: title || (url === "about:blank" ? "New Tab" : domain),
     url,
     isLoading: false,
     canGoBack: false,
     canGoForward: false,
     zoom: 1.0,
     mode: "embedded",
+    projectId: projectId || decision.projectId,
+    intent: decision.intent,
+    parentId,
+    parentTitle,
+    createdAt: Date.now(),
+    lastActiveAt: Date.now(),
+    position: {
+      x: 180 + Math.floor(Math.random() * 450),
+      y: 140 + Math.floor(Math.random() * 320),
+    },
   };
 }
 
@@ -215,7 +245,13 @@ function initRestoredTabs(): { tabs: Tab[]; activeId: string } {
   const saved = getSavedTabs();
   const savedActive = getSavedActiveTab();
   if (saved.length > 0) {
-    const restored = saved.map((s) => createNewTab(s.url, s.title));
+    const restored = saved.map((s) => {
+      const tab = createNewTab(s.url, s.title, s.parentId, s.parentTitle, s.projectId);
+      if (s.intent) tab.intent = s.intent;
+      if (s.pinned !== undefined) tab.pinned = s.pinned;
+      if (s.position) tab.position = s.position;
+      return tab;
+    });
     const match = restored.find((t) => t.url === savedActive);
     return {
       tabs: restored,
@@ -239,6 +275,57 @@ const [history, setHistory] = createRoot(() => createSignal<HistoryItem[]>(getSa
 function WebBrowserPanel(props: MainPanelProps) {
   const activeTab = () => tabs().find((t) => t.id === activeTabId()) || tabs()[0];
 
+  const workspaces = () => props.pluginSettings?.workspaces ?? getSavedWorkspaces();
+  const setWorkspaces = (ws: ProjectWorkspace[]) => {
+    saveWorkspaces(ws);
+    props.onPluginSettingsChange?.({ workspaces: ws });
+  };
+
+  const [currentWorkspaceId, setCurrentWorkspaceId] = createSignal<string>(
+    activeTab()?.projectId || "flurer"
+  );
+
+  const currentWorkspace = () =>
+    workspaces().find((w) => w.id === currentWorkspaceId()) ||
+    workspaces()[0] ||
+    DEFAULT_WORKSPACES[0];
+
+  const [orbitDeckOpen, setOrbitDeckOpen] = createSignal(false);
+  const orbitLayoutMode = () => props.pluginSettings?.orbitDeckLayout ?? "matrix";
+
+  // Sync currentWorkspaceId with active tab if active tab changes
+  createEffect(() => {
+    const cur = activeTab();
+    if (cur?.projectId && cur.projectId !== currentWorkspaceId()) {
+      const exists = workspaces().some((w) => w.id === cur.projectId);
+      if (exists) {
+        setCurrentWorkspaceId(cur.projectId);
+      }
+    }
+  });
+
+  // Global Keyboard shortcuts
+  onMount(() => {
+    const handleGlobalKey = (e: KeyboardEvent) => {
+      const isMod = e.ctrlKey || e.metaKey;
+      if (isMod && (e.key === "e" || e.key === "E" || e.key === "k" || e.key === "K")) {
+        e.preventDefault();
+        setOrbitDeckOpen((prev) => !prev);
+      } else if (isMod && (e.key === "t" || e.key === "T")) {
+        e.preventDefault();
+        handleNewTab("about:blank", activeTab()?.id, currentWorkspace().id);
+      } else if (isMod && (e.key === "w" || e.key === "W")) {
+        e.preventDefault();
+        if (activeTab()) {
+          handleCloseTab(activeTab().id);
+        }
+      }
+    };
+
+    window.addEventListener("keydown", handleGlobalKey);
+    onCleanup(() => window.removeEventListener("keydown", handleGlobalKey));
+  });
+
   const getLaunchOptions = () => ({
     incognito: props.pluginSettings?.incognitoMode,
     userAgent: props.pluginSettings?.customUserAgent,
@@ -246,7 +333,18 @@ function WebBrowserPanel(props: MainPanelProps) {
   });
 
   const persistCurrentTabs = (currentTabs: Tab[], activeUrl?: string) => {
-    saveTabs(currentTabs.map((t) => ({ title: t.title, url: t.url })));
+    saveTabs(
+      currentTabs.map((t) => ({
+        title: t.title,
+        url: t.url,
+        projectId: t.projectId,
+        intent: t.intent,
+        parentId: t.parentId,
+        parentTitle: t.parentTitle,
+        pinned: t.pinned,
+        position: t.position,
+      }))
+    );
     if (activeUrl !== undefined) {
       saveActiveTab(activeUrl === "about:blank" ? null : activeUrl);
     }
@@ -260,15 +358,32 @@ function WebBrowserPanel(props: MainPanelProps) {
     const target = tabs().find((t) => t.id === id);
     if (target) {
       saveActiveTab(target.url === "about:blank" ? null : target.url);
+      if (target.projectId) {
+        setCurrentWorkspaceId(target.projectId);
+      }
     }
   };
 
-  const handleNewTab = (url: string = "about:blank") => {
+  const handleNewTab = (
+    url: string = "about:blank",
+    parentId?: string,
+    projectId?: string
+  ) => {
     closeDockedWebview();
-    const newTab = createNewTab(url, url === "about:blank" ? "New Tab" : getDomain(url));
+    const parentTab = parentId ? tabs().find((t) => t.id === parentId) : undefined;
+    const parentTitle = parentTab ? parentTab.title : undefined;
+    const targetWs = projectId || parentTab?.projectId || currentWorkspace().id;
+    const newTab = createNewTab(
+      url,
+      url === "about:blank" ? "New Tab" : getDomain(url),
+      parentId,
+      parentTitle,
+      targetWs
+    );
     const nextTabs = [...tabs(), newTab];
     setTabs(nextTabs);
     setActiveTabId(newTab.id);
+    setCurrentWorkspaceId(targetWs);
     persistCurrentTabs(nextTabs, newTab.url);
   };
 
@@ -279,7 +394,7 @@ function WebBrowserPanel(props: MainPanelProps) {
     const current = tabs();
     if (current.length === 1) {
       // If closing last tab, reset it to about:blank
-      const fresh = [createNewTab()];
+      const fresh = [createNewTab("about:blank", "New Tab", undefined, undefined, currentWorkspace().id)];
       setTabs(fresh);
       setActiveTabId(fresh[0].id);
       persistCurrentTabs(fresh, fresh[0].url);
@@ -295,6 +410,9 @@ function WebBrowserPanel(props: MainPanelProps) {
       const nextIdx = Math.max(0, idx - 1);
       setActiveTabId(updated[nextIdx].id);
       nextActiveUrl = updated[nextIdx].url;
+      if (updated[nextIdx].projectId) {
+        setCurrentWorkspaceId(updated[nextIdx].projectId);
+      }
     }
     persistCurrentTabs(updated, nextActiveUrl);
   };
@@ -303,7 +421,6 @@ function WebBrowserPanel(props: MainPanelProps) {
     const id = activeTabId();
     const domain = getDomain(url);
 
-    // If preferred launch mode is WebviewWindow, spawn directly
     if (props.pluginSettings?.defaultMode === "webviewwindow") {
       openInWebviewWindow(url, domain, getLaunchOptions());
       if (url && url !== "about:blank") {
@@ -312,7 +429,21 @@ function WebBrowserPanel(props: MainPanelProps) {
       return;
     }
 
-    const nextTabs = tabs().map((t) => (t.id === id ? { ...t, url, title: domain } : t));
+    const cur = tabs().find((t) => t.id === id);
+    const decision = classifyHeuristic(url, domain, workspaces(), cur?.projectId);
+
+    const nextTabs = tabs().map((t) =>
+      t.id === id
+        ? {
+            ...t,
+            url,
+            title: domain,
+            projectId: t.projectId || decision.projectId,
+            intent: decision.intent,
+            lastActiveAt: Date.now(),
+          }
+        : t
+    );
     setTabs(nextTabs);
     persistCurrentTabs(nextTabs, url);
     if (url && url !== "about:blank") {
@@ -325,7 +456,6 @@ function WebBrowserPanel(props: MainPanelProps) {
     const currentTab = activeTab();
     if (currentTab && currentTab.url !== "about:blank") {
       const originalUrl = currentTab.url;
-      // Trigger iframe reload by momentarily resetting URL
       setTabs((prev) =>
         prev.map((t) => (t.id === id ? { ...t, url: "about:blank" } : t))
       );
@@ -442,31 +572,116 @@ function WebBrowserPanel(props: MainPanelProps) {
         "-webkit-backdrop-filter": `blur(var(--surface-blur, ${blur()}px))`,
       }}
     >
-      <div style={S.topBar}>
-        <TabBar
-          tabs={tabs()}
-          activeTabId={activeTabId()}
-          onSelectTab={handleSelectTab}
-          onCloseTab={handleCloseTab}
-          onNewTab={() => handleNewTab("about:blank")}
-        />
+      {/* Dynamic Header: Context Capsule Bar (Third Design) or Classic TabBar */}
+      <Show
+        when={props.pluginSettings?.designMode === "standard-tabs"}
+        fallback={
+          <ContextCapsuleBar
+            activeTab={activeTab()}
+            tabs={tabs()}
+            workspaces={workspaces()}
+            currentWorkspace={currentWorkspace()}
+            searchEngine={props.pluginSettings?.searchEngine ?? "duckduckgo"}
+            homeUrl={props.pluginSettings?.homeUrl ?? ""}
+            isBookmarked={isCurrentBookmarked()}
+            orbitDeckOpen={orbitDeckOpen()}
+            onToggleOrbitDeck={() => setOrbitDeckOpen(!orbitDeckOpen())}
+            onSelectTab={handleSelectTab}
+            onCloseTab={handleCloseTab}
+            onNewTab={(url, parentId) => handleNewTab(url, parentId, currentWorkspace().id)}
+            onNavigate={handleNavigate}
+            onReload={handleReload}
+            onGoHome={handleGoHome}
+            onPopoutWebviewWindow={handlePopoutWebviewWindow}
+            onOpenExternal={() => handleOpenExternal()}
+            onToggleBookmark={handleToggleBookmark}
+            onZoomIn={() => handleZoom(0.1)}
+            onZoomOut={() => handleZoom(-0.1)}
+            onResetZoom={handleResetZoom}
+            onSwitchWorkspace={(wsId) => setCurrentWorkspaceId(wsId)}
+          />
+        }
+      >
+        <div style={S.topBar}>
+          <TabBar
+            tabs={tabs()}
+            activeTabId={activeTabId()}
+            onSelectTab={handleSelectTab}
+            onCloseTab={handleCloseTab}
+            onNewTab={() => handleNewTab("about:blank")}
+          />
 
-        <NavigationBar
-          activeTab={activeTab()}
-          searchEngine={props.pluginSettings?.searchEngine ?? "duckduckgo"}
-          homeUrl={props.pluginSettings?.homeUrl ?? ""}
-          isBookmarked={isCurrentBookmarked()}
-          onNavigate={handleNavigate}
-          onReload={handleReload}
-          onGoHome={handleGoHome}
-          onPopoutWebviewWindow={handlePopoutWebviewWindow}
-          onOpenExternal={() => handleOpenExternal()}
-          onToggleBookmark={handleToggleBookmark}
-          onZoomIn={() => handleZoom(0.1)}
-          onZoomOut={() => handleZoom(-0.1)}
-          onResetZoom={handleResetZoom}
-        />
-      </div>
+          <NavigationBar
+            activeTab={activeTab()}
+            searchEngine={props.pluginSettings?.searchEngine ?? "duckduckgo"}
+            homeUrl={props.pluginSettings?.homeUrl ?? ""}
+            isBookmarked={isCurrentBookmarked()}
+            onNavigate={handleNavigate}
+            onReload={handleReload}
+            onGoHome={handleGoHome}
+            onPopoutWebviewWindow={handlePopoutWebviewWindow}
+            onOpenExternal={() => handleOpenExternal()}
+            onToggleBookmark={handleToggleBookmark}
+            onZoomIn={() => handleZoom(0.1)}
+            onZoomOut={() => handleZoom(-0.1)}
+            onResetZoom={handleResetZoom}
+          />
+        </div>
+      </Show>
+
+      {/* The Context Orbit Deck (The Third Design: Cluster Matrix & Spatial 2D Canvas) */}
+      <ContextOrbitDeck
+        isOpen={orbitDeckOpen()}
+        onClose={() => setOrbitDeckOpen(false)}
+        tabs={tabs()}
+        activeTabId={activeTabId()}
+        workspaces={workspaces()}
+        currentWorkspace={currentWorkspace()}
+        layoutMode={orbitLayoutMode()}
+        smartRouterConfig={props.pluginSettings?.smartRouter}
+        onSelectTab={handleSelectTab}
+        onCloseTab={handleCloseTab}
+        onNewTab={(url, parentId, wsId) => handleNewTab(url, parentId, wsId)}
+        onPopoutTab={(url, title) => {
+          openInWebviewWindow(url, title || getDomain(url), getLaunchOptions());
+        }}
+        onOpenExternal={handleOpenExternal}
+        onSwitchWorkspace={(wsId) => setCurrentWorkspaceId(wsId)}
+        onAddWorkspace={(name, color, keywords) => {
+          const newWs = {
+            id: `ws-${Date.now()}`,
+            name,
+            color,
+            icon: "✦",
+            keywords,
+          };
+          const updated = [...workspaces(), newWs];
+          setWorkspaces(updated);
+        }}
+        onUpdateTabProject={(tabId, projectId) => {
+          const next = tabs().map((t) => (t.id === tabId ? { ...t, projectId } : t));
+          setTabs(next);
+          persistCurrentTabs(next);
+        }}
+        onUpdateTabPosition={(tabId, x, y) => {
+          const next = tabs().map((t) => (t.id === tabId ? { ...t, position: { x, y } } : t));
+          setTabs(next);
+          persistCurrentTabs(next);
+        }}
+        onToggleLayoutMode={(mode) => {
+          props.onPluginSettingsChange?.({ orbitDeckLayout: mode });
+        }}
+        onUpdateSmartRouter={(patch) => {
+          const current = props.pluginSettings?.smartRouter || {
+            enabled: true,
+            provider: "heuristic",
+            localEndpointUrl: "http://127.0.0.1:11434",
+            modelName: "laya-router",
+            autoCreateCategories: true,
+          };
+          props.onPluginSettingsChange?.({ smartRouter: { ...current, ...patch } });
+        }}
+      />
 
       <WebViewport
         activeTab={activeTab()}
@@ -475,7 +690,7 @@ function WebBrowserPanel(props: MainPanelProps) {
         active={props.active}
         dockedChildWebview={props.pluginSettings?.dockedChildWebview !== false}
         onOpenUrl={handleNavigate}
-        onNewTab={handleNewTab}
+        onNewTab={(url) => handleNewTab(url, activeTab()?.id, currentWorkspace().id)}
         onOpenInWebviewWindow={(url) => {
           const domain = getDomain(url);
           openInWebviewWindow(url, domain, getLaunchOptions());
@@ -499,7 +714,7 @@ function WebBrowserPanel(props: MainPanelProps) {
   id: "web-loader",
   name: "Web Loader",
   description: "High-performance browser and WebviewWindow loader for modern websites and local web apps.",
-  version: typeof __VERSION__ !== "undefined" ? __VERSION__ : "0.1.14",
+  version: typeof __VERSION__ !== "undefined" ? __VERSION__ : "0.1.15",
   author: "Algosculptor",
   hasCustomAppearanceSettings: true,
   viewRailButton: (props: any) => (

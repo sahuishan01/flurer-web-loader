@@ -162,3 +162,97 @@ export function IncognitoIcon(props: { size?: number }) {
     </svg>
   );
 }
+
+export function OrbitIcon(props: { size?: number }) {
+  const s = () => props.size || 20;
+  return (
+    <svg width={s()} height={s()} viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style={{ "flex-shrink": "0", display: "block" }}>
+      <circle cx="12" cy="12" r="3" />
+      <circle cx="19" cy="5" r="2" />
+      <circle cx="5" cy="19" r="2" />
+      <path d="M10.4 21.9a10 10 0 0 0 9.9-9.9" />
+      <path d="M13.6 2.1a10 10 0 0 0-9.9 9.9" />
+    </svg>
+  );
+}
+
+export function MatrixIcon(props: { size?: number }) {
+  const s = () => props.size || 20;
+  return (
+    <svg width={s()} height={s()} viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style={{ "flex-shrink": "0", display: "block" }}>
+      <rect x="3" y="3" width="7" height="18" rx="2" />
+      <rect x="14" y="3" width="7" height="18" rx="2" />
+      <path d="M3 9h7" />
+      <path d="M14 9h7" />
+      <path d="M3 15h7" />
+      <path d="M14 15h7" />
+    </svg>
+  );
+}
+
+export function BranchIcon(props: { size?: number }) {
+  const s = () => props.size || 16;
+  return (
+    <svg width={s()} height={s()} viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style={{ "flex-shrink": "0", display: "block" }}>
+      <line x1="6" y1="3" x2="6" y2="15" />
+      <circle cx="18" cy="6" r="3" />
+      <circle cx="6" cy="18" r="3" />
+      <path d="M18 9a9 9 0 0 1-9 9" />
+    </svg>
+  );
+}
+
+export function SparklesIcon(props: { size?: number }) {
+  const s = () => props.size || 18;
+  return (
+    <svg width={s()} height={s()} viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style={{ "flex-shrink": "0", display: "block" }}>
+      <path d="M12 2l2.4 5.6L20 10l-5.6 2.4L12 18l-2.4-5.6L4 10l5.6-2.4L12 2z" />
+      <path d="M19 15l1.2 2.8L23 19l-2.8 1.2L19 23l-1.2-2.8L15 19l2.8-1.2L19 15z" />
+    </svg>
+  );
+}
+
+export function PinIcon(props: { size?: number; pinned?: boolean }) {
+  const s = () => props.size || 16;
+  return (
+    <svg width={s()} height={s()} viewBox="0 0 24 24" fill={props.pinned ? "currentColor" : "none"} stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style={{ "flex-shrink": "0", display: "block" }}>
+      <line x1="12" y1="17" x2="12" y2="22" />
+      <path d="M5 17h14v-2l-2-2V5h1V3H6v2h1v8l-2 2v2z" />
+    </svg>
+  );
+}
+
+export function GripIcon(props: { size?: number }) {
+  const s = () => props.size || 14;
+  return (
+    <svg width={s()} height={s()} viewBox="0 0 24 24" fill="currentColor" stroke="none" style={{ "flex-shrink": "0", display: "block" }}>
+      <circle cx="9" cy="6" r="2" />
+      <circle cx="15" cy="6" r="2" />
+      <circle cx="9" cy="12" r="2" />
+      <circle cx="15" cy="12" r="2" />
+      <circle cx="9" cy="18" r="2" />
+      <circle cx="15" cy="18" r="2" />
+    </svg>
+  );
+}
+
+export function ChevronRightIcon(props: { size?: number }) {
+  const s = () => props.size || 16;
+  return (
+    <svg width={s()} height={s()} viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" style={{ "flex-shrink": "0", display: "block" }}>
+      <polyline points="9 18 15 12 9 6" />
+    </svg>
+  );
+}
+
+export function LayersIcon(props: { size?: number }) {
+  const s = () => props.size || 18;
+  return (
+    <svg width={s()} height={s()} viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style={{ "flex-shrink": "0", display: "block" }}>
+      <polygon points="12 2 2 7 12 12 22 7 12 2" />
+      <polyline points="2 17 12 22 22 17" />
+      <polyline points="2 12 12 17 22 12" />
+    </svg>
+  );
+}
+
