@@ -1,6 +1,6 @@
 {
-  "0": "ContextOrbitDeck.tsx",
-  "1": "smartRouter.ts",
+  "0": "icons.tsx",
+  "1": "ContextOrbitDeck.tsx",
   "2": "compilerOptions",
   "3": "package.json",
   "4": "utils.ts",
@@ -10,6 +10,6 @@
   "8": "vite.config.ts",
   "9": "rules/graphify.md",
   "10": "workflows/graphify.md",
-  "11": "WebViewport.tsx",
+  "11": "index.tsx",
   "12": "types.ts"
 }

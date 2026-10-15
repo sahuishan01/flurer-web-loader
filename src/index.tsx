@@ -309,115 +309,161 @@ function WebBrowserPanel(props: MainPanelProps) {
     }
   });
 
-  // Global Keyboard shortcuts
+  // Global Keyboard shortcuts & Child Webview Bridge
   onMount(() => {
-    const handleGlobalKey = (e: KeyboardEvent) => {
-      const isMod = e.ctrlKey || e.metaKey;
-      const isShift = e.shiftKey;
-      const key = e.key;
+    const handleShortcutAction = (k: string, code: string, isMod: boolean, isShift: boolean, isAlt: boolean, preventDefault?: () => void) => {
+      const key = (k || "").toLowerCase();
+      const c = code || "";
 
       // 1. Fast Tab Switcher / Palette: Ctrl+P, Ctrl+O, or Ctrl+Shift+A
-      if (isMod && (key === "p" || key === "P" || key === "o" || key === "O" || (isShift && (key === "a" || key === "A")))) {
-        e.preventDefault();
+      if (isMod && (key === "p" || c === "KeyP" || key === "o" || c === "KeyO" || (isShift && (key === "a" || c === "KeyA")))) {
+        preventDefault?.();
         setQuickSwitcherOpen((prev) => !prev);
-        return;
+        return true;
       }
 
       // 2. Orbit Canvas: Ctrl+E or Ctrl+K
-      if (isMod && (key === "e" || key === "E" || key === "k" || key === "K")) {
-        e.preventDefault();
+      if (isMod && (key === "e" || c === "KeyE" || key === "k" || c === "KeyK")) {
+        preventDefault?.();
         setOrbitDeckOpen((prev) => !prev);
-        return;
+        return true;
       }
 
       // 3. New Tab: Ctrl+T
-      if (isMod && !isShift && (key === "t" || key === "T")) {
-        e.preventDefault();
+      if (isMod && !isShift && (key === "t" || c === "KeyT")) {
+        preventDefault?.();
         handleNewTab("about:blank", activeTab()?.id, currentWorkspace().id);
-        return;
+        return true;
       }
 
       // 4. Close Tab: Ctrl+W
-      if (isMod && (key === "w" || key === "W")) {
-        e.preventDefault();
+      if (isMod && (key === "w" || c === "KeyW")) {
+        preventDefault?.();
         if (activeTab()) {
           handleCloseTab(activeTab().id);
         }
-        return;
+        return true;
       }
 
       // 5. Reload Page: Ctrl+R or F5
-      if ((isMod && (key === "r" || key === "R")) || key === "F5") {
-        e.preventDefault();
+      if ((isMod && (key === "r" || c === "KeyR")) || key === "f5" || c === "F5") {
+        preventDefault?.();
         handleReload();
-        return;
+        return true;
       }
 
       // 6. Focus Address Bar / Omnibox: Ctrl+L or Alt+D
-      if ((isMod && (key === "l" || key === "L")) || (e.altKey && (key === "d" || key === "D"))) {
-        e.preventDefault();
+      if ((isMod && (key === "l" || c === "KeyL")) || (isAlt && (key === "d" || c === "KeyD"))) {
+        preventDefault?.();
         const omni = document.querySelector(".web-loader-omnibox input") as HTMLInputElement | null;
         if (omni) {
           omni.focus();
           omni.select();
         }
-        return;
+        return true;
       }
 
       // 7. Cycle Tabs: Ctrl+Tab (next) and Ctrl+Shift+Tab (prev)
-      if (isMod && key === "Tab") {
-        e.preventDefault();
+      if (isMod && (key === "tab" || c === "Tab")) {
+        preventDefault?.();
         const currentList = tabs();
-        if (currentList.length <= 1) return;
+        if (currentList.length <= 1) return true;
         const currentIdx = currentList.findIndex((t) => t.id === activeTabId());
         const nextIdx = isShift
           ? (currentIdx - 1 + currentList.length) % currentList.length
           : (currentIdx + 1) % currentList.length;
         handleSelectTab(currentList[nextIdx].id);
-        return;
+        return true;
       }
 
       // 8. Numbered Tab Switch: Ctrl+1..Ctrl+8 (direct), Ctrl+9 (last tab)
-      if (isMod && !isShift && /^[1-9]$/.test(key)) {
-        e.preventDefault();
+      if (isMod && !isShift && (/^[1-9]$/.test(key) || /^Digit[1-9]$/.test(c))) {
+        preventDefault?.();
         const currentList = tabs();
-        if (currentList.length === 0) return;
-        const num = parseInt(key, 10);
+        if (currentList.length === 0) return true;
+        const digitChar = /^[1-9]$/.test(key) ? key : c.replace("Digit", "");
+        const num = parseInt(digitChar, 10);
         if (num === 9) {
           handleSelectTab(currentList[currentList.length - 1].id);
         } else if (num - 1 < currentList.length) {
           handleSelectTab(currentList[num - 1].id);
         }
-        return;
+        return true;
       }
 
       // 9. Zoom: Ctrl+= / Ctrl++ (zoom in), Ctrl+- (zoom out), Ctrl+0 (reset)
-      if (isMod && (key === "=" || key === "+")) {
-        e.preventDefault();
+      if (isMod && (key === "=" || key === "+" || c === "Equal" || c === "NumpadAdd")) {
+        preventDefault?.();
         handleZoom(0.1);
-        return;
+        return true;
       }
-      if (isMod && key === "-") {
-        e.preventDefault();
+      if (isMod && (key === "-" || c === "Minus" || c === "NumpadSubtract")) {
+        preventDefault?.();
         handleZoom(-0.1);
-        return;
+        return true;
       }
-      if (isMod && key === "0") {
-        e.preventDefault();
+      if (isMod && (key === "0" || c === "Digit0" || c === "Numpad0")) {
+        preventDefault?.();
         handleResetZoom();
-        return;
+        return true;
       }
 
       // 10. Bookmark Toggle: Ctrl+D
-      if (isMod && (key === "d" || key === "D") && !e.altKey) {
-        e.preventDefault();
+      if (isMod && !isAlt && (key === "d" || c === "KeyD")) {
+        preventDefault?.();
         handleToggleBookmark();
-        return;
+        return true;
       }
+
+      return false;
     };
 
-    window.addEventListener("keydown", handleGlobalKey);
-    onCleanup(() => window.removeEventListener("keydown", handleGlobalKey));
+    const handleGlobalKey = (e: KeyboardEvent) => {
+      const isMod = e.ctrlKey || e.metaKey;
+      const isShift = e.shiftKey;
+      const isAlt = e.altKey;
+      handleShortcutAction(e.key, e.code, isMod, isShift, isAlt, () => {
+        e.preventDefault();
+        e.stopPropagation();
+      });
+    };
+
+    // Capture phase on window & document to preempt child element interception
+    window.addEventListener("keydown", handleGlobalKey, true);
+    document.addEventListener("keydown", handleGlobalKey, true);
+
+    // Tauri bridge listener for child webviews emitting "web-loader:shortcut"
+    let unlistenTauriShortcut: (() => void) | undefined;
+    if (window.TauriEvent?.listen) {
+      window.TauriEvent.listen("web-loader:shortcut", (event: any) => {
+        const p = event?.payload;
+        if (p) {
+          handleShortcutAction(p.key, p.code, !!p.ctrlKey || !!p.metaKey, !!p.shiftKey, !!p.altKey);
+        }
+      }).then((unlisten: () => void) => {
+        unlistenTauriShortcut = unlisten;
+      }).catch(() => {});
+    }
+
+    // Message bridge listener for iframe / postMessage communications
+    const handleWindowMessage = (e: MessageEvent) => {
+      if (e.data && e.data.type === "web-loader:shortcut") {
+        const p = e.data.payload;
+        if (p) {
+          handleShortcutAction(p.key, p.code, !!p.ctrlKey || !!p.metaKey, !!p.shiftKey, !!p.altKey);
+        }
+      }
+    };
+    window.addEventListener("message", handleWindowMessage);
+
+    onCleanup(() => {
+      window.removeEventListener("keydown", handleGlobalKey, true);
+      document.removeEventListener("keydown", handleGlobalKey, true);
+      window.removeEventListener("message", handleWindowMessage);
+      if (unlistenTauriShortcut) {
+        unlistenTauriShortcut();
+      }
+    });
   });
 
   const getLaunchOptions = () => ({
@@ -844,7 +890,7 @@ function WebBrowserPanel(props: MainPanelProps) {
   id: "web-loader",
   name: "Web Loader",
   description: "High-performance browser and WebviewWindow loader for modern websites and local web apps.",
-  version: typeof __VERSION__ !== "undefined" ? __VERSION__ : "0.1.20",
+  version: typeof __VERSION__ !== "undefined" ? __VERSION__ : "0.1.21",
   author: "Algosculptor",
   hasCustomAppearanceSettings: true,
   viewRailButton: (props: any) => (

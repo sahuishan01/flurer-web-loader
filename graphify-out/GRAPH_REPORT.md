@@ -1,16 +1,16 @@
 # Graph Report - flurer-web-loader-plugin  (2026-10-15)
 
 ## Corpus Check
-- 23 files · ~25,778 words
+- 23 files · ~26,332 words
 - Verdict: corpus is large enough that graph structure adds value.
 
 ## Summary
-- 205 nodes · 535 edges · 13 communities (10 shown, 3 thin omitted)
+- 207 nodes · 537 edges · 13 communities (10 shown, 3 thin omitted)
 - Extraction: 100% EXTRACTED · 0% INFERRED · 0% AMBIGUOUS
 - Token cost: 0 input · 0 output
 
 ## Graph Freshness
-- Built from commit: `e6a67d1a`
+- Built from commit: `12994e20`
 - Run `git rev-parse HEAD` and compare to check if the graph is stale.
 - Run `graphify update .` after code changes (no API cost).
 
@@ -75,7 +75,7 @@ Cohesion: 0.10
 Nodes (19): devDependencies, solid-js, @tauri-apps/api, typescript, vite, vite-plugin-solid, name, private (+11 more)
 
 ### Community 4 - "utils.ts"
-Cohesion: 0.11
+Cohesion: 0.10
 Nodes (26): WebViewport(), DEFAULT_WORKSPACES, CHROME_DESKTOP_USER_AGENT, closeAllDockedWebviews(), closeTabWebview(), createDockedWebview(), createOrShowDockedWebview(), DEFAULT_DESKTOP_USER_AGENT (+18 more)
 
 ### Community 5 - "SettingsPanel.tsx"
@@ -117,4 +117,4 @@ _Questions this graph is uniquely positioned to answer:_
 - **Should `package.json` be split into smaller, more focused modules?**
   _Cohesion score 0.1 - nodes in this community are weakly interconnected._
 - **Should `utils.ts` be split into smaller, more focused modules?**
-  _Cohesion score 0.11363636363636363 - nodes in this community are weakly interconnected._
+  _Cohesion score 0.10420168067226891 - nodes in this community are weakly interconnected._

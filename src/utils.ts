@@ -41,6 +41,10 @@ declare global {
     TauriShell?: {
       open(path: string): Promise<void>;
     };
+    TauriEvent?: {
+      listen<T = any>(event: string, handler: (event: { event: string; id: number; payload: T }) => void): Promise<() => void>;
+      emit(event: string, payload?: any): Promise<void>;
+    };
   }
 }
 
@@ -491,6 +495,49 @@ export async function createOrShowDockedWebview(
       y,
       width,
       height,
+      initializationScript: `
+        (function() {
+          window.addEventListener('keydown', function(e) {
+            var isMod = e.ctrlKey || e.metaKey;
+            var k = (e.key || '').toLowerCase();
+            var code = e.code || '';
+            var isShift = !!e.shiftKey;
+            var isAlt = !!e.altKey;
+
+            // Check if matches any web-loader shortcut
+            var isT = isMod && !isShift && (k === 't' || code === 'KeyT');
+            var isW = isMod && (k === 'w' || code === 'KeyW');
+            var isP = isMod && (k === 'p' || code === 'KeyP' || k === 'o' || code === 'KeyO' || (isShift && (k === 'a' || code === 'KeyA')));
+            var isE = isMod && (k === 'e' || code === 'KeyE' || k === 'k' || code === 'KeyK');
+            var isR = (isMod && (k === 'r' || code === 'KeyR')) || k === 'f5' || code === 'F5';
+            var isL = (isMod && (k === 'l' || code === 'KeyL')) || (isAlt && (k === 'd' || code === 'KeyD'));
+            var isTab = isMod && (k === 'tab' || code === 'Tab');
+            var isNum = isMod && !isShift && (/^[1-9]$/.test(k) || /^Digit[1-9]$/.test(code));
+            var isZoom = isMod && (k === '=' || k === '+' || k === '-' || k === '0' || code === 'Equal' || code === 'Minus' || code === 'Digit0' || code === 'NumpadAdd' || code === 'NumpadSubtract' || code === 'Numpad0');
+            var isD = isMod && !isAlt && (k === 'd' || code === 'KeyD');
+
+            if (isT || isW || isP || isE || isR || isL || isTab || isNum || isZoom || isD) {
+              e.preventDefault();
+              e.stopPropagation();
+              try {
+                if (window.__TAURI_INTERNALS__ && window.__TAURI_INTERNALS__.invoke) {
+                  window.__TAURI_INTERNALS__.invoke('plugin:event|emit', {
+                    event: 'web-loader:shortcut',
+                    payload: {
+                      key: e.key,
+                      code: e.code,
+                      ctrlKey: e.ctrlKey,
+                      metaKey: e.metaKey,
+                      shiftKey: e.shiftKey,
+                      altKey: e.altKey
+                    }
+                  });
+                }
+              } catch (err) {}
+            }
+          }, true);
+        })();
+      `,
     };
 
     await window.TauriCore.invoke("plugin:webview|create_webview", {
