@@ -1,14 +1,14 @@
 {
   "package.json": {
-    "mtime": 1792043986.0822632,
-    "seen": 1792044047.8633668,
-    "ast_hash": "b7fd1933e093e58ff7e097db39b4e0ad",
+    "mtime": 1792045328.088262,
+    "seen": 1792045400.992998,
+    "ast_hash": "0419d7119cf0f3a321d8f38ba71bd51e",
     "semantic_hash": ""
   },
   "plugin.json": {
-    "mtime": 1792044026.6064448,
-    "seen": 1792044047.8633707,
-    "ast_hash": "78261abda2fb5bfe283e982b4bdf3c80",
+    "mtime": 1792045382.2525043,
+    "seen": 1792045400.9930017,
+    "ast_hash": "da90a8a2c8399aec0f80e4da396f6f56",
     "semantic_hash": ""
   },
   "scripts/sync-version.cjs": {
@@ -36,9 +36,9 @@
     "semantic_hash": ""
   },
   "src/components/TabBar.tsx": {
-    "mtime": 1790749650.3178313,
-    "seen": 1790749753.2396197,
-    "ast_hash": "a883ed01b99eef680395f3b86df479ac",
+    "mtime": 1792044833.7860205,
+    "seen": 1792045400.993019,
+    "ast_hash": "8aa29edb57cbad3e54bcd07ce3166a83",
     "semantic_hash": ""
   },
   "src/components/WebViewport.tsx": {
@@ -48,15 +48,15 @@
     "semantic_hash": ""
   },
   "src/icons.tsx": {
-    "mtime": 1790750889.1392045,
-    "seen": 1790751145.1516826,
-    "ast_hash": "0661a65ea335274bec9c2449aaa6af64",
+    "mtime": 1792044794.8018434,
+    "seen": 1792045400.993023,
+    "ast_hash": "daf09212b1c8071d643087c5fb4e12ed",
     "semantic_hash": ""
   },
   "src/index.tsx": {
-    "mtime": 1792043980.8662398,
-    "seen": 1792044047.8633876,
-    "ast_hash": "740c1172887c524a0ba9a4b8b8a098cb",
+    "mtime": 1792045320.3042295,
+    "seen": 1792045400.9930246,
+    "ast_hash": "ccf3a9833d997cffd30c7c3ab391a64f",
     "semantic_hash": ""
   },
   "src/styles.ts": {
@@ -120,9 +120,9 @@
     "semantic_hash": ""
   },
   "src/components/ContextCapsuleBar.tsx": {
-    "mtime": 1790760730.4416537,
-    "seen": 1790760920.7949426,
-    "ast_hash": "ff1fe4190005819b4e5f627d3cc1ad1d",
+    "mtime": 1792044821.117963,
+    "seen": 1792045400.9930077,
+    "ast_hash": "f397e587876618ddab427d45542653c4",
     "semantic_hash": ""
   },
   "src/components/ContextOrbitDeck.tsx": {
@@ -135,6 +135,12 @@
     "mtime": 1790758788.7130773,
     "seen": 1790759023.5622892,
     "ast_hash": "d0d0c5fe2abfb2951671dc2ba7b2e95c",
+    "semantic_hash": ""
+  },
+  "src/components/QuickTabSwitcher.tsx": {
+    "mtime": 1792045355.6203837,
+    "seen": 1792045400.9930158,
+    "ast_hash": "aeb99c7f18d530854723bb4f49f01a05",
     "semantic_hash": ""
   }
 }

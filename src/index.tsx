@@ -13,6 +13,7 @@ import { TabBar } from "./components/TabBar";
 import { NavigationBar } from "./components/NavigationBar";
 import { ContextCapsuleBar } from "./components/ContextCapsuleBar";
 import { ContextOrbitDeck } from "./components/ContextOrbitDeck";
+import { QuickTabSwitcher } from "./components/QuickTabSwitcher";
 import { WebViewport } from "./components/WebViewport";
 import { SettingsPanel } from "./components/SettingsPanel";
 import { themeConfig, getEffectiveThemeStyles } from "./theme";
@@ -294,6 +295,7 @@ function WebBrowserPanel(props: MainPanelProps) {
 
   const [orbitDeckOpen, setOrbitDeckOpen] = createSignal(false);
   const [workspaceMenuOpen, setWorkspaceMenuOpen] = createSignal(false);
+  const [quickSwitcherOpen, setQuickSwitcherOpen] = createSignal(false);
   const orbitLayoutMode = () => props.pluginSettings?.orbitDeckLayout ?? "matrix";
 
   // Sync currentWorkspaceId with active tab if active tab changes
@@ -311,17 +313,106 @@ function WebBrowserPanel(props: MainPanelProps) {
   onMount(() => {
     const handleGlobalKey = (e: KeyboardEvent) => {
       const isMod = e.ctrlKey || e.metaKey;
-      if (isMod && (e.key === "e" || e.key === "E" || e.key === "k" || e.key === "K")) {
+      const isShift = e.shiftKey;
+      const key = e.key;
+
+      // 1. Fast Tab Switcher / Palette: Ctrl+P, Ctrl+O, or Ctrl+Shift+A
+      if (isMod && (key === "p" || key === "P" || key === "o" || key === "O" || (isShift && (key === "a" || key === "A")))) {
+        e.preventDefault();
+        setQuickSwitcherOpen((prev) => !prev);
+        return;
+      }
+
+      // 2. Orbit Canvas: Ctrl+E or Ctrl+K
+      if (isMod && (key === "e" || key === "E" || key === "k" || key === "K")) {
         e.preventDefault();
         setOrbitDeckOpen((prev) => !prev);
-      } else if (isMod && (e.key === "t" || e.key === "T")) {
+        return;
+      }
+
+      // 3. New Tab: Ctrl+T
+      if (isMod && !isShift && (key === "t" || key === "T")) {
         e.preventDefault();
         handleNewTab("about:blank", activeTab()?.id, currentWorkspace().id);
-      } else if (isMod && (e.key === "w" || e.key === "W")) {
+        return;
+      }
+
+      // 4. Close Tab: Ctrl+W
+      if (isMod && (key === "w" || key === "W")) {
         e.preventDefault();
         if (activeTab()) {
           handleCloseTab(activeTab().id);
         }
+        return;
+      }
+
+      // 5. Reload Page: Ctrl+R or F5
+      if ((isMod && (key === "r" || key === "R")) || key === "F5") {
+        e.preventDefault();
+        handleReload();
+        return;
+      }
+
+      // 6. Focus Address Bar / Omnibox: Ctrl+L or Alt+D
+      if ((isMod && (key === "l" || key === "L")) || (e.altKey && (key === "d" || key === "D"))) {
+        e.preventDefault();
+        const omni = document.querySelector(".web-loader-omnibox input") as HTMLInputElement | null;
+        if (omni) {
+          omni.focus();
+          omni.select();
+        }
+        return;
+      }
+
+      // 7. Cycle Tabs: Ctrl+Tab (next) and Ctrl+Shift+Tab (prev)
+      if (isMod && key === "Tab") {
+        e.preventDefault();
+        const currentList = tabs();
+        if (currentList.length <= 1) return;
+        const currentIdx = currentList.findIndex((t) => t.id === activeTabId());
+        const nextIdx = isShift
+          ? (currentIdx - 1 + currentList.length) % currentList.length
+          : (currentIdx + 1) % currentList.length;
+        handleSelectTab(currentList[nextIdx].id);
+        return;
+      }
+
+      // 8. Numbered Tab Switch: Ctrl+1..Ctrl+8 (direct), Ctrl+9 (last tab)
+      if (isMod && !isShift && /^[1-9]$/.test(key)) {
+        e.preventDefault();
+        const currentList = tabs();
+        if (currentList.length === 0) return;
+        const num = parseInt(key, 10);
+        if (num === 9) {
+          handleSelectTab(currentList[currentList.length - 1].id);
+        } else if (num - 1 < currentList.length) {
+          handleSelectTab(currentList[num - 1].id);
+        }
+        return;
+      }
+
+      // 9. Zoom: Ctrl+= / Ctrl++ (zoom in), Ctrl+- (zoom out), Ctrl+0 (reset)
+      if (isMod && (key === "=" || key === "+")) {
+        e.preventDefault();
+        handleZoom(0.1);
+        return;
+      }
+      if (isMod && key === "-") {
+        e.preventDefault();
+        handleZoom(-0.1);
+        return;
+      }
+      if (isMod && key === "0") {
+        e.preventDefault();
+        handleResetZoom();
+        return;
+      }
+
+      // 10. Bookmark Toggle: Ctrl+D
+      if (isMod && (key === "d" || key === "D") && !e.altKey) {
+        e.preventDefault();
+        handleToggleBookmark();
+        return;
       }
     };
 
@@ -404,16 +495,14 @@ function WebBrowserPanel(props: MainPanelProps) {
     const updated = current.filter((t) => t.id !== id);
     setTabs(updated);
 
-    let nextActiveUrl: string | undefined;
     if (activeTabId() === id) {
-      const nextIdx = Math.max(0, idx - 1);
-      setActiveTabId(updated[nextIdx].id);
-      nextActiveUrl = updated[nextIdx].url;
-      if (updated[nextIdx].projectId) {
-        setCurrentWorkspaceId(updated[nextIdx].projectId);
-      }
+      const nextIdx = Math.max(0, Math.min(idx, updated.length - 1));
+      const nextTab = updated[nextIdx];
+      handleSelectTab(nextTab.id);
+      persistCurrentTabs(updated, nextTab.url);
+    } else {
+      persistCurrentTabs(updated, activeTab()?.url);
     }
-    persistCurrentTabs(updated, nextActiveUrl);
   };
 
   const handleNavigate = (url: string) => {
@@ -625,6 +714,7 @@ function WebBrowserPanel(props: MainPanelProps) {
             onZoomOut={() => handleZoom(-0.1)}
             onResetZoom={handleResetZoom}
             onSwitchWorkspace={(wsId) => setCurrentWorkspaceId(wsId)}
+            onOpenQuickSwitcher={() => setQuickSwitcherOpen(true)}
           />
         }
       >
@@ -635,6 +725,7 @@ function WebBrowserPanel(props: MainPanelProps) {
             onSelectTab={handleSelectTab}
             onCloseTab={handleCloseTab}
             onNewTab={() => handleNewTab("about:blank")}
+            onOpenQuickSwitcher={() => setQuickSwitcherOpen(true)}
           />
 
           <NavigationBar
@@ -709,13 +800,24 @@ function WebBrowserPanel(props: MainPanelProps) {
         }}
       />
 
+      <QuickTabSwitcher
+        isOpen={quickSwitcherOpen()}
+        tabs={tabs()}
+        activeTabId={activeTabId()}
+        workspaces={workspaces()}
+        onClose={() => setQuickSwitcherOpen(false)}
+        onSelectTab={handleSelectTab}
+        onCloseTab={handleCloseTab}
+        onNewTab={(url) => handleNewTab(url, activeTab()?.id, currentWorkspace().id)}
+      />
+
       <WebViewport
         activeTab={activeTab()}
         tabs={tabs()}
         bookmarks={bookmarks()}
         history={history()}
         active={props.active}
-        isOverlayOpen={orbitDeckOpen() || workspaceMenuOpen()}
+        isOverlayOpen={orbitDeckOpen() || workspaceMenuOpen() || quickSwitcherOpen()}
         dockedChildWebview={props.pluginSettings?.dockedChildWebview !== false}
         onOpenUrl={handleNavigate}
         onNewTab={(url) => handleNewTab(url, activeTab()?.id, currentWorkspace().id)}
@@ -742,7 +844,7 @@ function WebBrowserPanel(props: MainPanelProps) {
   id: "web-loader",
   name: "Web Loader",
   description: "High-performance browser and WebviewWindow loader for modern websites and local web apps.",
-  version: typeof __VERSION__ !== "undefined" ? __VERSION__ : "0.1.19",
+  version: typeof __VERSION__ !== "undefined" ? __VERSION__ : "0.1.20",
   author: "Algosculptor",
   hasCustomAppearanceSettings: true,
   viewRailButton: (props: any) => (

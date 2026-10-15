@@ -15,6 +15,7 @@ import {
   BranchIcon,
   SparklesIcon,
   LayersIcon,
+  SearchIcon,
 } from "../icons";
 import { normalizeUrl, getModifierKey, getPlatformEngineName, getDomain } from "../utils";
 import { INTENT_COLORS, INTENT_LABELS } from "../smartRouter";
@@ -44,6 +45,7 @@ interface ContextCapsuleBarProps {
   onZoomOut: () => void;
   onResetZoom: () => void;
   onSwitchWorkspace: (workspaceId: string) => void;
+  onOpenQuickSwitcher?: () => void;
 }
 
 export function ContextCapsuleBar(props: ContextCapsuleBarProps) {
@@ -418,6 +420,27 @@ export function ContextCapsuleBar(props: ContextCapsuleBarProps) {
             title={`Open New Tab in ${props.currentWorkspace.name} (${mod}+T)`}
           >
             <PlusIcon size={16} />
+          </button>
+
+          {/* Quick Tab Search / Jump Button */}
+          <button
+            type="button"
+            class="icon-btn web-loader-icon-btn"
+            style={{
+              ...S.iconBtn,
+              width: "30px",
+              height: "30px",
+              "min-width": "30px",
+              "min-height": "30px",
+              "border-radius": "6px",
+              "flex-shrink": 0,
+              background: "rgba(255, 255, 255, 0.04)",
+              color: "var(--text-muted, #94a3b8)",
+            }}
+            onClick={() => props.onOpenQuickSwitcher?.()}
+            title={`Quick Tab Search & Jump (${mod}+P / ${mod}+O)`}
+          >
+            <SearchIcon size={15} />
           </button>
         </div>
 

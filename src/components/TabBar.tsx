@@ -1,7 +1,7 @@
 import { For } from "solid-js";
 import { Tab } from "../types";
 import { S } from "../styles";
-import { PlusIcon, CloseIcon, GlobeIcon } from "../icons";
+import { PlusIcon, CloseIcon, GlobeIcon, SearchIcon } from "../icons";
 import { getModifierKey } from "../utils";
 
 interface TabBarProps {
@@ -10,6 +10,7 @@ interface TabBarProps {
   onSelectTab: (id: string) => void;
   onCloseTab: (id: string) => void;
   onNewTab: () => void;
+  onOpenQuickSwitcher?: () => void;
 }
 
 export function TabBar(props: TabBarProps) {
@@ -61,6 +62,22 @@ export function TabBar(props: TabBarProps) {
         title={`Open New Tab (${mod}+T)`}
       >
         <PlusIcon size={20} />
+      </button>
+
+      <button
+        type="button"
+        class="icon-btn web-loader-icon-btn"
+        style={{
+          ...S.iconBtn,
+          width: "34px",
+          height: "34px",
+          background: "rgba(255, 255, 255, 0.04)",
+          color: "var(--text-muted, #94a3b8)",
+        }}
+        onClick={() => props.onOpenQuickSwitcher?.()}
+        title={`Quick Tab Search & Jump (${mod}+P / ${mod}+O)`}
+      >
+        <SearchIcon size={16} />
       </button>
     </div>
   );
