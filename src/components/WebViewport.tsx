@@ -1,4 +1,4 @@
-import { Show, createSignal, createEffect, onMount, onCleanup } from "solid-js";
+import { Show, For, createSignal, createEffect, onMount, onCleanup } from "solid-js";
 import { Tab, Bookmark, HistoryItem } from "../types";
 import { S } from "../styles";
 import { QuickDial } from "./QuickDial";
@@ -7,16 +7,17 @@ import {
   isKnownFrameRestricted,
   getDomain,
   getPlatformEngineName,
-  createDockedWebview,
+  createOrShowDockedWebview,
   updateDockedWebviewBounds,
-  closeDockedWebview,
-  hideDockedWebview,
-  showDockedWebview,
+  hideAllDockedWebviews,
+  closeTabWebview,
+  closeAllDockedWebviews,
   getIframeEmbedUrl,
 } from "../utils";
 
 interface WebViewportProps {
   activeTab: Tab | undefined;
+  tabs?: Tab[];
   bookmarks: Bookmark[];
   history?: HistoryItem[];
   active?: boolean;
@@ -37,26 +38,17 @@ export function WebViewport(props: WebViewportProps) {
   const isBlank = () => !props.activeTab || props.activeTab.url === "about:blank" || !props.activeTab.url;
   const isRestricted = () => (props.activeTab ? isKnownFrameRestricted(props.activeTab.url) : false);
 
-  const [dockedActive, setDockedActive] = createSignal(false);
+  const [dockedActiveMap, setDockedActiveMap] = createSignal<Record<string, boolean>>({});
   const [dockedFailed, setDockedFailed] = createSignal(false);
   const [forceEmbedTabs, setForceEmbedTabs] = createSignal<Record<string, boolean>>({});
 
-  let currentMountedTabId: string | null = null;
-  let currentMountedUrl: string | null = null;
-  let isMounting = false;
+  const isCurrentDockedActive = () => (props.activeTab ? !!dockedActiveMap()[props.activeTab.id] : false);
 
   const shouldShowLauncher = () => {
     if (!props.activeTab) return false;
     // If native docked child webview is active, no launcher needed!
-    if (dockedActive()) return false;
+    if (isCurrentDockedActive()) return false;
     return isRestricted() && !forceEmbedTabs()[props.activeTab.id];
-  };
-
-  const handleCloseDocked = async () => {
-    currentMountedTabId = null;
-    currentMountedUrl = null;
-    await closeDockedWebview();
-    setDockedActive(false);
   };
 
   const syncDockedBounds = () => {
@@ -64,51 +56,45 @@ export function WebViewport(props: WebViewportProps) {
     const rect = containerRef.getBoundingClientRect();
     if (rect.width <= 0 || rect.height <= 0) return;
 
-    if (dockedActive()) {
-      updateDockedWebviewBounds({
-        x: rect.left,
-        y: rect.top,
-        width: rect.width,
-        height: rect.height,
-      });
+    if (props.activeTab && isCurrentDockedActive()) {
+      updateDockedWebviewBounds(
+        {
+          x: rect.left,
+          y: rect.top,
+          width: rect.width,
+          height: rect.height,
+        },
+        props.activeTab.id
+      );
     } else {
-      // If docked webview was waiting for initial layout dimensions, mount now
-      const url = props.activeTab?.url;
-      const isPanelActive = props.active !== false;
-      if (
-        !isBlank() &&
-        url &&
-        isPanelActive &&
-        props.dockedChildWebview !== false &&
-        !forceEmbedTabs()[props.activeTab!.id]
-      ) {
-        tryMountDockedWebview(url, props.activeTab!.id);
-      }
+      syncCurrentTabDocked();
     }
   };
 
-  const tryMountDockedWebview = async (targetUrl: string, tabId?: string) => {
-    if (!containerRef || props.dockedChildWebview === false) {
-      await handleCloseDocked();
-      setDockedFailed(true);
+  let isSyncing = false;
+  const syncCurrentTabDocked = async () => {
+    if (!containerRef || isSyncing) return;
+    const tab = props.activeTab;
+    const isPanelActive = props.active !== false;
+
+    // 1. If blank tab (New Tab / Home Page), panel inactive, or overlay is open: hide all docked webviews!
+    if (!tab || isBlank() || !tab.url || !isPanelActive || props.isOverlayOpen) {
+      await hideAllDockedWebviews();
       return;
     }
+
+    // 2. If docked child webviews are disabled or tab forced embed: hide webviews
+    if (props.dockedChildWebview === false || forceEmbedTabs()[tab.id]) {
+      await hideAllDockedWebviews();
+      return;
+    }
+
     const rect = containerRef.getBoundingClientRect();
     if (rect.width <= 0 || rect.height <= 0) return;
 
-    const currentTabId = tabId || props.activeTab?.id || null;
-    if (isMounting || (currentMountedTabId === currentTabId && currentMountedUrl === targetUrl && dockedActive())) {
-      return;
-    }
-    isMounting = true;
-    currentMountedTabId = currentTabId;
-    currentMountedUrl = targetUrl;
-
+    isSyncing = true;
     try {
-      // Cleanly close any existing docked webview before creating new one
-      await closeDockedWebview();
-
-      const res = await createDockedWebview(targetUrl, {
+      const res = await createOrShowDockedWebview(tab.id, tab.url, {
         x: rect.left,
         y: rect.top,
         width: rect.width,
@@ -116,38 +102,28 @@ export function WebViewport(props: WebViewportProps) {
       });
 
       if (res.success) {
-        setDockedActive(true);
+        setDockedActiveMap((prev) => ({ ...prev, [tab.id]: true }));
         setDockedFailed(false);
       } else {
         console.warn("Native docked child webview unavailable, falling back:", res.error);
-        currentMountedTabId = null;
-        currentMountedUrl = null;
-        setDockedActive(false);
+        setDockedActiveMap((prev) => ({ ...prev, [tab.id]: false }));
         setDockedFailed(true);
       }
+    } catch (err) {
+      console.error("syncCurrentTabDocked error:", err);
     } finally {
-      isMounting = false;
+      isSyncing = false;
     }
   };
 
-  // Watch URL changes, active tab, and overlay state to manage docked webview lifecycle
+  // Watch URL changes, active tab, panel visibility, and overlay state
   createEffect(() => {
     const tabId = props.activeTab?.id;
     const url = props.activeTab?.url;
     const isPanelActive = props.active !== false;
+    const overlayOpen = props.isOverlayOpen;
 
-    // 1. If blank tab (New Tab / Home Page), panel inactive, OR overlay is open: close docked webview immediately!
-    if (isBlank() || !url || !isPanelActive || props.isOverlayOpen) {
-      handleCloseDocked();
-      return;
-    }
-
-    // 2. All web pages mount via docked child webview (bypasses X-Frame-Options / frame-ancestors for all sites)
-    if (props.dockedChildWebview !== false && !forceEmbedTabs()[tabId || ""]) {
-      tryMountDockedWebview(url, tabId);
-    } else {
-      handleCloseDocked();
-    }
+    syncCurrentTabDocked();
   });
 
   onMount(() => {
@@ -159,15 +135,21 @@ export function WebViewport(props: WebViewportProps) {
 
     onCleanup(() => {
       ro.disconnect();
-      handleCloseDocked();
+      hideAllDockedWebviews();
     });
   });
 
   const handlePopOut = () => {
     if (!props.activeTab || isBlank()) return;
-    handleCloseDocked();
+    closeTabWebview(props.activeTab.id);
+    setDockedActiveMap((prev) => ({ ...prev, [props.activeTab!.id]: false }));
     props.onOpenInWebviewWindow(props.activeTab.url);
   };
+
+  // For iframe fallback: keep all active web tabs mounted in DOM to prevent reloading on tab switches
+  const webTabs = () =>
+    props.tabs?.filter((t) => t.url && t.url !== "about:blank") ||
+    (props.activeTab && !isBlank() ? [props.activeTab] : []);
 
   return (
     <div ref={containerRef} style={{ ...S.viewport, position: "relative" }}>
@@ -189,7 +171,7 @@ export function WebViewport(props: WebViewportProps) {
         }
       >
         <Show
-          when={!dockedActive()}
+          when={!isCurrentDockedActive()}
           fallback={
             <div
               style={{
@@ -326,18 +308,33 @@ export function WebViewport(props: WebViewportProps) {
               </div>
             }
           >
-            <iframe
-              src={getIframeEmbedUrl(props.activeTab!.url)}
-              title={props.activeTab!.title || "Web View"}
-              style={{
-                ...S.iframe,
-                transform: `scale(${props.activeTab!.zoom})`,
-                "transform-origin": "0 0",
-                width: `${100 / props.activeTab!.zoom}%`,
-                height: `${100 / props.activeTab!.zoom}%`,
-              }}
-              allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share; fullscreen"
-            />
+            <For each={webTabs()}>
+              {(tab) => (
+                <div
+                  style={{
+                    position: "absolute",
+                    top: "0px",
+                    left: "0px",
+                    width: "100%",
+                    height: "100%",
+                    display: tab.id === props.activeTab?.id ? "block" : "none",
+                  }}
+                >
+                  <iframe
+                    src={getIframeEmbedUrl(tab.url)}
+                    title={tab.title || "Web View"}
+                    style={{
+                      ...S.iframe,
+                      transform: `scale(${tab.zoom || 1})`,
+                      "transform-origin": "0 0",
+                      width: `${100 / (tab.zoom || 1)}%`,
+                      height: `${100 / (tab.zoom || 1)}%`,
+                    }}
+                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share; fullscreen"
+                  />
+                </div>
+              )}
+            </For>
           </Show>
         </Show>
       </Show>

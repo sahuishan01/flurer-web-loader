@@ -1,0 +1,140 @@
+{
+  "package.json": {
+    "mtime": 1790760893.1503546,
+    "seen": 1790760920.7949338,
+    "ast_hash": "66e2f30fe53f2bfc843426eed15d896e",
+    "semantic_hash": ""
+  },
+  "plugin.json": {
+    "mtime": 1790760908.5944207,
+    "seen": 1790760920.7949376,
+    "ast_hash": "c12fd2dd172d069e35ebe9d028aa3fc1",
+    "semantic_hash": ""
+  },
+  "scripts/sync-version.cjs": {
+    "mtime": 1790663642.3422873,
+    "seen": 1790663861.0089347,
+    "ast_hash": "ef96a62f28a8b6ec493bef1c52182fc0",
+    "semantic_hash": "ef96a62f28a8b6ec493bef1c52182fc0"
+  },
+  "src/components/NavigationBar.tsx": {
+    "mtime": 1790749667.4219043,
+    "seen": 1790749753.2396145,
+    "ast_hash": "4bb0d746f68e32a1a8eb7893cb64fc13",
+    "semantic_hash": ""
+  },
+  "src/components/QuickDial.tsx": {
+    "mtime": 1790749719.9061236,
+    "seen": 1790749753.239616,
+    "ast_hash": "524cf5a1ac07733cf3a2fa4a004714e6",
+    "semantic_hash": ""
+  },
+  "src/components/SettingsPanel.tsx": {
+    "mtime": 1790758878.349467,
+    "seen": 1790759023.5622804,
+    "ast_hash": "610c8744a796820923cd8a4bc98e19d2",
+    "semantic_hash": ""
+  },
+  "src/components/TabBar.tsx": {
+    "mtime": 1790749650.3178313,
+    "seen": 1790749753.2396197,
+    "ast_hash": "a883ed01b99eef680395f3b86df479ac",
+    "semantic_hash": ""
+  },
+  "src/components/WebViewport.tsx": {
+    "mtime": 1790754785.1077583,
+    "seen": 1790754934.7659838,
+    "ast_hash": "2133e8a03a5b1e9d40b4d39441491e27",
+    "semantic_hash": ""
+  },
+  "src/icons.tsx": {
+    "mtime": 1790750889.1392045,
+    "seen": 1790751145.1516826,
+    "ast_hash": "0661a65ea335274bec9c2449aaa6af64",
+    "semantic_hash": ""
+  },
+  "src/index.tsx": {
+    "mtime": 1790760901.5223904,
+    "seen": 1790760920.7949586,
+    "ast_hash": "642eda1838225caae9e8e90d099ad3b8",
+    "semantic_hash": ""
+  },
+  "src/styles.ts": {
+    "mtime": 1790760571.484964,
+    "seen": 1790760920.7949615,
+    "ast_hash": "ca3472bfd52fb777de6b1069c2b29712",
+    "semantic_hash": ""
+  },
+  "src/types.ts": {
+    "mtime": 1790758622.060349,
+    "seen": 1790759023.5622935,
+    "ast_hash": "5519a67b4147f0c651713000a97f779d",
+    "semantic_hash": ""
+  },
+  "src/utils.ts": {
+    "mtime": 1790750977.0555978,
+    "seen": 1790751145.151693,
+    "ast_hash": "56da831fbc9b88e027a03707f9f9c08b",
+    "semantic_hash": ""
+  },
+  "tsconfig.json": {
+    "mtime": 1790663659.718356,
+    "seen": 1790663861.0089548,
+    "ast_hash": "fe4d7ed1606b4b08b2c51cd9a6eaf0f4",
+    "semantic_hash": "fe4d7ed1606b4b08b2c51cd9a6eaf0f4"
+  },
+  "vite.config.ts": {
+    "mtime": 1790663667.2023854,
+    "seen": 1790663861.0089562,
+    "ast_hash": "d7570caebd6044c9e86dd5504fba13cb",
+    "semantic_hash": "d7570caebd6044c9e86dd5504fba13cb"
+  },
+  ".agents/rules/graphify.md": {
+    "mtime": 1790663858.4991415,
+    "seen": 1790663950.649087,
+    "ast_hash": "f1e53ecc9194573d3c28fc116c743a2e",
+    "semantic_hash": ""
+  },
+  ".agents/workflows/graphify.md": {
+    "mtime": 1790663858.4991415,
+    "seen": 1790663950.649088,
+    "ast_hash": "6d73634a678cf1e1c71930adf80bd1f0",
+    "semantic_hash": ""
+  },
+  ".github/workflows/release.yml": {
+    "mtime": 1790666657.4589906,
+    "seen": 1790666678.3601143,
+    "ast_hash": "a3d54704b19c91a397acb3022bb21a6c",
+    "semantic_hash": ""
+  },
+  "README.md": {
+    "mtime": 1790663853.8151228,
+    "seen": 1790663950.6490905,
+    "ast_hash": "159a9cf3450cda7f037dd8965fd25868",
+    "semantic_hash": ""
+  },
+  "src/theme.ts": {
+    "mtime": 1790668602.7831728,
+    "seen": 1790668859.4707623,
+    "ast_hash": "9ad2464f26fe09c4333e99024622c049",
+    "semantic_hash": ""
+  },
+  "src/components/ContextCapsuleBar.tsx": {
+    "mtime": 1790760730.4416537,
+    "seen": 1790760920.7949426,
+    "ast_hash": "ff1fe4190005819b4e5f627d3cc1ad1d",
+    "semantic_hash": ""
+  },
+  "src/components/ContextOrbitDeck.tsx": {
+    "mtime": 1790758956.6138074,
+    "seen": 1790759023.5622756,
+    "ast_hash": "39263647f8b16cc3e7c4fc311d92b093",
+    "semantic_hash": ""
+  },
+  "src/smartRouter.ts": {
+    "mtime": 1790758788.7130773,
+    "seen": 1790759023.5622892,
+    "ast_hash": "d0d0c5fe2abfb2951671dc2ba7b2e95c",
+    "semantic_hash": ""
+  }
+}

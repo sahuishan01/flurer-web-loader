@@ -32,6 +32,8 @@ import {
   removeHistoryItem,
   clearHistory,
   closeDockedWebview,
+  closeTabWebview,
+  closeAllDockedWebviews,
   setDockedWebviewZoom,
   getSavedWorkspaces,
   saveWorkspaces,
@@ -354,9 +356,6 @@ function WebBrowserPanel(props: MainPanelProps) {
   const handleSelectTab = (id: string) => {
     setOrbitDeckOpen(false);
     setWorkspaceMenuOpen(false);
-    if (id !== activeTabId()) {
-      closeDockedWebview();
-    }
     setActiveTabId(id);
     const target = tabs().find((t) => t.id === id);
     if (target) {
@@ -372,7 +371,6 @@ function WebBrowserPanel(props: MainPanelProps) {
     parentId?: string,
     projectId?: string
   ) => {
-    closeDockedWebview();
     const parentTab = parentId ? tabs().find((t) => t.id === parentId) : undefined;
     const parentTitle = parentTab ? parentTab.title : undefined;
     const targetWs = projectId || parentTab?.projectId || currentWorkspace().id;
@@ -391,9 +389,7 @@ function WebBrowserPanel(props: MainPanelProps) {
   };
 
   const handleCloseTab = (id: string) => {
-    if (id === activeTabId()) {
-      closeDockedWebview();
-    }
+    closeTabWebview(id);
     const current = tabs();
     if (current.length === 1) {
       // If closing last tab, reset it to about:blank
@@ -715,6 +711,7 @@ function WebBrowserPanel(props: MainPanelProps) {
 
       <WebViewport
         activeTab={activeTab()}
+        tabs={tabs()}
         bookmarks={bookmarks()}
         history={history()}
         active={props.active}
@@ -745,7 +742,7 @@ function WebBrowserPanel(props: MainPanelProps) {
   id: "web-loader",
   name: "Web Loader",
   description: "High-performance browser and WebviewWindow loader for modern websites and local web apps.",
-  version: typeof __VERSION__ !== "undefined" ? __VERSION__ : "0.1.18",
+  version: typeof __VERSION__ !== "undefined" ? __VERSION__ : "0.1.19",
   author: "Algosculptor",
   hasCustomAppearanceSettings: true,
   viewRailButton: (props: any) => (

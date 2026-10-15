@@ -17,6 +17,8 @@ interface QuickDialProps {
 }
 
 const DEFAULT_DEV_TARGETS: { title: string; url: string; tag: string }[] = [
+  { title: "Splitter App", url: "https://splitter.algosculptor.com", tag: "Splitter :8088" },
+  { title: "Localhost :8088", url: "http://localhost:8088", tag: "Splitter Local" },
   { title: "Localhost :3000", url: "http://localhost:3000", tag: "App / Dash" },
   { title: "Localhost :5173", url: "http://localhost:5173", tag: "Vite Dev" },
   { title: "Localhost :8080", url: "http://localhost:8080", tag: "Taste Server" },

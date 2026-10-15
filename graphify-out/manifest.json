@@ -1,14 +1,14 @@
 {
   "package.json": {
-    "mtime": 1790760893.1503546,
-    "seen": 1790760920.7949338,
-    "ast_hash": "66e2f30fe53f2bfc843426eed15d896e",
+    "mtime": 1792043986.0822632,
+    "seen": 1792044047.8633668,
+    "ast_hash": "b7fd1933e093e58ff7e097db39b4e0ad",
     "semantic_hash": ""
   },
   "plugin.json": {
-    "mtime": 1790760908.5944207,
-    "seen": 1790760920.7949376,
-    "ast_hash": "c12fd2dd172d069e35ebe9d028aa3fc1",
+    "mtime": 1792044026.6064448,
+    "seen": 1792044047.8633707,
+    "ast_hash": "78261abda2fb5bfe283e982b4bdf3c80",
     "semantic_hash": ""
   },
   "scripts/sync-version.cjs": {
@@ -24,9 +24,9 @@
     "semantic_hash": ""
   },
   "src/components/QuickDial.tsx": {
-    "mtime": 1790749719.9061236,
-    "seen": 1790749753.239616,
-    "ast_hash": "524cf5a1ac07733cf3a2fa4a004714e6",
+    "mtime": 1792043866.2337148,
+    "seen": 1792044047.8633804,
+    "ast_hash": "027a41ef501bb622b109ffd21c96569b",
     "semantic_hash": ""
   },
   "src/components/SettingsPanel.tsx": {
@@ -42,9 +42,9 @@
     "semantic_hash": ""
   },
   "src/components/WebViewport.tsx": {
-    "mtime": 1790754785.1077583,
-    "seen": 1790754934.7659838,
-    "ast_hash": "2133e8a03a5b1e9d40b4d39441491e27",
+    "mtime": 1792043852.0016503,
+    "seen": 1792044047.8633847,
+    "ast_hash": "b1eda270b9720e7d12364d23543a4776",
     "semantic_hash": ""
   },
   "src/icons.tsx": {
@@ -54,9 +54,9 @@
     "semantic_hash": ""
   },
   "src/index.tsx": {
-    "mtime": 1790760901.5223904,
-    "seen": 1790760920.7949586,
-    "ast_hash": "642eda1838225caae9e8e90d099ad3b8",
+    "mtime": 1792043980.8662398,
+    "seen": 1792044047.8633876,
+    "ast_hash": "740c1172887c524a0ba9a4b8b8a098cb",
     "semantic_hash": ""
   },
   "src/styles.ts": {
@@ -72,9 +72,9 @@
     "semantic_hash": ""
   },
   "src/utils.ts": {
-    "mtime": 1790750977.0555978,
-    "seen": 1790751145.151693,
-    "ast_hash": "56da831fbc9b88e027a03707f9f9c08b",
+    "mtime": 1792044015.086393,
+    "seen": 1792044047.863396,
+    "ast_hash": "c0760e7395f5f60ba41b201d38fd9872",
     "semantic_hash": ""
   },
   "tsconfig.json": {

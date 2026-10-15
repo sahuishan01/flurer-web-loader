@@ -102,6 +102,11 @@ export function normalizeUrl(input: string, searchEngine: SearchEngine = "duckdu
 
   // Protocol already provided
   if (/^[a-zA-Z][a-zA-Z0-9+.-]*:\/\//.test(trimmed)) {
+    // If user provided http:// for algosculptor.com domains, auto-upgrade to https://
+    // Caddy & Cloudflare terminate HTTPS; loading http:// inside iframes triggers Mixed Content blocks
+    if (trimmed.startsWith("http://") && trimmed.includes("algosculptor.com")) {
+      return trimmed.replace(/^http:\/\//i, "https://");
+    }
     return trimmed;
   }
 
@@ -116,8 +121,8 @@ export function normalizeUrl(input: string, searchEngine: SearchEngine = "duckdu
     return `http://${trimmed}`;
   }
 
-  // Looks like a domain (e.g., github.com, algosculptor.com, sub.domain.org/path)
-  if (/^[a-zA-Z0-9-]+(\.[a-zA-Z0-9-]+)+([/?#].*)?$/.test(trimmed) && !trimmed.includes(" ")) {
+  // Looks like a domain with optional port (e.g., github.com, algosculptor.com, splitter.algosculptor.com:8088, host.org:3000/path)
+  if (/^[a-zA-Z0-9-]+(\.[a-zA-Z0-9-]+)+(:\d+)?([/?#].*)?$/.test(trimmed) && !trimmed.includes(" ")) {
     if (trimmed.includes("google.") && !trimmed.includes("igu=1")) {
       return `https://${trimmed}/search?igu=1`;
     }
@@ -375,15 +380,28 @@ export async function clearAllBrowsingData(): Promise<{ success: boolean; error?
 }
 
 export const DOCKED_WEBVIEW_PREFIX = "web-docked";
-let activeDockedLabel: string | null = null;
 let dockedCounter = 0;
 let dockedWebviewSupported: boolean | null = null;
 
-export async function createDockedWebview(
+// Registry of child webviews keyed by tabId: tabId -> { label: string, url: string }
+const tabWebviewRegistry = new Map<string, { label: string; url: string }>();
+let currentVisibleTabId: string | null = null;
+let currentVisibleLabel: string | null = null;
+
+export function getActiveDockedLabel(): string | null {
+  return currentVisibleLabel;
+}
+
+export function isTabWebviewMounted(tabId: string): boolean {
+  return tabWebviewRegistry.has(tabId);
+}
+
+export async function createOrShowDockedWebview(
+  tabId: string,
   url: string,
   rect: { x: number; y: number; width: number; height: number },
   windowLabel?: string
-): Promise<{ success: boolean; error?: string }> {
+): Promise<{ success: boolean; error?: string; reused?: boolean }> {
   if (dockedWebviewSupported === false) {
     return { success: false, error: "Docked child webview not supported by host runtime" };
   }
@@ -401,25 +419,71 @@ export async function createDockedWebview(
     return { success: false, error: sanitized.warning || "Unsafe URL blocked" };
   }
 
-  // Ensure any previous docked child webview is fully closed and destroyed first
-  if (activeDockedLabel) {
-    const oldLabel = activeDockedLabel;
-    activeDockedLabel = null;
-    try {
-      await window.TauriCore.invoke("plugin:webview|webview_close", {
-        label: oldLabel,
-      });
-    } catch {}
+  const x = Math.max(0, Math.round(rect.x));
+  const y = Math.max(0, Math.round(rect.y));
+  const width = Math.max(100, Math.round(rect.width));
+  const height = Math.max(100, Math.round(rect.height));
+
+  // Case 1: Tab already has a child webview mounted
+  const existing = tabWebviewRegistry.get(tabId);
+  if (existing) {
+    // If URL is the same: reuse existing webview! No reload!
+    if (existing.url === sanitized.url) {
+      // Hide all other tab webviews
+      for (const [otherId, other] of tabWebviewRegistry.entries()) {
+        if (otherId !== tabId) {
+          try {
+            await window.TauriCore.invoke("plugin:webview|webview_hide", { label: other.label });
+          } catch {}
+        }
+      }
+
+      // Show and update bounds of this tab's webview
+      try {
+        await window.TauriCore.invoke("plugin:webview|webview_show", { label: existing.label });
+        await window.TauriCore.invoke("plugin:webview|set_webview_position", {
+          label: existing.label,
+          value: { Logical: { x, y } },
+        });
+        await window.TauriCore.invoke("plugin:webview|set_webview_size", {
+          label: existing.label,
+          value: { Logical: { width, height } },
+        });
+        await window.TauriCore.invoke("plugin:webview|set_webview_focus", { label: existing.label });
+        currentVisibleTabId = tabId;
+        currentVisibleLabel = existing.label;
+        dockedWebviewSupported = true;
+        return { success: true, reused: true };
+      } catch (err: any) {
+        console.warn("Failed to reuse existing docked webview, will recreate:", err);
+        try {
+          await window.TauriCore.invoke("plugin:webview|webview_close", { label: existing.label });
+        } catch {}
+        tabWebviewRegistry.delete(tabId);
+      }
+    } else {
+      // URL changed for this tab: close old webview and create a new one
+      try {
+        await window.TauriCore.invoke("plugin:webview|webview_close", { label: existing.label });
+      } catch {}
+      tabWebviewRegistry.delete(tabId);
+    }
   }
 
-  const newLabel = `${DOCKED_WEBVIEW_PREFIX}-${Date.now().toString(36)}-${(++dockedCounter).toString(36)}`;
+  // Case 2: Create new child webview for this tab
+  // Hide all other webviews
+  for (const [otherId, other] of tabWebviewRegistry.entries()) {
+    if (otherId !== tabId) {
+      try {
+        await window.TauriCore.invoke("plugin:webview|webview_hide", { label: other.label });
+      } catch {}
+    }
+  }
+
+  const cleanTabId = tabId.replace(/[^a-zA-Z0-9-]/g, "").slice(0, 16);
+  const newLabel = `${DOCKED_WEBVIEW_PREFIX}-${cleanTabId}-${Date.now().toString(36)}-${(++dockedCounter).toString(36)}`;
 
   try {
-    const x = Math.max(0, Math.round(rect.x));
-    const y = Math.max(0, Math.round(rect.y));
-    const width = Math.max(100, Math.round(rect.width));
-    const height = Math.max(100, Math.round(rect.height));
-
     const windowOptions: Record<string, any> = {
       label: newLabel,
       url: sanitized.url,
@@ -434,9 +498,11 @@ export async function createDockedWebview(
       options: windowOptions,
     });
 
-    activeDockedLabel = newLabel;
+    tabWebviewRegistry.set(tabId, { label: newLabel, url: sanitized.url });
+    currentVisibleTabId = tabId;
+    currentVisibleLabel = newLabel;
     dockedWebviewSupported = true;
-    return { success: true };
+    return { success: true, reused: false };
   } catch (err: any) {
     const errStr = String(err?.message || err);
     console.warn("create_webview error:", errStr);
@@ -447,13 +513,13 @@ export async function createDockedWebview(
   }
 }
 
-export async function updateDockedWebviewBounds(rect: {
-  x: number;
-  y: number;
-  width: number;
-  height: number;
-}): Promise<void> {
-  if (!window.TauriCore || !activeDockedLabel) return;
+export async function updateDockedWebviewBounds(
+  rect: { x: number; y: number; width: number; height: number },
+  tabId?: string
+): Promise<void> {
+  if (!window.TauriCore) return;
+  const targetLabel = tabId ? tabWebviewRegistry.get(tabId)?.label : currentVisibleLabel;
+  if (!targetLabel) return;
   try {
     const x = Math.max(0, Math.round(rect.x));
     const y = Math.max(0, Math.round(rect.y));
@@ -461,51 +527,93 @@ export async function updateDockedWebviewBounds(rect: {
     const height = Math.max(100, Math.round(rect.height));
 
     await window.TauriCore.invoke("plugin:webview|set_webview_position", {
-      label: activeDockedLabel,
-      value: {
-        Logical: { x, y },
-      },
+      label: targetLabel,
+      value: { Logical: { x, y } },
     });
     await window.TauriCore.invoke("plugin:webview|set_webview_size", {
-      label: activeDockedLabel,
-      value: {
-        Logical: { width, height },
-      },
-    });
-  } catch {}
-}
-
-export async function closeDockedWebview(): Promise<void> {
-  if (!window.TauriCore || !activeDockedLabel) return;
-  const targetLabel = activeDockedLabel;
-  activeDockedLabel = null;
-  try {
-    await window.TauriCore.invoke("plugin:webview|webview_close", {
       label: targetLabel,
+      value: { Logical: { width, height } },
     });
   } catch {}
 }
 
-export async function hideDockedWebview(): Promise<void> {
-  // On Windows, destroying the child HWND via close is the only reliable way to prevent
-  // the old webview from sitting on top of the parent window's DirectComposition surface
-  return closeDockedWebview();
-}
-
-export async function showDockedWebview(): Promise<void> {
-  if (!window.TauriCore || !activeDockedLabel) return;
+export async function hideTabWebview(tabId: string): Promise<void> {
+  if (!window.TauriCore) return;
+  const entry = tabWebviewRegistry.get(tabId);
+  if (!entry) return;
   try {
-    await window.TauriCore.invoke("plugin:webview|webview_show", {
-      label: activeDockedLabel,
-    });
+    await window.TauriCore.invoke("plugin:webview|webview_hide", { label: entry.label });
+    if (currentVisibleTabId === tabId) {
+      currentVisibleTabId = null;
+      currentVisibleLabel = null;
+    }
   } catch {}
 }
 
-export async function setDockedWebviewZoom(zoom: number): Promise<void> {
-  if (!window.TauriCore || !activeDockedLabel) return;
+export async function hideAllDockedWebviews(): Promise<void> {
+  if (!window.TauriCore) return;
+  for (const entry of tabWebviewRegistry.values()) {
+    try {
+      await window.TauriCore.invoke("plugin:webview|webview_hide", { label: entry.label });
+    } catch {}
+  }
+  currentVisibleTabId = null;
+  currentVisibleLabel = null;
+}
+
+export async function closeTabWebview(tabId: string): Promise<void> {
+  if (!window.TauriCore) return;
+  const entry = tabWebviewRegistry.get(tabId);
+  if (!entry) return;
+  tabWebviewRegistry.delete(tabId);
+  if (currentVisibleTabId === tabId) {
+    currentVisibleTabId = null;
+    currentVisibleLabel = null;
+  }
+  try {
+    await window.TauriCore.invoke("plugin:webview|webview_close", { label: entry.label });
+  } catch {}
+}
+
+export async function closeAllDockedWebviews(): Promise<void> {
+  if (!window.TauriCore) return;
+  const entries = Array.from(tabWebviewRegistry.values());
+  tabWebviewRegistry.clear();
+  currentVisibleTabId = null;
+  currentVisibleLabel = null;
+  for (const entry of entries) {
+    try {
+      await window.TauriCore.invoke("plugin:webview|webview_close", { label: entry.label });
+    } catch {}
+  }
+}
+
+// Backward-compatibility aliases
+export const createDockedWebview = (
+  url: string,
+  rect: { x: number; y: number; width: number; height: number },
+  windowLabel?: string
+) => createOrShowDockedWebview("default", url, rect, windowLabel);
+
+export const closeDockedWebview = closeAllDockedWebviews;
+export const hideDockedWebview = hideAllDockedWebviews;
+
+export async function showDockedWebview(tabId?: string): Promise<void> {
+  if (!window.TauriCore) return;
+  const targetLabel = tabId ? tabWebviewRegistry.get(tabId)?.label : currentVisibleLabel;
+  if (!targetLabel) return;
+  try {
+    await window.TauriCore.invoke("plugin:webview|webview_show", { label: targetLabel });
+  } catch {}
+}
+
+export async function setDockedWebviewZoom(zoom: number, tabId?: string): Promise<void> {
+  if (!window.TauriCore) return;
+  const targetLabel = tabId ? tabWebviewRegistry.get(tabId)?.label : currentVisibleLabel;
+  if (!targetLabel) return;
   try {
     await window.TauriCore.invoke("plugin:webview|set_webview_zoom", {
-      label: activeDockedLabel,
+      label: targetLabel,
       value: zoom,
     });
   } catch {}
@@ -560,7 +668,7 @@ export function getSavedRouterConfig(): SmartRouterConfig {
       return {
         enabled: true,
         provider: "heuristic",
-        localEndpointUrl: "http://127.0.0.1:11434",
+        apiEndpointUrl: "http://127.0.0.1:11434/v1",
         modelName: "laya-router",
         autoCreateCategories: true,
       };
@@ -570,7 +678,7 @@ export function getSavedRouterConfig(): SmartRouterConfig {
     return {
       enabled: true,
       provider: "heuristic",
-      localEndpointUrl: "http://127.0.0.1:11434",
+      apiEndpointUrl: "http://127.0.0.1:11434/v1",
       modelName: "laya-router",
       autoCreateCategories: true,
     };

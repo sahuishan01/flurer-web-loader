@@ -618,7 +618,7 @@
       "file_type": "code",
       "norm_label": "contextcapsulebar()",
       "source_file": "src/components/ContextCapsuleBar.tsx",
-      "source_location": "L47"
+      "source_location": "L49"
     },
     {
       "id": "src_components_navigationbar_navigationbar",
@@ -2292,7 +2292,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "src/components/ContextCapsuleBar.tsx",
-      "source_location": "L48",
+      "source_location": "L50",
       "weight": 1.0
     },
     {
@@ -2304,7 +2304,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "src/components/ContextCapsuleBar.tsx",
-      "source_location": "L49",
+      "source_location": "L51",
       "weight": 1.0
     },
     {
@@ -2316,7 +2316,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "src/components/ContextCapsuleBar.tsx",
-      "source_location": "L64",
+      "source_location": "L82",
       "weight": 1.0
     },
     {
@@ -2748,7 +2748,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "src/index.tsx",
-      "source_location": "L336",
+      "source_location": "L337",
       "weight": 1.0
     },
     {
@@ -2760,7 +2760,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "src/index.tsx",
-      "source_location": "L349",
+      "source_location": "L350",
       "weight": 1.0
     },
     {
@@ -2772,7 +2772,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "src/index.tsx",
-      "source_location": "L356",
+      "source_location": "L358",
       "weight": 1.0
     },
     {
@@ -2784,7 +2784,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "src/index.tsx",
-      "source_location": "L377",
+      "source_location": "L379",
       "weight": 1.0
     },
     {
@@ -2796,7 +2796,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "src/index.tsx",
-      "source_location": "L379",
+      "source_location": "L381",
       "weight": 1.0
     },
     {
@@ -2808,7 +2808,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "src/index.tsx",
-      "source_location": "L426",
+      "source_location": "L428",
       "weight": 1.0
     },
     {
@@ -2820,7 +2820,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "src/index.tsx",
-      "source_location": "L428",
+      "source_location": "L430",
       "weight": 1.0
     },
     {
@@ -2832,7 +2832,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "src/index.tsx",
-      "source_location": "L434",
+      "source_location": "L436",
       "weight": 1.0
     },
     {
@@ -2844,7 +2844,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "src/index.tsx",
-      "source_location": "L452",
+      "source_location": "L454",
       "weight": 1.0
     },
     {
@@ -2856,7 +2856,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "src/index.tsx",
-      "source_location": "L514",
+      "source_location": "L516",
       "weight": 1.0
     },
     {
@@ -2868,7 +2868,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "src/index.tsx",
-      "source_location": "L541",
+      "source_location": "L543",
       "weight": 1.0
     },
     {
@@ -2880,7 +2880,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "src/index.tsx",
-      "source_location": "L568",
+      "source_location": "L570",
       "weight": 1.0
     },
     {
@@ -2892,7 +2892,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "src/index.tsx",
-      "source_location": "L584",
+      "source_location": "L586",
       "weight": 1.0
     },
     {
@@ -2904,7 +2904,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "src/index.tsx",
-      "source_location": "L729",
+      "source_location": "L733",
       "weight": 1.0
     },
     {
@@ -2916,7 +2916,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "src/index.tsx",
-      "source_location": "L731",
+      "source_location": "L735",
       "weight": 1.0
     },
     {
@@ -6586,7 +6586,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "src/components/ContextCapsuleBar.tsx",
-      "source_location": "L47",
+      "source_location": "L49",
       "weight": 1.0
     },
     {
@@ -8131,5 +8131,5 @@
     }
   ],
   "hyperedges": [],
-  "built_at_commit": "39e4f0d97ed3e507b090cf9c2d65bc69d512a1fa"
+  "built_at_commit": "2c01e07abd9fcb96b69a0d5ea1d91c4ec8248cef"
 }
