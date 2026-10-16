@@ -409,6 +409,17 @@ export function WebViewport(props: WebViewportProps) {
                       height: `${100 / (tab.zoom || 1)}%`,
                     }}
                     allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share; fullscreen"
+                    onLoad={(e) => {
+                      try {
+                        const frameWindow = (e.currentTarget as HTMLIFrameElement)?.contentWindow;
+                        const frameHref = frameWindow?.location?.href;
+                        if (frameHref && frameHref !== "about:blank" && frameHref !== tab.url) {
+                          props.onOpenUrl(frameHref);
+                        }
+                      } catch {
+                        // Cross-origin access blocked by browser security policy (expected for external sites)
+                      }
+                    }}
                   />
                 </div>
               )}

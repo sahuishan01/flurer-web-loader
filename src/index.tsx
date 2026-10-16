@@ -39,6 +39,8 @@ import {
   setDockedWebviewZoom,
   getSavedWorkspaces,
   saveWorkspaces,
+  getDockedWebviewEntry,
+  updateDockedWebviewUrl,
 } from "./utils";
 
 declare const __VERSION__: string;
@@ -435,6 +437,9 @@ function WebBrowserPanel(props: MainPanelProps) {
 
     // Tauri bridge listener for child webviews emitting "web-loader:shortcut"
     let unlistenTauriShortcut: (() => void) | undefined;
+    let unlistenPageLoad: (() => void) | undefined;
+    let unlistenNavigated: (() => void) | undefined;
+
     if (window.TauriEvent?.listen) {
       window.TauriEvent.listen("web-loader:shortcut", (event: any) => {
         const p = event?.payload;
@@ -444,6 +449,25 @@ function WebBrowserPanel(props: MainPanelProps) {
       }).then((unlisten: () => void) => {
         unlistenTauriShortcut = unlisten;
       }).catch(() => {});
+
+      window.TauriEvent.listen("tauri://page-load", (event: any) => {
+        const rawUrl = typeof event?.payload === "string" ? event.payload : event?.payload?.url;
+        if (rawUrl && rawUrl !== "about:blank") {
+          handleWebviewNavigated(rawUrl);
+        }
+      }).then((unlisten: () => void) => {
+        unlistenPageLoad = unlisten;
+      }).catch(() => {});
+
+      window.TauriEvent.listen("web-loader:navigated", (event: any) => {
+        const rawUrl = typeof event?.payload === "string" ? event.payload : event?.payload?.url;
+        const targetTabId = event?.payload?.tabId;
+        if (rawUrl && rawUrl !== "about:blank") {
+          handleWebviewNavigated(rawUrl, targetTabId);
+        }
+      }).then((unlisten: () => void) => {
+        unlistenNavigated = unlisten;
+      }).catch(() => {});
     }
 
     // Message bridge listener for iframe / postMessage communications
@@ -452,6 +476,12 @@ function WebBrowserPanel(props: MainPanelProps) {
         const p = e.data.payload;
         if (p) {
           handleShortcutAction(p.key, p.code, !!p.ctrlKey || !!p.metaKey, !!p.shiftKey, !!p.altKey);
+        }
+      } else if (e.data && e.data.type === "web-loader:navigated") {
+        const rawUrl = e.data.payload?.url || e.data.url;
+        const targetTabId = e.data.payload?.tabId || e.data.tabId;
+        if (rawUrl) {
+          handleWebviewNavigated(rawUrl, targetTabId);
         }
       }
     };
@@ -463,6 +493,12 @@ function WebBrowserPanel(props: MainPanelProps) {
       window.removeEventListener("message", handleWindowMessage);
       if (unlistenTauriShortcut) {
         unlistenTauriShortcut();
+      }
+      if (unlistenPageLoad) {
+        unlistenPageLoad();
+      }
+      if (unlistenNavigated) {
+        unlistenNavigated();
       }
     });
   });
@@ -621,6 +657,58 @@ function WebBrowserPanel(props: MainPanelProps) {
 
     if (url && url !== "about:blank") {
       setHistory(addHistoryItem(domain, url));
+    }
+  };
+
+  const handleWebviewNavigated = (newUrl: string, targetTabId?: string) => {
+    if (!newUrl || newUrl === "about:blank" || newUrl.startsWith("javascript:")) return;
+    const id = targetTabId || activeTabId();
+    const cur = tabs().find((t) => t.id === id);
+    if (!cur) return;
+
+    // If URL is identical to current tab URL, skip duplicate navigation
+    if (cur.url === newUrl) return;
+
+    const domain = getDomain(newUrl);
+    updateDockedWebviewUrl(id, newUrl);
+
+    const decision = classifyHeuristic(newUrl, domain, workspaces(), cur.projectId);
+    const nextTabs = tabs().map((t) =>
+      t.id === id
+        ? {
+            ...t,
+            url: newUrl,
+            title: domain,
+            projectId: t.projectId || decision.projectId,
+            intent: decision.intent,
+            lastActiveAt: Date.now(),
+          }
+        : t
+    );
+    setTabs(nextTabs);
+    persistCurrentTabs(nextTabs, id === activeTabId() ? newUrl : undefined);
+    setHistory(addHistoryItem(domain, newUrl));
+
+    if (props.pluginSettings?.smartRouter?.enabled && props.pluginSettings.smartRouter.provider !== "heuristic") {
+      routeTab(newUrl, domain, props.pluginSettings.smartRouter, workspaces(), cur.projectId)
+        .then((asyncDecision) => {
+          if (asyncDecision.projectId !== decision.projectId || asyncDecision.intent !== decision.intent) {
+            setTabs((prev) => {
+              const updated = prev.map((t) =>
+                t.id === id
+                  ? {
+                      ...t,
+                      projectId: asyncDecision.projectId,
+                      intent: asyncDecision.intent,
+                    }
+                  : t
+              );
+              persistCurrentTabs(updated, id === activeTabId() ? newUrl : undefined);
+              return updated;
+            });
+          }
+        })
+        .catch(() => {});
     }
   };
 
@@ -912,7 +1000,7 @@ function WebBrowserPanel(props: MainPanelProps) {
   id: "web-loader",
   name: "Web Loader",
   description: "High-performance browser and WebviewWindow loader for modern websites and local web apps.",
-  version: typeof __VERSION__ !== "undefined" ? __VERSION__ : "0.1.24",
+  version: typeof __VERSION__ !== "undefined" ? __VERSION__ : "0.1.25",
   author: "Algosculptor",
   hasCustomAppearanceSettings: true,
   viewRailButton: (props: any) => (

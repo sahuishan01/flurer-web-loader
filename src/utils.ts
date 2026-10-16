@@ -526,6 +526,17 @@ export function getActiveDockedLabel(): string | null {
   return currentVisibleLabel;
 }
 
+export function getDockedWebviewEntry(tabId: string): { label: string; url: string } | undefined {
+  return tabWebviewRegistry.get(tabId);
+}
+
+export function updateDockedWebviewUrl(tabId: string, newUrl: string): void {
+  const existing = tabWebviewRegistry.get(tabId);
+  if (existing) {
+    tabWebviewRegistry.set(tabId, { ...existing, url: newUrl });
+  }
+}
+
 export function isTabWebviewMounted(tabId: string): boolean {
   return tabWebviewRegistry.has(tabId);
 }

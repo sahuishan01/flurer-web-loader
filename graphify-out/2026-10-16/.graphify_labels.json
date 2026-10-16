@@ -1,5 +1,6 @@
 {
-  "0": "ContextOrbitDeck.tsx",
+  "0": "icons.tsx",
+  "1": "ContextOrbitDeck.tsx",
   "2": "compilerOptions",
   "3": "package.json",
   "4": "utils.ts",
@@ -10,5 +11,8 @@
   "9": "rules/graphify.md",
   "10": "workflows/graphify.md",
   "11": "index.tsx",
-  "12": "types.ts"
+  "12": "types.ts",
+  "13": "invoke",
+  "14": "addHistoryItem",
+  "15": "openInWebviewWindow"
 }

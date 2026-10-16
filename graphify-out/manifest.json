@@ -1,14 +1,14 @@
 {
   "package.json": {
-    "mtime": 1792142929.5705128,
-    "seen": 1792142946.6174028,
-    "ast_hash": "f7cd5bf4050a55ca04e4e314d336e192",
+    "mtime": 1792146479.2540944,
+    "seen": 1792146493.606525,
+    "ast_hash": "8631e39df0ca0074117b70da49df9532",
     "semantic_hash": ""
   },
   "plugin.json": {
-    "mtime": 1792142938.3025513,
-    "seen": 1792142946.6174066,
-    "ast_hash": "62599a25947e84969c61b54984824b0f",
+    "mtime": 1792146483.7661142,
+    "seen": 1792146493.6065278,
+    "ast_hash": "dc6afdd41e46e516b53291b32f4a8ede",
     "semantic_hash": ""
   },
   "scripts/sync-version.cjs": {
@@ -42,9 +42,9 @@
     "semantic_hash": ""
   },
   "src/components/WebViewport.tsx": {
-    "mtime": 1792141808.889581,
-    "seen": 1792141835.356642,
-    "ast_hash": "72ef35e2a4bcbf41fd60e941d13c3f63",
+    "mtime": 1792146438.4139144,
+    "seen": 1792146493.606543,
+    "ast_hash": "248d0b17b047260a83c350453e390571",
     "semantic_hash": ""
   },
   "src/icons.tsx": {
@@ -54,9 +54,9 @@
     "semantic_hash": ""
   },
   "src/index.tsx": {
-    "mtime": 1792142934.5945349,
-    "seen": 1792142946.6174264,
-    "ast_hash": "3fd844391683113d81cfd68b14f2473e",
+    "mtime": 1792146473.7980704,
+    "seen": 1792146493.606546,
+    "ast_hash": "2b357b86b54558860f3598eebd2352d0",
     "semantic_hash": ""
   },
   "src/styles.ts": {
@@ -72,9 +72,9 @@
     "semantic_hash": ""
   },
   "src/utils.ts": {
-    "mtime": 1792142712.3815577,
-    "seen": 1792142946.617436,
-    "ast_hash": "b9099ab3b224ff86c3cd51039954e574",
+    "mtime": 1792146370.0896137,
+    "seen": 1792146493.6065533,
+    "ast_hash": "3f94b0de8c2ae01abb19241f9fc90eeb",
     "semantic_hash": ""
   },
   "tsconfig.json": {
