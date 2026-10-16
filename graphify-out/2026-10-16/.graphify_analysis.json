@@ -1,0 +1,242 @@
+{
+  "communities": {
+    "0": [
+      "src_components_settingspanel",
+      "src_components_settingspanel_settingspanel",
+      "src_components_tabbar",
+      "src_components_tabbar_tabbar",
+      "src_components_tabbar_tabbarprops",
+      "src_icons_closeicon",
+      "src_icons_plusicon",
+      "src_index",
+      "src_index_activetabid_setactivetabid",
+      "src_index_bookmarks_setbookmarks",
+      "src_index_createnewtab",
+      "src_index_tabs_settabs",
+      "src_styles",
+      "src_styles_s",
+      "src_types",
+      "src_types_historyitem",
+      "src_types_mainpanelprops",
+      "src_types_settingspanelprops",
+      "src_types_tab",
+      "src_types_webpluginsettings"
+    ],
+    "1": [
+      "src_components_navigationbar",
+      "src_components_navigationbar_navigationbar",
+      "src_components_navigationbar_navigationbarprops",
+      "src_icons",
+      "src_icons_arrowlefticon",
+      "src_icons_arrowrighticon",
+      "src_icons_externalicon",
+      "src_icons_homeicon",
+      "src_icons_lockicon",
+      "src_icons_popouticon",
+      "src_icons_reloadicon",
+      "src_icons_staricon",
+      "src_types_searchengine",
+      "src_utils_normalizeurl"
+    ],
+    "2": [
+      "ref_src",
+      "tsconfig",
+      "tsconfig_compileroptions",
+      "tsconfig_compileroptions_esmoduleinterop",
+      "tsconfig_compileroptions_jsx",
+      "tsconfig_compileroptions_jsximportsource",
+      "tsconfig_compileroptions_module",
+      "tsconfig_compileroptions_moduleresolution",
+      "tsconfig_compileroptions_outdir",
+      "tsconfig_compileroptions_skiplibcheck",
+      "tsconfig_compileroptions_strict",
+      "tsconfig_compileroptions_target",
+      "tsconfig_include"
+    ],
+    "3": [
+      "package_devdependencies",
+      "package_devdependencies_solid_js",
+      "package_devdependencies_tauri_apps_api",
+      "package_devdependencies_typescript",
+      "package_devdependencies_vite",
+      "package_devdependencies_vite_plugin_solid",
+      "solid_js",
+      "tauri_apps_api",
+      "typescript",
+      "vite",
+      "vite_plugin_solid"
+    ],
+    "4": [
+      "src_components_webviewport_webviewport",
+      "src_index_webbrowserpanel",
+      "src_utils",
+      "src_utils_getdomain",
+      "src_utils_invoke",
+      "src_utils_isknownframerestricted",
+      "src_utils_known_frame_restricted_domains",
+      "src_utils_open",
+      "src_utils_openinexternalbrowser",
+      "src_utils_openinwebviewwindow",
+      "src_utils_window"
+    ],
+    "5": [
+      "src_components_quickdial",
+      "src_components_quickdial_default_ai_targets",
+      "src_components_quickdial_default_dev_targets",
+      "src_components_quickdial_default_doc_targets",
+      "src_components_quickdial_quickdial",
+      "src_components_quickdial_quickdialprops",
+      "src_components_webviewport",
+      "src_components_webviewport_webviewportprops",
+      "src_icons_globeicon",
+      "src_types_bookmark"
+    ],
+    "6": [
+      "package",
+      "package_name",
+      "package_private",
+      "package_scripts",
+      "package_scripts_build",
+      "package_scripts_dev",
+      "package_scripts_prebuild",
+      "package_type",
+      "package_version"
+    ],
+    "7": [
+      "scripts_sync_version",
+      "scripts_sync_version_fs",
+      "scripts_sync_version_path",
+      "scripts_sync_version_pkg",
+      "scripts_sync_version_plugin",
+      "scripts_sync_version_pluginpath"
+    ],
+    "8": [
+      "vite_config",
+      "vite_config_pkg"
+    ]
+  },
+  "cohesion": {
+    "0": 0.18421052631578946,
+    "1": 0.25274725274725274,
+    "2": 0.15384615384615385,
+    "3": 0.18181818181818182,
+    "4": 0.32727272727272727,
+    "5": 0.3111111111111111,
+    "6": 0.2222222222222222,
+    "7": 0.3333333333333333,
+    "8": 1.0
+  },
+  "gods": [
+    {
+      "id": "tsconfig_compileroptions",
+      "label": "compilerOptions",
+      "degree": 10
+    },
+    {
+      "id": "src_types_tab",
+      "label": "Tab",
+      "degree": 8
+    },
+    {
+      "id": "src_styles_s",
+      "label": "S",
+      "degree": 7
+    },
+    {
+      "id": "src_utils_getdomain",
+      "label": "getDomain()",
+      "degree": 7
+    },
+    {
+      "id": "src_types_bookmark",
+      "label": "Bookmark",
+      "degree": 6
+    },
+    {
+      "id": "src_utils_openinwebviewwindow",
+      "label": "openInWebviewWindow()",
+      "degree": 6
+    },
+    {
+      "id": "src_icons_globeicon",
+      "label": "GlobeIcon()",
+      "degree": 5
+    },
+    {
+      "id": "src_index_webbrowserpanel",
+      "label": "WebBrowserPanel()",
+      "degree": 5
+    },
+    {
+      "id": "src_types_searchengine",
+      "label": "SearchEngine",
+      "degree": 5
+    },
+    {
+      "id": "src_utils_openinexternalbrowser",
+      "label": "openInExternalBrowser()",
+      "degree": 5
+    }
+  ],
+  "surprises": [
+    {
+      "source": "NavigationBarProps",
+      "target": "Tab",
+      "source_files": [
+        "src/components/NavigationBar.tsx",
+        "src/types.ts"
+      ],
+      "confidence": "EXTRACTED",
+      "relation": "references",
+      "why": "bridges separate communities"
+    },
+    {
+      "source": "QuickDialProps",
+      "target": "Bookmark",
+      "source_files": [
+        "src/components/QuickDial.tsx",
+        "src/types.ts"
+      ],
+      "confidence": "EXTRACTED",
+      "relation": "references",
+      "why": "peripheral node `QuickDialProps` unexpectedly reaches hub `Bookmark`"
+    },
+    {
+      "source": "TabBarProps",
+      "target": "Tab",
+      "source_files": [
+        "src/components/TabBar.tsx",
+        "src/types.ts"
+      ],
+      "confidence": "EXTRACTED",
+      "relation": "references",
+      "why": "peripheral node `TabBarProps` unexpectedly reaches hub `Tab`"
+    },
+    {
+      "source": "WebViewportProps",
+      "target": "Tab",
+      "source_files": [
+        "src/components/WebViewport.tsx",
+        "src/types.ts"
+      ],
+      "confidence": "EXTRACTED",
+      "relation": "references",
+      "why": "bridges separate communities"
+    },
+    {
+      "source": "NavigationBarProps",
+      "target": "SearchEngine",
+      "source_files": [
+        "src/components/NavigationBar.tsx",
+        "src/types.ts"
+      ],
+      "confidence": "EXTRACTED",
+      "relation": "references",
+      "why": "cross-file semantic connection"
+    }
+  ],
+  "tokens": {
+    "input": 0,
+    "output": 0
+  }
+}

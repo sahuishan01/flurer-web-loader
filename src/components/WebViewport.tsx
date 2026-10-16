@@ -13,6 +13,7 @@ import {
   closeTabWebview,
   closeAllDockedWebviews,
   getIframeEmbedUrl,
+  addUserRestrictedDomain,
 } from "../utils";
 
 interface WebViewportProps {
@@ -23,6 +24,7 @@ interface WebViewportProps {
   active?: boolean;
   dockedChildWebview?: boolean;
   isOverlayOpen?: boolean;
+  autoLaunchRestricted?: boolean;
   onOpenUrl: (url: string) => void;
   onNewTab: (url: string) => void;
   onOpenInWebviewWindow: (url: string) => void;
@@ -116,6 +118,22 @@ export function WebViewport(props: WebViewportProps) {
     }
   };
 
+  // Auto-launch separate native window if autoLaunchRestricted is enabled
+  createEffect(() => {
+    const tab = props.activeTab;
+    if (
+      props.autoLaunchRestricted &&
+      tab &&
+      tab.url &&
+      tab.url !== "about:blank" &&
+      isRestricted() &&
+      !isCurrentDockedActive() &&
+      !forceEmbedTabs()[tab.id]
+    ) {
+      props.onOpenInWebviewWindow(tab.url);
+    }
+  });
+
   // Watch URL changes, active tab, panel visibility, and overlay state
   createEffect(() => {
     const tabId = props.activeTab?.id;
@@ -146,10 +164,19 @@ export function WebViewport(props: WebViewportProps) {
     props.onOpenInWebviewWindow(props.activeTab.url);
   };
 
-  // For iframe fallback: keep all active web tabs mounted in DOM to prevent reloading on tab switches
+  // For iframe fallback: strictly exclude frame-restricted tabs so blocked sites NEVER mount an iframe in the DOM
   const webTabs = () =>
-    props.tabs?.filter((t) => t.url && t.url !== "about:blank") ||
-    (props.activeTab && !isBlank() ? [props.activeTab] : []);
+    props.tabs?.filter(
+      (t) =>
+        t.url &&
+        t.url !== "about:blank" &&
+        (!isKnownFrameRestricted(t.url) || forceEmbedTabs()[t.id])
+    ) ||
+    (props.activeTab &&
+    !isBlank() &&
+    (!isKnownFrameRestricted(props.activeTab.url) || forceEmbedTabs()[props.activeTab.id])
+      ? [props.activeTab]
+      : []);
 
   return (
     <div ref={containerRef} style={{ ...S.viewport, position: "relative" }}>
@@ -238,7 +265,7 @@ export function WebViewport(props: WebViewportProps) {
                   <div style={{ display: "flex", "align-items": "center", "justify-content": "center", gap: "8px", "margin-bottom": "8px" }}>
                     <span style={S.badge}>Frame Protected</span>
                     <span style={{ "font-size": "11px", "font-family": "Space Mono, monospace", color: "var(--text-muted, #94a3b8)" }}>
-                      X-Frame-Options: SAMEORIGIN
+                      X-Frame-Options / CSP Restrict
                     </span>
                   </div>
 
@@ -261,10 +288,10 @@ export function WebViewport(props: WebViewportProps) {
                       "line-height": 1.55,
                     }}
                   >
-                    Google and major platforms block embedded HTML iframes via <code>X-Frame-Options: SAMEORIGIN</code>.
+                    <strong>{getDomain(props.activeTab!.url)}</strong> explicitly blocks embedded HTML iframes to protect authentication against clickjacking.
                     <br />
                     <br />
-                    Click <strong>Launch Native Window</strong> to open an unrestricted, persistent <strong>{getPlatformEngineName()}</strong> session, or use the manual pop-out toggle anytime.
+                    Click <strong>Launch Native Window</strong> to open an unrestricted, persistent <strong>{getPlatformEngineName()}</strong> session with full login & cookie support.
                   </p>
                 </div>
 
@@ -308,6 +335,54 @@ export function WebViewport(props: WebViewportProps) {
               </div>
             }
           >
+            {/* Quick-switch helper overlay if an embedded iframe refuses connection */}
+            <Show when={props.activeTab && !isRestricted() && props.activeTab.url !== "about:blank"}>
+              <div
+                style={{
+                  position: "absolute",
+                  top: "12px",
+                  right: "16px",
+                  "z-index": 60,
+                  display: "flex",
+                  "align-items": "center",
+                  gap: "8px",
+                  padding: "4px 10px",
+                  background: "rgba(15, 23, 42, 0.85)",
+                  "backdrop-filter": "blur(8px)",
+                  "-webkit-backdrop-filter": "blur(8px)",
+                  border: "1px solid rgba(255, 255, 255, 0.15)",
+                  "border-radius": "999px",
+                  "box-shadow": "0 4px 16px rgba(0, 0, 0, 0.3)",
+                }}
+              >
+                <span style={{ "font-size": "11px", "font-family": "Space Mono, monospace", color: "var(--text-muted, #94a3b8)" }}>
+                  Refused to connect?
+                </span>
+                <button
+                  type="button"
+                  class="icon-btn web-loader-icon-btn"
+                  style={{
+                    ...S.actionBtn,
+                    padding: "3px 8px",
+                    "font-size": "11px",
+                    "border-radius": "999px",
+                    gap: "4px",
+                    cursor: "pointer",
+                  }}
+                  onClick={() => {
+                    if (props.activeTab && props.activeTab.url !== "about:blank") {
+                      addUserRestrictedDomain(getDomain(props.activeTab.url));
+                      props.onOpenInWebviewWindow(props.activeTab.url);
+                    }
+                  }}
+                  title="Open in native desktop window and automatically remember this domain as frame-restricted"
+                >
+                  <PopoutIcon size={12} />
+                  Open Natively
+                </button>
+              </div>
+            </Show>
+
             <For each={webTabs()}>
               {(tab) => (
                 <div

@@ -99,6 +99,7 @@ export interface WebPluginSettings {
   incognitoMode?: boolean;
   singleWindowPerDomain?: boolean;
   strictUrlSanitization?: boolean;
+  autoLaunchRestricted?: boolean;
 
   // Third Design Customization Settings:
   designMode?: NavDesignMode;

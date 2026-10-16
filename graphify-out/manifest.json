@@ -1,14 +1,14 @@
 {
   "package.json": {
-    "mtime": 1792076429.1173403,
-    "seen": 1792076487.0520766,
-    "ast_hash": "dad4956d62d0824dcf191e6b00d2c392",
+    "mtime": 1792135270.9850326,
+    "seen": 1792135285.3699508,
+    "ast_hash": "ddc783e2e00d87d3634263c7d32e3ba7",
     "semantic_hash": ""
   },
   "plugin.json": {
-    "mtime": 1792076469.1615155,
-    "seen": 1792076487.0520802,
-    "ast_hash": "528ac97eab25ec344c16cadf4df109ac",
+    "mtime": 1792135274.473048,
+    "seen": 1792135285.369954,
+    "ast_hash": "9e288fd20ac6578be9b0682bb2eb8854",
     "semantic_hash": ""
   },
   "scripts/sync-version.cjs": {
@@ -30,9 +30,9 @@
     "semantic_hash": ""
   },
   "src/components/SettingsPanel.tsx": {
-    "mtime": 1790758878.349467,
-    "seen": 1790759023.5622804,
-    "ast_hash": "610c8744a796820923cd8a4bc98e19d2",
+    "mtime": 1792135253.7129564,
+    "seen": 1792135285.3699667,
+    "ast_hash": "bbc829fb764d7bdf4b6973b9fd641f3f",
     "semantic_hash": ""
   },
   "src/components/TabBar.tsx": {
@@ -42,9 +42,9 @@
     "semantic_hash": ""
   },
   "src/components/WebViewport.tsx": {
-    "mtime": 1792043852.0016503,
-    "seen": 1792044047.8633847,
-    "ast_hash": "b1eda270b9720e7d12364d23543a4776",
+    "mtime": 1792135219.132804,
+    "seen": 1792135285.3699698,
+    "ast_hash": "77227be48fea1571bc990f77e195e7f4",
     "semantic_hash": ""
   },
   "src/icons.tsx": {
@@ -54,9 +54,9 @@
     "semantic_hash": ""
   },
   "src/index.tsx": {
-    "mtime": 1792076436.073371,
-    "seen": 1792076487.0520995,
-    "ast_hash": "81b9395b95c67508a8cae8d67c3e73e8",
+    "mtime": 1792135264.4930038,
+    "seen": 1792135285.3699737,
+    "ast_hash": "eccc25faf9bce47f61cffeff1e7630dc",
     "semantic_hash": ""
   },
   "src/styles.ts": {
@@ -66,15 +66,15 @@
     "semantic_hash": ""
   },
   "src/types.ts": {
-    "mtime": 1790758622.060349,
-    "seen": 1790759023.5622935,
-    "ast_hash": "5519a67b4147f0c651713000a97f779d",
+    "mtime": 1792135133.2844253,
+    "seen": 1792135285.3699799,
+    "ast_hash": "a0a7519ea65e2a3a2c1cb5c9cad88680",
     "semantic_hash": ""
   },
   "src/utils.ts": {
-    "mtime": 1792076466.4815037,
-    "seen": 1792076487.0521064,
-    "ast_hash": "f7fa7f7b57b8609a00381ad0adf8c55a",
+    "mtime": 1792135150.488501,
+    "seen": 1792135285.3699808,
+    "ast_hash": "153d7951a698a7dae187948715c628ce",
     "semantic_hash": ""
   },
   "tsconfig.json": {

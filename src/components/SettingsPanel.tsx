@@ -1302,6 +1302,19 @@ export function SettingsPanel(props: SettingsPanelProps) {
           </label>
         </div>
 
+        {/* Auto Launch Native Window for Restricted Sites */}
+        <div style={{ display: "flex", "align-items": "center", gap: "10px" }}>
+          <input
+            type="checkbox"
+            id="auto-launch-restricted"
+            checked={props.pluginSettings.autoLaunchRestricted ?? false}
+            onChange={(e) => props.onPluginSettingsChange({ autoLaunchRestricted: e.currentTarget.checked })}
+          />
+          <label for="auto-launch-restricted" style={{ "font-size": "13px", cursor: "pointer" }}>
+            Auto-open Native Window for frame-restricted sites (Outlook, GitHub, Google Auth)
+          </label>
+        </div>
+
         {/* --- Security, Persistent Login & Privacy Systems --- */}
         <div style={{ "margin-top": "16px", "padding-top": "20px", "border-top": "1px solid var(--border-color, rgba(255, 255, 255, 0.1))" }}>
           <div style={{ display: "flex", "align-items": "center", gap: "8px", "margin-bottom": "6px" }}>

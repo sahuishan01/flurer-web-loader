@@ -176,35 +176,133 @@ export function getIframeEmbedUrl(url: string): string {
 }
 
 export const KNOWN_FRAME_RESTRICTED_DOMAINS = [
-  "youtube.com",
+  // Microsoft & Office 365
+  "office.com",
+  "office365.com",
+  "outlook.com",
+  "outlook.office.com",
+  "outlook.office365.com",
+  "microsoft.com",
+  "microsoft365.com",
+  "live.com",
+  "login.microsoftonline.com",
+  "sharepoint.com",
+  "teams.microsoft.com",
+
+  // Google Protected Portals
+  "accounts.google.com",
+  "mail.google.com",
+  "drive.google.com",
+  "docs.google.com",
+
+  // Developer & Collaboration Workspaces
   "github.com",
+  "gitlab.com",
+  "bitbucket.org",
+  "notion.so",
+  "figma.com",
+  "trello.com",
+  "linear.app",
+  "atlassian.net",
+  "jira.com",
+  "slack.com",
+  "discord.com",
+  "zoom.us",
+
+  // Media, Video & Social Networks
+  "youtube.com",
   "twitter.com",
   "x.com",
   "reddit.com",
   "linkedin.com",
   "facebook.com",
   "instagram.com",
+  "tiktok.com",
   "netflix.com",
+  "spotify.com",
+  "twitch.tv",
+
+  // AI & LLM Consoles
   "openai.com",
+  "chatgpt.com",
   "anthropic.com",
   "claude.ai",
-  "chatgpt.com",
-  "discord.com",
-  "slack.com",
+  "perplexity.ai",
+
+  // Banking & Financial Auth
+  "paypal.com",
+  "stripe.com",
+  "chase.com",
+  "bankofamerica.com",
+  "wellsfargo.com",
 ];
+
+const USER_RESTRICTED_DOMAINS_KEY = "flurer-web-loader-user-restricted-domains";
+
+export function getUserRestrictedDomains(): string[] {
+  try {
+    const raw = localStorage.getItem(USER_RESTRICTED_DOMAINS_KEY);
+    if (!raw) return [];
+    const parsed = JSON.parse(raw);
+    return Array.isArray(parsed) ? parsed : [];
+  } catch {
+    return [];
+  }
+}
+
+export function addUserRestrictedDomain(domain: string): void {
+  try {
+    const clean = domain.toLowerCase().trim().replace(/^www\./, "");
+    if (!clean) return;
+    const current = getUserRestrictedDomains();
+    if (!current.includes(clean)) {
+      const updated = [...current, clean];
+      localStorage.setItem(USER_RESTRICTED_DOMAINS_KEY, JSON.stringify(updated));
+    }
+  } catch {}
+}
+
+export function removeUserRestrictedDomain(domain: string): void {
+  try {
+    const clean = domain.toLowerCase().trim().replace(/^www\./, "");
+    const current = getUserRestrictedDomains();
+    const updated = current.filter((d) => d !== clean);
+    localStorage.setItem(USER_RESTRICTED_DOMAINS_KEY, JSON.stringify(updated));
+  } catch {}
+}
 
 export function isKnownFrameRestricted(url: string): boolean {
   try {
-    // Google with igu=1 explicitly permits iframe embedding without X-Frame-Options
-    if (url.includes("igu=1") || getDomain(url).toLowerCase().includes("google.")) {
-      return false;
+    if (!url || url === "about:blank") return false;
+    const fullUrl = url.startsWith("http://") || url.startsWith("https://") ? url : `https://${url}`;
+    const parsed = new URL(fullUrl);
+    const hostname = parsed.hostname.toLowerCase().replace(/^www\./, "");
+
+    // Google Search with igu=1 explicitly permits iframe embedding without X-Frame-Options
+    if (url.includes("igu=1") && (hostname === "google.com" || hostname.endsWith(".google.com"))) {
+      if (
+        !hostname.startsWith("mail.") &&
+        !hostname.startsWith("accounts.") &&
+        !hostname.startsWith("docs.") &&
+        !hostname.startsWith("drive.")
+      ) {
+        return false;
+      }
     }
-    const domain = getDomain(url).toLowerCase();
+
+    const isMatch = (blocked: string) => {
+      const clean = blocked.toLowerCase().trim();
+      return hostname === clean || hostname.endsWith("." + clean);
+    };
+
+    const userRestricted = getUserRestrictedDomains();
+    if (userRestricted.some(isMatch)) {
+      return true;
+    }
+
     return (
-      domain.includes("youtube.") ||
-      KNOWN_FRAME_RESTRICTED_DOMAINS.some(
-        (blocked) => domain === blocked || domain.endsWith("." + blocked)
-      )
+      hostname.includes("youtube.") ||
+      KNOWN_FRAME_RESTRICTED_DOMAINS.some(isMatch)
     );
   } catch {
     return false;
