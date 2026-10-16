@@ -301,12 +301,11 @@ export function ContextOrbitDeck(props: ContextOrbitDeckProps) {
     setShowNewWsModal(false);
   };
 
-  if (!props.isOpen) return null;
-
   return (
-    <div
-      style={{
-        position: "fixed",
+    <Show when={props.isOpen}>
+      <div
+        style={{
+          position: "fixed",
         top: 0,
         left: 0,
         right: 0,
@@ -1457,5 +1456,6 @@ export function ContextOrbitDeck(props: ContextOrbitDeckProps) {
         </div>
       </Show>
     </div>
+  </Show>
   );
 }

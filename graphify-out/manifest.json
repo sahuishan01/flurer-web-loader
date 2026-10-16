@@ -1,14 +1,14 @@
 {
   "package.json": {
-    "mtime": 1792141813.1896012,
-    "seen": 1792141835.356603,
-    "ast_hash": "562714960a84e737ef05668a1212c525",
+    "mtime": 1792142929.5705128,
+    "seen": 1792142946.6174028,
+    "ast_hash": "f7cd5bf4050a55ca04e4e314d336e192",
     "semantic_hash": ""
   },
   "plugin.json": {
-    "mtime": 1792141826.7376616,
-    "seen": 1792141835.3566065,
-    "ast_hash": "765409b976de30e090ba90ad87276ffe",
+    "mtime": 1792142938.3025513,
+    "seen": 1792142946.6174066,
+    "ast_hash": "62599a25947e84969c61b54984824b0f",
     "semantic_hash": ""
   },
   "scripts/sync-version.cjs": {
@@ -36,9 +36,9 @@
     "semantic_hash": ""
   },
   "src/components/TabBar.tsx": {
-    "mtime": 1792044833.7860205,
-    "seen": 1792045400.993019,
-    "ast_hash": "8aa29edb57cbad3e54bcd07ce3166a83",
+    "mtime": 1792142837.9221098,
+    "seen": 1792142946.6174216,
+    "ast_hash": "5fa250147f2b0637d83d9b3d98a9d59f",
     "semantic_hash": ""
   },
   "src/components/WebViewport.tsx": {
@@ -54,9 +54,9 @@
     "semantic_hash": ""
   },
   "src/index.tsx": {
-    "mtime": 1792141822.029641,
-    "seen": 1792141835.356645,
-    "ast_hash": "04de07b6264c9eb06d65c9249cd9bc66",
+    "mtime": 1792142934.5945349,
+    "seen": 1792142946.6174264,
+    "ast_hash": "3fd844391683113d81cfd68b14f2473e",
     "semantic_hash": ""
   },
   "src/styles.ts": {
@@ -72,9 +72,9 @@
     "semantic_hash": ""
   },
   "src/utils.ts": {
-    "mtime": 1792141783.689463,
-    "seen": 1792141835.3566532,
-    "ast_hash": "e1a16ee5e2e073e71d11f18d9cbf50ac",
+    "mtime": 1792142712.3815577,
+    "seen": 1792142946.617436,
+    "ast_hash": "b9099ab3b224ff86c3cd51039954e574",
     "semantic_hash": ""
   },
   "tsconfig.json": {
@@ -120,15 +120,15 @@
     "semantic_hash": ""
   },
   "src/components/ContextCapsuleBar.tsx": {
-    "mtime": 1792044821.117963,
-    "seen": 1792045400.9930077,
-    "ast_hash": "f397e587876618ddab427d45542653c4",
+    "mtime": 1792142813.5900028,
+    "seen": 1792142946.6174119,
+    "ast_hash": "8021a9392ba710824af85a55d1b6e1b8",
     "semantic_hash": ""
   },
   "src/components/ContextOrbitDeck.tsx": {
-    "mtime": 1790758956.6138074,
-    "seen": 1790759023.5622756,
-    "ast_hash": "39263647f8b16cc3e7c4fc311d92b093",
+    "mtime": 1792142733.4776506,
+    "seen": 1792142946.6174133,
+    "ast_hash": "8bd2c9e7725032231a29e1131e021269",
     "semantic_hash": ""
   },
   "src/smartRouter.ts": {

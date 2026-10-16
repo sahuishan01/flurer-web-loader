@@ -35,6 +35,7 @@ import {
   closeDockedWebview,
   closeTabWebview,
   closeAllDockedWebviews,
+  hideAllDockedWebviews,
   setDockedWebviewZoom,
   getSavedWorkspaces,
   saveWorkspaces,
@@ -496,6 +497,9 @@ function WebBrowserPanel(props: MainPanelProps) {
     setActiveTabId(id);
     const target = tabs().find((t) => t.id === id);
     if (target) {
+      if (target.url === "about:blank") {
+        hideAllDockedWebviews();
+      }
       saveActiveTab(target.url === "about:blank" ? null : target.url);
       if (target.projectId) {
         setCurrentWorkspaceId(target.projectId);
@@ -508,6 +512,7 @@ function WebBrowserPanel(props: MainPanelProps) {
     parentId?: string,
     projectId?: string
   ) => {
+    hideAllDockedWebviews();
     const parentTab = parentId ? tabs().find((t) => t.id === parentId) : undefined;
     const parentTitle = parentTab ? parentTab.title : undefined;
     const targetWs = projectId || parentTab?.projectId || currentWorkspace().id;
@@ -523,6 +528,15 @@ function WebBrowserPanel(props: MainPanelProps) {
     setActiveTabId(newTab.id);
     setCurrentWorkspaceId(targetWs);
     persistCurrentTabs(nextTabs, newTab.url);
+  };
+
+  const handleUpdateTabWorkspace = (tabId: string, projectId: string | undefined) => {
+    const nextTabs = tabs().map((t) => (t.id === tabId ? { ...t, projectId } : t));
+    setTabs(nextTabs);
+    persistCurrentTabs(nextTabs);
+    if (tabId === activeTabId() && projectId) {
+      setCurrentWorkspaceId(projectId);
+    }
   };
 
   const handleCloseTab = (id: string) => {
@@ -746,10 +760,15 @@ function WebBrowserPanel(props: MainPanelProps) {
             orbitDeckOpen={orbitDeckOpen()}
             isWsMenuOpen={workspaceMenuOpen()}
             onWsMenuToggle={(open) => setWorkspaceMenuOpen(open)}
-            onToggleOrbitDeck={() => setOrbitDeckOpen(!orbitDeckOpen())}
+            onToggleOrbitDeck={() => {
+              const nextState = !orbitDeckOpen();
+              if (nextState) hideAllDockedWebviews();
+              setOrbitDeckOpen(nextState);
+            }}
             onSelectTab={handleSelectTab}
             onCloseTab={handleCloseTab}
             onNewTab={(url, parentId) => handleNewTab(url, parentId, currentWorkspace().id)}
+            onUpdateTabWorkspace={handleUpdateTabWorkspace}
             onNavigate={handleNavigate}
             onReload={handleReload}
             onGoHome={handleGoHome}
@@ -768,9 +787,11 @@ function WebBrowserPanel(props: MainPanelProps) {
           <TabBar
             tabs={tabs()}
             activeTabId={activeTabId()}
+            workspaces={workspaces()}
             onSelectTab={handleSelectTab}
             onCloseTab={handleCloseTab}
             onNewTab={() => handleNewTab("about:blank")}
+            onUpdateTabWorkspace={handleUpdateTabWorkspace}
             onOpenQuickSwitcher={() => setQuickSwitcherOpen(true)}
           />
 
@@ -891,7 +912,7 @@ function WebBrowserPanel(props: MainPanelProps) {
   id: "web-loader",
   name: "Web Loader",
   description: "High-performance browser and WebviewWindow loader for modern websites and local web apps.",
-  version: typeof __VERSION__ !== "undefined" ? __VERSION__ : "0.1.23",
+  version: typeof __VERSION__ !== "undefined" ? __VERSION__ : "0.1.24",
   author: "Algosculptor",
   hasCustomAppearanceSettings: true,
   viewRailButton: (props: any) => (

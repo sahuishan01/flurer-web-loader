@@ -76,6 +76,33 @@ export function sanitizeUrl(input: string): { url: string; isSafe: boolean; isSe
   return { url: trimmed, isSafe: true, isSecure };
 }
 
+export const COMMON_DOMAIN_SHORTCUTS: Record<string, string> = {
+  github: "https://github.com",
+  youtube: "https://youtube.com",
+  reddit: "https://reddit.com",
+  twitter: "https://x.com",
+  x: "https://x.com",
+  linkedin: "https://linkedin.com",
+  outlook: "https://outlook.office.com",
+  office: "https://office.com",
+  gmail: "https://mail.google.com",
+  chatgpt: "https://chatgpt.com",
+  claude: "https://claude.ai",
+  notion: "https://notion.so",
+  figma: "https://figma.com",
+  linear: "https://linear.app",
+  gitlab: "https://gitlab.com",
+  wikipedia: "https://wikipedia.org",
+  stackoverflow: "https://stackoverflow.com",
+  amazon: "https://amazon.com",
+  netflix: "https://netflix.com",
+  spotify: "https://open.spotify.com",
+  twitch: "https://twitch.tv",
+  discord: "https://discord.com",
+  slack: "https://app.slack.com",
+  termix: "https://termix.algosculptor.com",
+};
+
 export function normalizeUrl(input: string, searchEngine: SearchEngine = "duckduckgo"): string {
   const trimmed = input.trim();
   if (!trimmed) return "about:blank";
@@ -87,6 +114,11 @@ export function normalizeUrl(input: string, searchEngine: SearchEngine = "duckdu
   }
 
   const lower = trimmed.toLowerCase();
+
+  // Instant known domain shortcuts (e.g. "github" -> https://github.com)
+  if (COMMON_DOMAIN_SHORTCUTS[lower]) {
+    return COMMON_DOMAIN_SHORTCUTS[lower];
+  }
 
   // Direct Google domain mapping with igu=1 (disables X-Frame-Options)
   if (
@@ -674,18 +706,34 @@ export async function hideTabWebview(tabId: string): Promise<void> {
   const entry = tabWebviewRegistry.get(tabId);
   if (!entry) return;
   try {
+    await window.TauriCore.invoke("plugin:webview|set_webview_position", {
+      label: entry.label,
+      value: { Logical: { x: -10000, y: -10000 } },
+    });
+    await window.TauriCore.invoke("plugin:webview|set_webview_size", {
+      label: entry.label,
+      value: { Logical: { width: 0, height: 0 } },
+    });
     await window.TauriCore.invoke("plugin:webview|webview_hide", { label: entry.label });
-    if (currentVisibleTabId === tabId) {
-      currentVisibleTabId = null;
-      currentVisibleLabel = null;
-    }
   } catch {}
+  if (currentVisibleTabId === tabId) {
+    currentVisibleTabId = null;
+    currentVisibleLabel = null;
+  }
 }
 
 export async function hideAllDockedWebviews(): Promise<void> {
   if (!window.TauriCore) return;
   for (const entry of tabWebviewRegistry.values()) {
     try {
+      await window.TauriCore.invoke("plugin:webview|set_webview_position", {
+        label: entry.label,
+        value: { Logical: { x: -10000, y: -10000 } },
+      });
+      await window.TauriCore.invoke("plugin:webview|set_webview_size", {
+        label: entry.label,
+        value: { Logical: { width: 0, height: 0 } },
+      });
       await window.TauriCore.invoke("plugin:webview|webview_hide", { label: entry.label });
     } catch {}
   }

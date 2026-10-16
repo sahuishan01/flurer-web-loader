@@ -46,6 +46,7 @@ interface ContextCapsuleBarProps {
   onResetZoom: () => void;
   onSwitchWorkspace: (workspaceId: string) => void;
   onOpenQuickSwitcher?: () => void;
+  onUpdateTabWorkspace?: (tabId: string, projectId: string | undefined) => void;
 }
 
 export function ContextCapsuleBar(props: ContextCapsuleBarProps) {
@@ -54,12 +55,27 @@ export function ContextCapsuleBar(props: ContextCapsuleBarProps) {
   const [inputValue, setInputValue] = createSignal("");
   const [isFocused, setIsFocused] = createSignal(false);
   const [internalWsMenu, setInternalWsMenu] = createSignal(false);
+  const [tabMenu, setTabMenu] = createSignal<{ tabId: string; x: number; y: number } | null>(null);
   const showWsMenu = () => (props.isWsMenuOpen !== undefined ? props.isWsMenuOpen : internalWsMenu());
   const setShowWsMenu = (open: boolean) => {
     setInternalWsMenu(open);
     props.onWsMenuToggle?.(open);
   };
   const [showAllWorkspaces, setShowAllWorkspaces] = createSignal(false);
+
+  createEffect(() => {
+    if (!tabMenu()) return;
+    const handleClick = () => setTabMenu(null);
+    const handleKey = (e: KeyboardEvent) => {
+      if (e.key === "Escape") setTabMenu(null);
+    };
+    window.addEventListener("click", handleClick);
+    window.addEventListener("keydown", handleKey);
+    onCleanup(() => {
+      window.removeEventListener("click", handleClick);
+      window.removeEventListener("keydown", handleKey);
+    });
+  });
 
   createEffect(() => {
     if (!showWsMenu()) return;
@@ -349,6 +365,11 @@ export function ContextCapsuleBar(props: ContextCapsuleBarProps) {
                     "user-select": "none",
                   }}
                   onClick={() => props.onSelectTab(tab.id)}
+                  onContextMenu={(e) => {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    setTabMenu({ tabId: tab.id, x: e.clientX, y: e.clientY });
+                  }}
                   title={tab.url}
                 >
                   <GlobeIcon size={14} />
@@ -364,17 +385,24 @@ export function ContextCapsuleBar(props: ContextCapsuleBarProps) {
                     {tab.title || "New Tab"}
                   </span>
 
-                  {/* Intent tag pill on the tab */}
+                  {/* Intent tag pill on the tab - Click to group/ungroup */}
                   <span
                     style={{
                       "font-size": "9px",
                       "font-family": "Space Mono, monospace",
-                      padding: "1px 4px",
-                      "border-radius": "3px",
-                      background: "rgba(0, 0, 0, 0.3)",
+                      padding: "1px 5px",
+                      "border-radius": "4px",
+                      background: "rgba(0, 0, 0, 0.35)",
                       color: badgeColor(),
                       "flex-shrink": 0,
+                      cursor: "pointer",
                     }}
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      const rect = e.currentTarget.getBoundingClientRect();
+                      setTabMenu({ tabId: tab.id, x: rect.left, y: rect.bottom + 6 });
+                    }}
+                    title="Click or right-click tab to group/ungroup workspace"
                   >
                     {intent().slice(0, 3).toUpperCase()}
                   </span>
@@ -690,6 +718,141 @@ export function ContextCapsuleBar(props: ContextCapsuleBarProps) {
           <ExternalIcon size={20} />
         </button>
       </div>
+
+      {/* Floating Tab Context Menu for Group / Ungroup */}
+      <Show when={tabMenu()}>
+        <div
+          style={{
+            position: "fixed",
+            top: `${tabMenu()!.y}px`,
+            left: `${Math.min(tabMenu()!.x, window.innerWidth - 220)}px`,
+            "z-index": 10000,
+            background: "rgba(15, 23, 42, 0.95)",
+            "backdrop-filter": "blur(16px)",
+            "-webkit-backdrop-filter": "blur(16px)",
+            border: "1px solid rgba(255, 255, 255, 0.15)",
+            "border-radius": "10px",
+            padding: "6px",
+            "box-shadow": "0 16px 36px rgba(0, 0, 0, 0.6), 0 0 1px rgba(255, 255, 255, 0.2)",
+            "min-width": "200px",
+            display: "flex",
+            "flex-direction": "column",
+            gap: "2px",
+            animation: "web-loader-card-enter 0.15s cubic-bezier(0.16, 1, 0.3, 1) both",
+          }}
+          onClick={(e) => e.stopPropagation()}
+        >
+          <div
+            style={{
+              padding: "4px 8px",
+              "font-size": "10px",
+              "font-family": "Space Mono, monospace",
+              color: "var(--text-muted, #94a3b8)",
+              "text-transform": "uppercase",
+              "letter-spacing": "0.08em",
+            }}
+          >
+            Assign Workspace
+          </div>
+
+          <For each={props.workspaces}>
+            {(ws) => {
+              const isCurrent = () => {
+                const t = props.tabs.find((x) => x.id === tabMenu()?.tabId);
+                return (t?.projectId || "general") === ws.id;
+              };
+              return (
+                <button
+                  type="button"
+                  style={{
+                    display: "flex",
+                    "align-items": "center",
+                    "justify-content": "space-between",
+                    gap: "8px",
+                    padding: "6px 8px",
+                    "border-radius": "6px",
+                    background: isCurrent() ? "rgba(255, 255, 255, 0.1)" : "transparent",
+                    border: "none",
+                    color: "var(--text-primary, #f8fafc)",
+                    "font-size": "12px",
+                    cursor: "pointer",
+                    "text-align": "left",
+                    transition: "background 0.15s ease",
+                  }}
+                  onClick={() => {
+                    if (tabMenu()) {
+                      props.onUpdateTabWorkspace?.(tabMenu()!.tabId, ws.id);
+                      setTabMenu(null);
+                    }
+                  }}
+                >
+                  <div style={{ display: "flex", "align-items": "center", gap: "6px" }}>
+                    <span style={{ color: ws.color }}>{ws.icon || "✦"}</span>
+                    <span>{ws.name}</span>
+                  </div>
+                  {isCurrent() && (
+                    <span style={{ color: "var(--accent-default, #38bdf8)", "font-size": "11px" }}>✓</span>
+                  )}
+                </button>
+              );
+            }}
+          </For>
+
+          <div style={{ height: "1px", background: "rgba(255, 255, 255, 0.08)", margin: "4px 0" }} />
+
+          <button
+            type="button"
+            style={{
+              display: "flex",
+              "align-items": "center",
+              gap: "6px",
+              padding: "6px 8px",
+              "border-radius": "6px",
+              background: "transparent",
+              border: "none",
+              color: "var(--text-secondary, #cbd5e1)",
+              "font-size": "12px",
+              cursor: "pointer",
+              "text-align": "left",
+            }}
+            onClick={() => {
+              if (tabMenu()) {
+                props.onUpdateTabWorkspace?.(tabMenu()!.tabId, undefined);
+                setTabMenu(null);
+              }
+            }}
+          >
+            <span>❖</span>
+            <span>Ungroup Tab (General)</span>
+          </button>
+
+          <button
+            type="button"
+            style={{
+              display: "flex",
+              "align-items": "center",
+              gap: "6px",
+              padding: "6px 8px",
+              "border-radius": "6px",
+              background: "transparent",
+              border: "none",
+              color: "#f87171",
+              "font-size": "12px",
+              cursor: "pointer",
+              "text-align": "left",
+            }}
+            onClick={() => {
+              if (tabMenu()) {
+                props.onCloseTab(tabMenu()!.tabId);
+                setTabMenu(null);
+              }
+            }}
+          >
+            <span>✕</span>
+            <span>Close Tab</span>
+          </button>
+        </div>
+      </Show>
     </div>
   );
 }
