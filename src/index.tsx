@@ -496,7 +496,7 @@ function WebBrowserPanel(props: MainPanelProps) {
       if (liveUrl && liveUrl !== curTab.url && liveUrl !== "about:blank" && !liveUrl.startsWith("javascript:")) {
         handleWebviewNavigated(liveUrl, curTab.id);
       }
-    }, 750);
+    }, 350);
 
     onCleanup(() => {
       clearInterval(pollInterval);
@@ -1026,7 +1026,7 @@ function WebBrowserPanel(props: MainPanelProps) {
   id: "web-loader",
   name: "Web Loader",
   description: "High-performance browser and WebviewWindow loader for modern websites and local web apps.",
-  version: typeof __VERSION__ !== "undefined" ? __VERSION__ : "0.1.27",
+  version: typeof __VERSION__ !== "undefined" ? __VERSION__ : "0.1.28",
   author: "Algosculptor",
   hasCustomAppearanceSettings: true,
   viewRailButton: (props: any) => (

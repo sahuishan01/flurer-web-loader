@@ -639,6 +639,31 @@ export async function createOrShowDockedWebview(
   const newLabel = `${DOCKED_WEBVIEW_PREFIX}-${cleanTabId}-${Date.now().toString(36)}-${(++dockedCounter).toString(36)}`;
 
   try {
+    const navTrackingScript = `
+(function() {
+  var lastHref = window.location.href;
+  function report() {
+    try {
+      var current = window.location.href;
+      if (current && current !== lastHref && current !== 'about:blank') {
+        lastHref = current;
+        if (window.opener && window.opener.postMessage) {
+          window.opener.postMessage({ type: 'web-loader:navigated', payload: { url: current, tabId: '${cleanTabId}' } }, '*');
+        }
+        if (window.parent && window.parent.postMessage && window.parent !== window) {
+          window.parent.postMessage({ type: 'web-loader:navigated', payload: { url: current, tabId: '${cleanTabId}' } }, '*');
+        }
+      }
+    } catch(e) {}
+  }
+  window.addEventListener('popstate', report);
+  window.addEventListener('hashchange', report);
+  document.addEventListener('DOMContentLoaded', report);
+  window.addEventListener('load', report);
+  setInterval(report, 400);
+})();
+`;
+
     const windowOptions: Record<string, any> = {
       label: newLabel,
       url: sanitized.url,
@@ -649,6 +674,7 @@ export async function createOrShowDockedWebview(
       focus: true,
       transparent: false,
       userAgent: DEFAULT_DESKTOP_USER_AGENT,
+      initializationScript: navTrackingScript,
     };
 
     try {
