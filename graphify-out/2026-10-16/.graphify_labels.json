@@ -11,8 +11,5 @@
   "9": "rules/graphify.md",
   "10": "workflows/graphify.md",
   "11": "index.tsx",
-  "12": "types.ts",
-  "13": "invoke",
-  "14": "addHistoryItem",
-  "15": "openInWebviewWindow"
+  "12": "types.ts"
 }

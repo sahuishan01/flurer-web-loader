@@ -810,6 +810,19 @@ export async function setDockedWebviewZoom(zoom: number, tabId?: string): Promis
   } catch {}
 }
 
+export async function queryDockedWebviewUrl(tabId?: string): Promise<string | null> {
+  if (!window.TauriCore) return null;
+  const targetLabel = tabId ? tabWebviewRegistry.get(tabId)?.label : currentVisibleLabel;
+  if (!targetLabel) return null;
+  try {
+    const url = await window.TauriCore.invoke("get_docked_webview_url", { label: targetLabel });
+    if (typeof url === "string" && url.length > 0 && url !== "about:blank") {
+      return url;
+    }
+  } catch {}
+  return null;
+}
+
 
 
 const TABS_KEY = "flurer-web-loader-tabs";

@@ -41,6 +41,7 @@ import {
   saveWorkspaces,
   getDockedWebviewEntry,
   updateDockedWebviewUrl,
+  queryDockedWebviewUrl,
 } from "./utils";
 
 declare const __VERSION__: string;
@@ -487,7 +488,18 @@ function WebBrowserPanel(props: MainPanelProps) {
     };
     window.addEventListener("message", handleWindowMessage);
 
+    // Periodically poll active docked webview's live URL (e.g. user clicked a link in search results)
+    const pollInterval = setInterval(async () => {
+      const curTab = activeTab();
+      if (!curTab || curTab.url === "about:blank" || props.active === false) return;
+      const liveUrl = await queryDockedWebviewUrl(curTab.id);
+      if (liveUrl && liveUrl !== curTab.url && liveUrl !== "about:blank" && !liveUrl.startsWith("javascript:")) {
+        handleWebviewNavigated(liveUrl, curTab.id);
+      }
+    }, 750);
+
     onCleanup(() => {
+      clearInterval(pollInterval);
       window.removeEventListener("keydown", handleGlobalKey, true);
       document.removeEventListener("keydown", handleGlobalKey, true);
       window.removeEventListener("message", handleWindowMessage);
@@ -1000,7 +1012,7 @@ function WebBrowserPanel(props: MainPanelProps) {
   id: "web-loader",
   name: "Web Loader",
   description: "High-performance browser and WebviewWindow loader for modern websites and local web apps.",
-  version: typeof __VERSION__ !== "undefined" ? __VERSION__ : "0.1.25",
+  version: typeof __VERSION__ !== "undefined" ? __VERSION__ : "0.1.26",
   author: "Algosculptor",
   hasCustomAppearanceSettings: true,
   viewRailButton: (props: any) => (
