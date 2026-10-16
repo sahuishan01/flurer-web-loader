@@ -1,16 +1,16 @@
 # Graph Report - flurer-web-loader-plugin  (2026-10-16)
 
 ## Corpus Check
-- 23 files · ~26,801 words
+- 23 files · ~26,625 words
 - Verdict: corpus is large enough that graph structure adds value.
 
 ## Summary
-- 210 nodes · 544 edges · 13 communities (10 shown, 3 thin omitted)
+- 211 nodes · 546 edges · 13 communities (10 shown, 3 thin omitted)
 - Extraction: 100% EXTRACTED · 0% INFERRED · 0% AMBIGUOUS
 - Token cost: 0 input · 0 output
 
 ## Graph Freshness
-- Built from commit: `86940ad8`
+- Built from commit: `cf53ec4e`
 - Run `git rev-parse HEAD` and compare to check if the graph is stale.
 - Run `graphify update .` after code changes (no API cost).
 
@@ -42,16 +42,16 @@
 10. `compilerOptions` - 10 edges
 
 ## Surprising Connections (you probably didn't know these)
+- `ContextCapsuleBarProps` --references--> `SearchEngine`  [EXTRACTED]
+  src/components/ContextCapsuleBar.tsx → src/types.ts
 - `ContextOrbitDeckProps` --references--> `ProjectWorkspace`  [EXTRACTED]
   src/components/ContextOrbitDeck.tsx → src/types.ts
 - `ContextOrbitDeckProps` --references--> `Tab`  [EXTRACTED]
   src/components/ContextOrbitDeck.tsx → src/types.ts
 - `ContextOrbitDeck()` --calls--> `getModifierKey()`  [EXTRACTED]
   src/components/ContextOrbitDeck.tsx → src/utils.ts
-- `SettingsPanel()` --calls--> `downloadAndSetupLayaOffline()`  [EXTRACTED]
-  src/components/SettingsPanel.tsx → src/smartRouter.ts
-- `SettingsPanel()` --calls--> `isLayaOfflineDownloaded()`  [EXTRACTED]
-  src/components/SettingsPanel.tsx → src/smartRouter.ts
+- `NavigationBarProps` --references--> `Tab`  [EXTRACTED]
+  src/components/NavigationBar.tsx → src/types.ts
 
 ## Import Cycles
 - None detected.
@@ -60,7 +60,7 @@
 
 ### Community 0 - "icons.tsx"
 Cohesion: 0.12
-Nodes (32): ContextCapsuleBar(), NavigationBar(), DEFAULT_AI_TARGETS, DEFAULT_DEV_TARGETS, DEFAULT_DOC_TARGETS, QuickDial(), QuickTabSwitcher(), TabBar() (+24 more)
+Nodes (33): ContextCapsuleBar(), NavigationBar(), NavigationBarProps, DEFAULT_AI_TARGETS, DEFAULT_DEV_TARGETS, DEFAULT_DOC_TARGETS, QuickDial(), TabBar() (+25 more)
 
 ### Community 1 - "ContextOrbitDeck.tsx"
 Cohesion: 0.20
@@ -76,7 +76,7 @@ Nodes (19): devDependencies, solid-js, @tauri-apps/api, typescript, vite, vite-p
 
 ### Community 4 - "utils.ts"
 Cohesion: 0.10
-Nodes (28): WebViewport(), addUserRestrictedDomain(), CHROME_DESKTOP_USER_AGENT, closeAllDockedWebviews(), closeTabWebview(), createDockedWebview(), createOrShowDockedWebview(), DEFAULT_DESKTOP_USER_AGENT (+20 more)
+Nodes (26): WebViewport(), addUserRestrictedDomain(), CHROME_DESKTOP_USER_AGENT, closeAllDockedWebviews(), closeTabWebview(), createDockedWebview(), createOrShowDockedWebview(), DEFAULT_DESKTOP_USER_AGENT (+18 more)
 
 ### Community 5 - "SettingsPanel.tsx"
 Cohesion: 0.17
@@ -91,12 +91,12 @@ Cohesion: 0.33
 Nodes (5): fs, path, pkg, plugin, pluginPath
 
 ### Community 11 - "index.tsx"
-Cohesion: 0.16
-Nodes (22): [activeTabId, setActiveTabId], [bookmarks, setBookmarks], createNewTab(), [history, setHistory], initialTabsState, initRestoredTabs(), [tabs, setTabs], WebBrowserPanel() (+14 more)
+Cohesion: 0.15
+Nodes (25): [activeTabId, setActiveTabId], [bookmarks, setBookmarks], createNewTab(), [history, setHistory], initialTabsState, initRestoredTabs(), [tabs, setTabs], WebBrowserPanel() (+17 more)
 
 ### Community 12 - "types.ts"
 Cohesion: 0.16
-Nodes (17): ContextCapsuleBarProps, NavigationBarProps, QuickDialProps, QuickTabSwitcherProps, TabBarProps, WebViewportProps, Bookmark, HistoryItem (+9 more)
+Nodes (16): ContextCapsuleBarProps, QuickDialProps, QuickTabSwitcher(), QuickTabSwitcherProps, TabBarProps, WebViewportProps, Bookmark, HistoryItem (+8 more)
 
 ## Knowledge Gaps
 - **52 isolated node(s):** `name`, `version`, `private`, `type`, `prebuild` (+47 more)
@@ -110,11 +110,13 @@ _Questions this graph is uniquely positioned to answer:_
   _High betweenness centrality (0.012) - this node is a cross-community bridge._
 - **Why does `Tab` connect `types.ts` to `icons.tsx`, `ContextOrbitDeck.tsx`, `index.tsx`, `utils.ts`?**
   _High betweenness centrality (0.011) - this node is a cross-community bridge._
+- **Why does `Bookmark` connect `types.ts` to `icons.tsx`, `index.tsx`, `utils.ts`?**
+  _High betweenness centrality (0.006) - this node is a cross-community bridge._
 - **What connects `name`, `version`, `private` to the rest of the system?**
   _52 weakly-connected nodes found - possible documentation gaps or missing edges._
 - **Should `icons.tsx` be split into smaller, more focused modules?**
-  _Cohesion score 0.1241565452091768 - nodes in this community are weakly interconnected._
+  _Cohesion score 0.12179487179487179 - nodes in this community are weakly interconnected._
 - **Should `package.json` be split into smaller, more focused modules?**
   _Cohesion score 0.1 - nodes in this community are weakly interconnected._
 - **Should `utils.ts` be split into smaller, more focused modules?**
-  _Cohesion score 0.1036036036036036 - nodes in this community are weakly interconnected._
+  _Cohesion score 0.10252100840336134 - nodes in this community are weakly interconnected._

@@ -50,6 +50,8 @@ export function WebViewport(props: WebViewportProps) {
     if (!props.activeTab) return false;
     // If native docked child webview is active, no launcher needed!
     if (isCurrentDockedActive()) return false;
+    // If native docked child webviews are enabled and haven't failed, let docked webview handle it in-place
+    if (props.dockedChildWebview !== false && !dockedFailed()) return false;
     return isRestricted() && !forceEmbedTabs()[props.activeTab.id];
   };
 
@@ -118,11 +120,12 @@ export function WebViewport(props: WebViewportProps) {
     }
   };
 
-  // Auto-launch separate native window if autoLaunchRestricted is enabled
+  // Auto-launch separate native window ONLY if docked webview is disabled/failed and autoLaunchRestricted is enabled
   createEffect(() => {
     const tab = props.activeTab;
     if (
       props.autoLaunchRestricted &&
+      (props.dockedChildWebview === false || dockedFailed()) &&
       tab &&
       tab.url &&
       tab.url !== "about:blank" &&

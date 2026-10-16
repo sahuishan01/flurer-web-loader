@@ -498,6 +498,19 @@ export function isTabWebviewMounted(tabId: string): boolean {
   return tabWebviewRegistry.has(tabId);
 }
 
+export function getCurrentWindowLabel(): string {
+  try {
+    const internals = (window as any).__TAURI_INTERNALS__;
+    if (internals?.metadata?.currentWindow?.label) {
+      return internals.metadata.currentWindow.label;
+    }
+    if (internals?.metadata?.currentWebview?.label) {
+      return internals.metadata.currentWebview.label;
+    }
+  } catch {}
+  return "flurer-0";
+}
+
 export async function createOrShowDockedWebview(
   tabId: string,
   url: string,
@@ -511,10 +524,7 @@ export async function createOrShowDockedWebview(
     dockedWebviewSupported = false;
     return { success: false, error: "TauriCore not available" };
   }
-  const targetWindowLabel =
-    windowLabel ||
-    (window as any).__TAURI_INTERNALS__?.metadata?.currentWindow?.label ||
-    "main";
+  const targetWindowLabel = windowLabel || getCurrentWindowLabel();
 
   const sanitized = sanitizeUrl(url);
   if (!sanitized.isSafe) {
@@ -593,55 +603,32 @@ export async function createOrShowDockedWebview(
       y,
       width,
       height,
-      initializationScript: `
-        (function() {
-          window.addEventListener('keydown', function(e) {
-            var isMod = e.ctrlKey || e.metaKey;
-            var k = (e.key || '').toLowerCase();
-            var code = e.code || '';
-            var isShift = !!e.shiftKey;
-            var isAlt = !!e.altKey;
-
-            // Check if matches any web-loader shortcut
-            var isT = isMod && !isShift && (k === 't' || code === 'KeyT');
-            var isW = isMod && (k === 'w' || code === 'KeyW');
-            var isP = isMod && (k === 'p' || code === 'KeyP' || k === 'o' || code === 'KeyO' || (isShift && (k === 'a' || code === 'KeyA')));
-            var isE = isMod && (k === 'e' || code === 'KeyE' || k === 'k' || code === 'KeyK');
-            var isR = (isMod && (k === 'r' || code === 'KeyR')) || k === 'f5' || code === 'F5';
-            var isL = (isMod && (k === 'l' || code === 'KeyL')) || (isAlt && (k === 'd' || code === 'KeyD'));
-            var isTab = isMod && (k === 'tab' || code === 'Tab');
-            var isNum = isMod && !isShift && (/^[1-9]$/.test(k) || /^Digit[1-9]$/.test(code));
-            var isZoom = isMod && (k === '=' || k === '+' || k === '-' || k === '0' || code === 'Equal' || code === 'Minus' || code === 'Digit0' || code === 'NumpadAdd' || code === 'NumpadSubtract' || code === 'Numpad0');
-            var isD = isMod && !isAlt && (k === 'd' || code === 'KeyD');
-
-            if (isT || isW || isP || isE || isR || isL || isTab || isNum || isZoom || isD) {
-              e.preventDefault();
-              e.stopPropagation();
-              try {
-                if (window.__TAURI_INTERNALS__ && window.__TAURI_INTERNALS__.invoke) {
-                  window.__TAURI_INTERNALS__.invoke('plugin:event|emit', {
-                    event: 'web-loader:shortcut',
-                    payload: {
-                      key: e.key,
-                      code: e.code,
-                      ctrlKey: e.ctrlKey,
-                      metaKey: e.metaKey,
-                      shiftKey: e.shiftKey,
-                      altKey: e.altKey
-                    }
-                  });
-                }
-              } catch (err) {}
-            }
-          }, true);
-        })();
-      `,
+      focus: true,
+      transparent: false,
+      userAgent: DEFAULT_DESKTOP_USER_AGENT,
     };
 
-    await window.TauriCore.invoke("plugin:webview|create_webview", {
-      windowLabel: targetWindowLabel,
-      options: windowOptions,
-    });
+    try {
+      await window.TauriCore.invoke("plugin:webview|create_webview", {
+        windowLabel: targetWindowLabel,
+        options: windowOptions,
+      });
+    } catch (invokeErr: any) {
+      const msg = String(invokeErr?.message || invokeErr);
+      if (msg.includes("WindowNotFound") && targetWindowLabel !== "flurer-0") {
+        await window.TauriCore.invoke("plugin:webview|create_webview", {
+          windowLabel: "flurer-0",
+          options: windowOptions,
+        });
+      } else if (msg.includes("WindowNotFound") && targetWindowLabel !== "main") {
+        await window.TauriCore.invoke("plugin:webview|create_webview", {
+          windowLabel: "main",
+          options: windowOptions,
+        });
+      } else {
+        throw invokeErr;
+      }
+    }
 
     tabWebviewRegistry.set(tabId, { label: newLabel, url: sanitized.url });
     currentVisibleTabId = tabId;
