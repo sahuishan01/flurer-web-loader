@@ -539,6 +539,16 @@ function WebBrowserPanel(props: MainPanelProps) {
     }
   };
 
+  const focusOmnibox = () => {
+    setTimeout(() => {
+      const omni = document.querySelector(".web-loader-omnibox input") as HTMLInputElement | null;
+      if (omni) {
+        omni.focus();
+        omni.select();
+      }
+    }, 40);
+  };
+
   const handleSelectTab = (id: string) => {
     setOrbitDeckOpen(false);
     setWorkspaceMenuOpen(false);
@@ -547,6 +557,7 @@ function WebBrowserPanel(props: MainPanelProps) {
     if (target) {
       if (target.url === "about:blank") {
         hideAllDockedWebviews();
+        focusOmnibox();
       }
       saveActiveTab(target.url === "about:blank" ? null : target.url);
       if (target.projectId) {
@@ -576,6 +587,9 @@ function WebBrowserPanel(props: MainPanelProps) {
     setActiveTabId(newTab.id);
     setCurrentWorkspaceId(targetWs);
     persistCurrentTabs(nextTabs, newTab.url);
+    if (url === "about:blank") {
+      focusOmnibox();
+    }
   };
 
   const handleUpdateTabWorkspace = (tabId: string, projectId: string | undefined) => {
@@ -1012,7 +1026,7 @@ function WebBrowserPanel(props: MainPanelProps) {
   id: "web-loader",
   name: "Web Loader",
   description: "High-performance browser and WebviewWindow loader for modern websites and local web apps.",
-  version: typeof __VERSION__ !== "undefined" ? __VERSION__ : "0.1.26",
+  version: typeof __VERSION__ !== "undefined" ? __VERSION__ : "0.1.27",
   author: "Algosculptor",
   hasCustomAppearanceSettings: true,
   viewRailButton: (props: any) => (

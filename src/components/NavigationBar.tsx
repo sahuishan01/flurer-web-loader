@@ -35,11 +35,19 @@ export function NavigationBar(props: NavigationBarProps) {
   const engineName = getPlatformEngineName();
   const [inputValue, setInputValue] = createSignal("");
   const [isFocused, setIsFocused] = createSignal(false);
+  let inputRef: HTMLInputElement | undefined;
 
-  // Sync omnibox with active tab's URL unless the user is actively typing
+  // Sync omnibox with active tab's URL unless the user is actively typing, and autofocus on new tab
   createEffect(() => {
-    if (!isFocused() && props.activeTab) {
-      setInputValue(props.activeTab.url === "about:blank" ? "" : props.activeTab.url);
+    const tab = props.activeTab;
+    if (!isFocused() && tab) {
+      setInputValue(tab.url === "about:blank" ? "" : tab.url);
+    }
+    if (tab && tab.url === "about:blank") {
+      requestAnimationFrame(() => {
+        inputRef?.focus();
+        inputRef?.select();
+      });
     }
   });
 
@@ -89,6 +97,7 @@ export function NavigationBar(props: NavigationBarProps) {
       >
         <LockIcon size={16} />
         <input
+          ref={inputRef}
           type="text"
           style={S.omniboxInput}
           placeholder="Search with DuckDuckGo or enter web address / localhost:port..."

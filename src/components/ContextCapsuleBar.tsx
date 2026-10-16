@@ -88,10 +88,19 @@ export function ContextCapsuleBar(props: ContextCapsuleBarProps) {
     onCleanup(() => window.removeEventListener("keydown", handleKeyDown));
   });
 
-  // Sync omnibox with active tab's URL unless user is actively typing
+  let inputRef: HTMLInputElement | undefined;
+
+  // Sync omnibox with active tab's URL unless user is actively typing, and autofocus on new tab
   createEffect(() => {
-    if (!isFocused() && props.activeTab) {
-      setInputValue(props.activeTab.url === "about:blank" ? "" : props.activeTab.url);
+    const tab = props.activeTab;
+    if (!isFocused() && tab) {
+      setInputValue(tab.url === "about:blank" ? "" : tab.url);
+    }
+    if (tab && tab.url === "about:blank") {
+      requestAnimationFrame(() => {
+        inputRef?.focus();
+        inputRef?.select();
+      });
     }
   });
 
@@ -594,6 +603,7 @@ export function ContextCapsuleBar(props: ContextCapsuleBarProps) {
         >
           <LockIcon size={16} />
           <input
+            ref={inputRef}
             type="text"
             style={S.omniboxInput}
             placeholder={`Search ${props.searchEngine} or enter web address / localhost:port...`}
