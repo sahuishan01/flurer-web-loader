@@ -410,11 +410,47 @@ export function WebViewport(props: WebViewportProps) {
                     }}
                     allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share; fullscreen"
                     onLoad={(e) => {
+                      const iframeEl = e.currentTarget as HTMLIFrameElement;
                       try {
-                        const frameWindow = (e.currentTarget as HTMLIFrameElement)?.contentWindow;
+                        const frameWindow = iframeEl?.contentWindow;
                         const frameHref = frameWindow?.location?.href;
                         if (frameHref && frameHref !== "about:blank" && frameHref !== tab.url) {
                           props.onOpenUrl(frameHref);
+                        }
+
+                        // Attach keydown forwarder if iframe document is accessible (same-origin / about:blank)
+                        if (frameWindow && frameWindow.document) {
+                          frameWindow.addEventListener("keydown", (evt: KeyboardEvent) => {
+                            const isMod = evt.ctrlKey || evt.metaKey;
+                            const isShift = evt.shiftKey;
+                            const isAlt = evt.altKey;
+                            const k = evt.key?.toLowerCase();
+                            const c = evt.code;
+
+                            // Check if this is a web-loader shortcut
+                            if (
+                              (isMod && (k === "t" || k === "w" || k === "r" || k === "l" || k === "p" || k === "o" || k === "e" || k === "k" || k === "d" || k === "tab" || /^[1-9]$/.test(k) || k === "=" || k === "+" || k === "-" || k === "0")) ||
+                              (isAlt && (k === "d" || c === "KeyD")) ||
+                              k === "f5"
+                            ) {
+                              evt.preventDefault();
+                              evt.stopPropagation();
+                              window.postMessage(
+                                {
+                                  type: "web-loader:shortcut",
+                                  payload: {
+                                    key: evt.key,
+                                    code: evt.code,
+                                    ctrlKey: evt.ctrlKey,
+                                    metaKey: evt.metaKey,
+                                    shiftKey: evt.shiftKey,
+                                    altKey: evt.altKey,
+                                  },
+                                },
+                                "*"
+                              );
+                            }
+                          }, true);
                         }
                       } catch {
                         // Cross-origin access blocked by browser security policy (expected for external sites)

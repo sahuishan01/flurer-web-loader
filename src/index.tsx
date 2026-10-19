@@ -359,11 +359,7 @@ function WebBrowserPanel(props: MainPanelProps) {
       // 6. Focus Address Bar / Omnibox: Ctrl+L or Alt+D
       if ((isMod && (key === "l" || c === "KeyL")) || (isAlt && (key === "d" || c === "KeyD"))) {
         preventDefault?.();
-        const omni = document.querySelector(".web-loader-omnibox input") as HTMLInputElement | null;
-        if (omni) {
-          omni.focus();
-          omni.select();
-        }
+        focusOmnibox();
         return true;
       }
 
@@ -540,13 +536,28 @@ function WebBrowserPanel(props: MainPanelProps) {
   };
 
   const focusOmnibox = () => {
-    setTimeout(() => {
+    // Retry across immediate tick, next frame, 50ms, 150ms, and 300ms to guarantee focus
+    const tryFocus = () => {
       const omni = document.querySelector(".web-loader-omnibox input") as HTMLInputElement | null;
       if (omni) {
         omni.focus();
         omni.select();
+        return true;
       }
-    }, 40);
+      return false;
+    };
+
+    if (!tryFocus()) {
+      requestAnimationFrame(() => {
+        if (!tryFocus()) {
+          setTimeout(tryFocus, 50);
+          setTimeout(tryFocus, 150);
+          setTimeout(tryFocus, 300);
+        }
+      });
+    } else {
+      setTimeout(tryFocus, 60);
+    }
   };
 
   const handleSelectTab = (id: string) => {
@@ -610,6 +621,7 @@ function WebBrowserPanel(props: MainPanelProps) {
       setTabs(fresh);
       setActiveTabId(fresh[0].id);
       persistCurrentTabs(fresh, fresh[0].url);
+      focusOmnibox();
       return;
     }
 

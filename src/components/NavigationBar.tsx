@@ -40,14 +40,21 @@ export function NavigationBar(props: NavigationBarProps) {
   // Sync omnibox with active tab's URL unless the user is actively typing, and autofocus on new tab
   createEffect(() => {
     const tab = props.activeTab;
+    const tabId = tab?.id;
     if (!isFocused() && tab) {
       setInputValue(tab.url === "about:blank" ? "" : tab.url);
     }
     if (tab && tab.url === "about:blank") {
-      requestAnimationFrame(() => {
-        inputRef?.focus();
-        inputRef?.select();
-      });
+      const doFocus = () => {
+        if (inputRef) {
+          inputRef.focus();
+          inputRef.select();
+        }
+      };
+      doFocus();
+      requestAnimationFrame(doFocus);
+      setTimeout(doFocus, 50);
+      setTimeout(doFocus, 150);
     }
   });
 
@@ -99,6 +106,7 @@ export function NavigationBar(props: NavigationBarProps) {
         <input
           ref={inputRef}
           type="text"
+          autofocus={props.activeTab?.url === "about:blank"}
           style={S.omniboxInput}
           placeholder="Search with DuckDuckGo or enter web address / localhost:port..."
           value={inputValue()}
