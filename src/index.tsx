@@ -315,7 +315,18 @@ function WebBrowserPanel(props: MainPanelProps) {
 
   // Global Keyboard shortcuts & Child Webview Bridge
   onMount(() => {
+    let lastShortcutSig = "";
+    let lastShortcutTime = 0;
+
     const handleShortcutAction = (k: string, code: string, isMod: boolean, isShift: boolean, isAlt: boolean, preventDefault?: () => void) => {
+      const now = Date.now();
+      const sig = `${k}_${code}_${isMod}_${isShift}_${isAlt}`;
+      if (sig === lastShortcutSig && now - lastShortcutTime < 250) {
+        return false;
+      }
+      lastShortcutSig = sig;
+      lastShortcutTime = now;
+
       const key = (k || "").toLowerCase();
       const c = code || "";
 
@@ -432,9 +443,8 @@ function WebBrowserPanel(props: MainPanelProps) {
     window.addEventListener("keydown", handleGlobalKey, true);
     document.addEventListener("keydown", handleGlobalKey, true);
 
-    // Tauri bridge listener for child webviews emitting "web-loader:shortcut" and global "flurer:webview-shortcut"
+    // Tauri bridge listener for child webviews emitting "web-loader:shortcut"
     let unlistenTauriShortcut: (() => void) | undefined;
-    let unlistenFlurerShortcut: (() => void) | undefined;
     let unlistenPageLoad: (() => void) | undefined;
     let unlistenNavigated: (() => void) | undefined;
 
@@ -452,10 +462,6 @@ function WebBrowserPanel(props: MainPanelProps) {
 
       window.TauriEvent.listen("web-loader:shortcut", handlePayloadShortcut).then((unlisten: () => void) => {
         unlistenTauriShortcut = unlisten;
-      }).catch(() => {});
-
-      window.TauriEvent.listen("flurer:webview-shortcut", handlePayloadShortcut).then((unlisten: () => void) => {
-        unlistenFlurerShortcut = unlisten;
       }).catch(() => {});
 
       window.TauriEvent.listen("tauri://page-load", (event: any) => {
@@ -512,9 +518,6 @@ function WebBrowserPanel(props: MainPanelProps) {
       window.removeEventListener("message", handleWindowMessage);
       if (unlistenTauriShortcut) {
         unlistenTauriShortcut();
-      }
-      if (unlistenFlurerShortcut) {
-        unlistenFlurerShortcut();
       }
       if (unlistenPageLoad) {
         unlistenPageLoad();
