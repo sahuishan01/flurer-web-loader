@@ -37,122 +37,149 @@ export function TabBar(props: TabBarProps) {
   });
 
   return (
-    <div style={S.tabRow}>
-      <For each={props.tabs}>
-        {(tab) => {
-          const isActive = () => tab.id === props.activeTabId;
-          const isCompact = () => !!props.compactTabs;
+    <div
+      style={{
+        display: "flex",
+        "align-items": "center",
+        gap: "6px",
+        width: "100%",
+        "min-width": 0,
+      }}
+    >
+      {/* Extreme Left: Search / Quick Switcher + Compact Mode Toggle */}
+      <div style={{ display: "flex", "align-items": "center", gap: "4px", "flex-shrink": 0 }}>
+        <button
+          type="button"
+          class="icon-btn web-loader-icon-btn"
+          style={{
+            ...S.iconBtn,
+            width: "32px",
+            height: "32px",
+            "min-width": "32px",
+            "min-height": "32px",
+            background: "rgba(255, 255, 255, 0.04)",
+            color: "var(--text-muted, #94a3b8)",
+          }}
+          onClick={() => props.onOpenQuickSwitcher?.()}
+          title={`Quick Tab Search & Jump (${mod}+P / ${mod}+O)`}
+        >
+          <SearchIcon size={16} />
+        </button>
 
-          return (
-            <div
-              class={`web-loader-tab ${isActive() ? "active" : ""} ${isCompact() ? "web-loader-tab-compact" : ""}`}
-              style={{
-                ...S.tab,
-                ...(isActive() ? S.tabActive : {}),
-                ...(isCompact()
-                  ? {
-                      "min-width": "34px",
-                      "max-width": "54px",
-                      padding: "6px 8px",
-                      gap: "4px",
-                      "justify-content": "center",
-                    }
-                  : {}),
-              }}
-              onClick={() => props.onSelectTab(tab.id)}
-              onMouseDown={(e) => {
-                // Middle click to close tab
-                if (e.button === 1) {
-                  e.preventDefault();
-                  props.onCloseTab(tab.id);
-                }
-              }}
-              onContextMenu={(e) => {
-                e.preventDefault();
-                e.stopPropagation();
-                setTabMenu({ tabId: tab.id, x: e.clientX, y: e.clientY });
-              }}
-              title={`${tab.title || "New Tab"}\n${tab.url}`}
-            >
-              <WebsiteIcon url={tab.url} favicon={tab.favicon} size={16} />
-              <Show when={!isCompact()}>
-                <span style={S.tabTitle}>{tab.title || "New Tab"}</span>
-              </Show>
-              <button
-                type="button"
-                class="icon-btn web-loader-icon-btn web-loader-tab-close"
+        <button
+          type="button"
+          class="icon-btn web-loader-icon-btn"
+          style={{
+            ...S.iconBtn,
+            width: "32px",
+            height: "32px",
+            "min-width": "32px",
+            "min-height": "32px",
+            background: props.compactTabs ? "rgba(56, 189, 248, 0.15)" : "rgba(255, 255, 255, 0.04)",
+            color: props.compactTabs ? "var(--accent-default, #38bdf8)" : "var(--text-muted, #94a3b8)",
+            border: props.compactTabs ? "1px solid rgba(56, 189, 248, 0.4)" : "none",
+          }}
+          onClick={() => props.onToggleCompactTabs?.()}
+          title={props.compactTabs ? "Switch to Full Tab View" : "Switch to Compact Tab View (Favicons Only)"}
+        >
+          <CompactIcon size={16} />
+        </button>
+      </div>
+
+      {/* Scrollable Tab Strip */}
+      <div
+        style={{
+          ...S.tabRow,
+          flex: "1 1 auto",
+          "min-width": 0,
+        }}
+      >
+        <For each={props.tabs}>
+          {(tab) => {
+            const isActive = () => tab.id === props.activeTabId;
+            const isCompact = () => !!props.compactTabs;
+
+            return (
+              <div
+                class={`web-loader-tab ${isActive() ? "active" : ""} ${isCompact() ? "web-loader-tab-compact" : ""}`}
                 style={{
-                  ...S.tabCloseBtn,
+                  ...S.tab,
+                  ...(isActive() ? S.tabActive : {}),
                   ...(isCompact()
                     ? {
-                        width: "14px",
-                        height: "14px",
-                        "min-width": "14px",
-                        "min-height": "14px",
-                        padding: "0",
-                        ...(isActive() ? {} : { display: "none" }),
+                        "min-width": "34px",
+                        "max-width": "54px",
+                        padding: "6px 8px",
+                        gap: "4px",
+                        "justify-content": "center",
                       }
                     : {}),
                 }}
-                title="Close Tab"
-                onClick={(e) => {
-                  e.stopPropagation();
-                  props.onCloseTab(tab.id);
+                onClick={() => props.onSelectTab(tab.id)}
+                onMouseDown={(e) => {
+                  // Middle click to close tab
+                  if (e.button === 1) {
+                    e.preventDefault();
+                    props.onCloseTab(tab.id);
+                  }
                 }}
+                onContextMenu={(e) => {
+                  e.preventDefault();
+                  e.stopPropagation();
+                  setTabMenu({ tabId: tab.id, x: e.clientX, y: e.clientY });
+                }}
+                title={`${tab.title || "New Tab"}\n${tab.url}`}
               >
-                <CloseIcon size={isCompact() ? 10 : 15} />
-              </button>
-            </div>
-          );
-        }}
-      </For>
+                <WebsiteIcon url={tab.url} favicon={tab.favicon} size={16} />
+                <Show when={!isCompact()}>
+                  <span style={S.tabTitle}>{tab.title || "New Tab"}</span>
+                </Show>
+                <button
+                  type="button"
+                  class="icon-btn web-loader-icon-btn web-loader-tab-close"
+                  style={{
+                    ...S.tabCloseBtn,
+                    ...(isCompact()
+                      ? {
+                          width: "14px",
+                          height: "14px",
+                          "min-width": "14px",
+                          "min-height": "14px",
+                          padding: "0",
+                          ...(isActive() ? {} : { display: "none" }),
+                        }
+                      : {}),
+                  }}
+                  title="Close Tab"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    props.onCloseTab(tab.id);
+                  }}
+                >
+                  <CloseIcon size={isCompact() ? 10 : 15} />
+                </button>
+              </div>
+            );
+          }}
+        </For>
 
-      <button
-        type="button"
-        class="icon-btn web-loader-icon-btn"
-        style={{
-          ...S.iconBtn,
-          width: "34px",
-          height: "34px",
-        }}
-        onClick={props.onNewTab}
-        title={`Open New Tab (${mod}+T)`}
-      >
-        <PlusIcon size={20} />
-      </button>
-
-      <button
-        type="button"
-        class="icon-btn web-loader-icon-btn"
-        style={{
-          ...S.iconBtn,
-          width: "34px",
-          height: "34px",
-          background: "rgba(255, 255, 255, 0.04)",
-          color: "var(--text-muted, #94a3b8)",
-        }}
-        onClick={() => props.onOpenQuickSwitcher?.()}
-        title={`Quick Tab Search & Jump (${mod}+P / ${mod}+O)`}
-      >
-        <SearchIcon size={16} />
-      </button>
-
-      <button
-        type="button"
-        class="icon-btn web-loader-icon-btn"
-        style={{
-          ...S.iconBtn,
-          width: "34px",
-          height: "34px",
-          background: props.compactTabs ? "rgba(56, 189, 248, 0.15)" : "rgba(255, 255, 255, 0.04)",
-          color: props.compactTabs ? "var(--accent-default, #38bdf8)" : "var(--text-muted, #94a3b8)",
-          border: props.compactTabs ? "1px solid rgba(56, 189, 248, 0.4)" : "none",
-        }}
-        onClick={() => props.onToggleCompactTabs?.()}
-        title={props.compactTabs ? "Switch to Full Tab View" : "Switch to Compact Tab View (Favicons Only)"}
-      >
-        <CompactIcon size={16} />
-      </button>
+        <button
+          type="button"
+          class="icon-btn web-loader-icon-btn"
+          style={{
+            ...S.iconBtn,
+            width: "32px",
+            height: "32px",
+            "min-width": "32px",
+            "min-height": "32px",
+            "flex-shrink": 0,
+          }}
+          onClick={props.onNewTab}
+          title={`Open New Tab (${mod}+T)`}
+        >
+          <PlusIcon size={18} />
+        </button>
+      </div>
 
       {/* Floating Tab Context Menu for Group / Ungroup */}
       <Show when={tabMenu()}>

@@ -148,7 +148,7 @@ export function ContextCapsuleBar(props: ContextCapsuleBarProps) {
         padding: "6px 12px",
       }}
     >
-      {/* Row 1: Workspace Selector + Living Tab Capsules Strip + Add Tab + Orbit Deck Button */}
+      {/* Row 1: Extreme Left Controls (Search & Compact) + Workspace Selector + Living Tab Capsules Strip + Add Tab + Orbit Deck Button */}
       <div
         style={{
           display: "flex",
@@ -158,6 +158,50 @@ export function ContextCapsuleBar(props: ContextCapsuleBarProps) {
           "min-width": 0,
         }}
       >
+        {/* Extreme Left: Search / Quick Switcher + Compact Mode Toggle */}
+        <div style={{ display: "flex", "align-items": "center", gap: "4px", "flex-shrink": 0 }}>
+          <button
+            type="button"
+            class="icon-btn web-loader-icon-btn"
+            style={{
+              ...S.iconBtn,
+              width: "30px",
+              height: "30px",
+              "min-width": "30px",
+              "min-height": "30px",
+              "border-radius": "6px",
+              "flex-shrink": 0,
+              background: "rgba(255, 255, 255, 0.04)",
+              color: "var(--text-muted, #94a3b8)",
+            }}
+            onClick={() => props.onOpenQuickSwitcher?.()}
+            title={`Quick Tab Search & Jump (${mod}+P / ${mod}+O)`}
+          >
+            <SearchIcon size={15} />
+          </button>
+
+          <button
+            type="button"
+            class="icon-btn web-loader-icon-btn"
+            style={{
+              ...S.iconBtn,
+              width: "30px",
+              height: "30px",
+              "min-width": "30px",
+              "min-height": "30px",
+              "border-radius": "6px",
+              "flex-shrink": 0,
+              background: props.compactTabs ? "rgba(56, 189, 248, 0.18)" : "rgba(255, 255, 255, 0.04)",
+              color: props.compactTabs ? "var(--accent-default, #38bdf8)" : "var(--text-muted, #94a3b8)",
+              border: props.compactTabs ? "1px solid rgba(56, 189, 248, 0.4)" : "1px solid rgba(255, 255, 255, 0.08)",
+            }}
+            onClick={() => props.onToggleCompactTabs?.()}
+            title={props.compactTabs ? "Switch to Full Tab Titles" : "Switch to Compact Tab View (Favicons Only)"}
+          >
+            <CompactIcon size={14} />
+          </button>
+        </div>
+
         {/* Workspace Pill Dropdown Button */}
         <div style={{ position: "relative", "flex-shrink": 0 }}>
           <button
@@ -485,49 +529,6 @@ export function ContextCapsuleBar(props: ContextCapsuleBarProps) {
             title={`Open New Tab in ${props.currentWorkspace.name} (${mod}+T)`}
           >
             <PlusIcon size={16} />
-          </button>
-
-          {/* Quick Tab Search / Jump Button */}
-          <button
-            type="button"
-            class="icon-btn web-loader-icon-btn"
-            style={{
-              ...S.iconBtn,
-              width: "30px",
-              height: "30px",
-              "min-width": "30px",
-              "min-height": "30px",
-              "border-radius": "6px",
-              "flex-shrink": 0,
-              background: "rgba(255, 255, 255, 0.04)",
-              color: "var(--text-muted, #94a3b8)",
-            }}
-            onClick={() => props.onOpenQuickSwitcher?.()}
-            title={`Quick Tab Search & Jump (${mod}+P / ${mod}+O)`}
-          >
-            <SearchIcon size={15} />
-          </button>
-
-          {/* Compact View Toggle Button */}
-          <button
-            type="button"
-            class="icon-btn web-loader-icon-btn"
-            style={{
-              ...S.iconBtn,
-              width: "30px",
-              height: "30px",
-              "min-width": "30px",
-              "min-height": "30px",
-              "border-radius": "6px",
-              "flex-shrink": 0,
-              background: props.compactTabs ? "rgba(56, 189, 248, 0.18)" : "rgba(255, 255, 255, 0.04)",
-              color: props.compactTabs ? "var(--accent-default, #38bdf8)" : "var(--text-muted, #94a3b8)",
-              border: props.compactTabs ? "1px solid rgba(56, 189, 248, 0.4)" : "1px solid rgba(255, 255, 255, 0.08)",
-            }}
-            onClick={() => props.onToggleCompactTabs?.()}
-            title={props.compactTabs ? "Switch to Full Tab Titles" : "Switch to Compact Tab View (Favicons Only)"}
-          >
-            <CompactIcon size={14} />
           </button>
         </div>
 

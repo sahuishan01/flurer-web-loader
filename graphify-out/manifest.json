@@ -1,14 +1,14 @@
 {
   "package.json": {
-    "mtime": 1792417320.340288,
-    "seen": 1792417334.627314,
-    "ast_hash": "dc472039fba4955edc45190a8361f0eb",
+    "mtime": 1792418176.6640427,
+    "seen": 1792418189.5183368,
+    "ast_hash": "3c6018774922d05f78f9d550f7147e30",
     "semantic_hash": ""
   },
   "plugin.json": {
-    "mtime": 1792417324.052304,
-    "seen": 1792417334.6273184,
-    "ast_hash": "aaa0310e5d415c5cde31a94cadca005d",
+    "mtime": 1792418180.828061,
+    "seen": 1792418189.5183399,
+    "ast_hash": "3ee54dacc0c7b49911ead4d36dd49a30",
     "semantic_hash": ""
   },
   "scripts/sync-version.cjs": {
@@ -36,9 +36,9 @@
     "semantic_hash": ""
   },
   "src/components/TabBar.tsx": {
-    "mtime": 1792417179.6196764,
-    "seen": 1792417334.627336,
-    "ast_hash": "51b45b7bb34a2a0741c6ea4211204b8d",
+    "mtime": 1792418159.7919688,
+    "seen": 1792418189.5183551,
+    "ast_hash": "e942b4660994ddd1345da8f836cbf6f9",
     "semantic_hash": ""
   },
   "src/components/WebViewport.tsx": {
@@ -120,9 +120,9 @@
     "semantic_hash": ""
   },
   "src/components/ContextCapsuleBar.tsx": {
-    "mtime": 1792417132.6914723,
-    "seen": 1792417334.6273246,
-    "ast_hash": "f059df9d60b00bce94d9e7b255c9539d",
+    "mtime": 1792418125.607819,
+    "seen": 1792418189.5183449,
+    "ast_hash": "30fd8986b2f597ac0abc19947533a855",
     "semantic_hash": ""
   },
   "src/components/ContextOrbitDeck.tsx": {
