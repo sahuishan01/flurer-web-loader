@@ -1,7 +1,7 @@
 # Graph Report - flurer-web-loader-plugin  (2026-10-19)
 
 ## Corpus Check
-- 25 files · ~29,741 words
+- 25 files · ~29,861 words
 - Verdict: corpus is large enough that graph structure adds value.
 
 ## Summary
@@ -10,7 +10,7 @@
 - Token cost: 0 input · 0 output
 
 ## Graph Freshness
-- Built from commit: `69c7f5a1`
+- Built from commit: `b449bd2a`
 - Run `git rev-parse HEAD` and compare to check if the graph is stale.
 - Run `graphify update .` after code changes (no API cost).
 
@@ -36,26 +36,26 @@
 ## God Nodes (most connected - your core abstractions)
 1. `WebBrowserPanel()` - 22 edges
 2. `getDomain()` - 18 edges
-3. `invoke()` - 13 edges
-4. `Tab` - 13 edges
+3. `Tab` - 13 edges
+4. `invoke()` - 13 edges
 5. `getModifierKey()` - 12 edges
-6. `ProjectWorkspace` - 12 edges
+6. `ProjectWorkspace` - 11 edges
 7. `WebViewport()` - 11 edges
 8. `SettingsPanel()` - 11 edges
 9. `routeTab()` - 10 edges
 10. `compilerOptions` - 10 edges
 
 ## Surprising Connections (you probably didn't know these)
-- `WebViewport()` --calls--> `createOrShowDockedWebview()`  [EXTRACTED]
-  src/components/WebViewport.tsx → src/utils.ts
-- `WebViewport()` --calls--> `getDomain()`  [EXTRACTED]
-  src/components/WebViewport.tsx → src/utils.ts
-- `WebViewport()` --calls--> `getPlatformEngineName()`  [EXTRACTED]
-  src/components/WebViewport.tsx → src/utils.ts
 - `createNewTab()` --calls--> `classifyHeuristic()`  [EXTRACTED]
   src/index.tsx → src/smartRouter.ts
 - `createNewTab()` --calls--> `getDomain()`  [EXTRACTED]
   src/index.tsx → src/utils.ts
+- `[history, setHistory]` --calls--> `getSavedHistory()`  [EXTRACTED]
+  src/index.tsx → src/utils.ts
+- `WebBrowserPanel()` --calls--> `classifyHeuristic()`  [EXTRACTED]
+  src/index.tsx → src/smartRouter.ts
+- `WebBrowserPanel()` --calls--> `routeTab()`  [EXTRACTED]
+  src/index.tsx → src/smartRouter.ts
 
 ## Import Cycles
 - None detected.
@@ -63,12 +63,12 @@
 ## Communities (17 total, 3 thin omitted)
 
 ### Community 0 - "ContextOrbitDeck.tsx"
-Cohesion: 0.13
-Nodes (36): ContextCapsuleBar(), ContextCapsuleBarProps, NavigationBar(), NavigationBarProps, QuickTabSwitcher(), QuickTabSwitcherProps, TabBar(), TabBarProps (+28 more)
+Cohesion: 0.11
+Nodes (39): ContextCapsuleBar(), ContextCapsuleBarProps, NavigationBar(), NavigationBarProps, DEFAULT_AI_TARGETS, DEFAULT_DEV_TARGETS, DEFAULT_DOC_TARGETS, QuickDial() (+31 more)
 
 ### Community 1 - "WebViewport.tsx"
-Cohesion: 0.15
-Nodes (20): DEFAULT_AI_TARGETS, DEFAULT_DEV_TARGETS, DEFAULT_DOC_TARGETS, QuickDial(), QuickDialProps, WebViewport(), WebViewportProps, HistoryIcon() (+12 more)
+Cohesion: 0.25
+Nodes (13): QuickDialProps, WebViewport(), WebViewportProps, Bookmark, HistoryItem, addUserRestrictedDomain(), closeTabWebview(), getIframeEmbedUrl() (+5 more)
 
 ### Community 2 - "compilerOptions"
 Cohesion: 0.15
@@ -99,8 +99,8 @@ Cohesion: 0.16
 Nodes (21): [activeTabId, setActiveTabId], [bookmarks, setBookmarks], createNewTab(), [history, setHistory], initialTabsState, [tabs, setTabs], WebBrowserPanel(), addHistoryItem() (+13 more)
 
 ### Community 12 - "types.ts"
-Cohesion: 0.22
-Nodes (9): ContextOrbitDeckProps, MainPanelProps, NavDesignMode, OrbitLayoutMode, SavedTabRecord, SettingsPanelProps, SmartRouterConfig, SmartRouterProvider (+1 more)
+Cohesion: 0.21
+Nodes (13): ContextOrbitDeckProps, QuickTabSwitcherProps, TabBarProps, MainPanelProps, NavDesignMode, OrbitLayoutMode, ProjectWorkspace, SavedTabRecord (+5 more)
 
 ### Community 13 - "invoke"
 Cohesion: 0.29
@@ -119,24 +119,24 @@ Cohesion: 0.67
 Nodes (3): initRestoredTabs(), getSavedActiveTab(), getSavedTabs()
 
 ## Knowledge Gaps
-- **57 isolated node(s):** `Release Steps:`, `2. Architecture & Runtime Invariants`, `3. Secret & Instruction Handling`, `name`, `version` (+52 more)
+- **57 isolated node(s):** `name`, `version`, `private`, `type`, `prebuild` (+52 more)
   These have ≤1 connection - possible missing edges or undocumented components.
 - **3 thin communities (<3 nodes) omitted from report** — run `graphify query` to explore isolated nodes.
 
 ## Suggested Questions
 _Questions this graph is uniquely positioned to answer:_
 
-- **Why does `getDomain()` connect `SettingsPanel.tsx` to `ContextOrbitDeck.tsx`, `WebViewport.tsx`, `utils.ts`, `index.tsx`, `openInWebviewWindow`?**
+- **Why does `getDomain()` connect `SettingsPanel.tsx` to `ContextOrbitDeck.tsx`, `WebViewport.tsx`, `utils.ts`, `index.tsx`, `types.ts`, `openInWebviewWindow`?**
   _High betweenness centrality (0.011) - this node is a cross-community bridge._
-- **Why does `ProjectWorkspace` connect `ContextOrbitDeck.tsx` to `utils.ts`, `index.tsx`, `types.ts`, `SettingsPanel.tsx`?**
+- **Why does `Tab` connect `types.ts` to `ContextOrbitDeck.tsx`, `WebViewport.tsx`, `index.tsx`?**
   _High betweenness centrality (0.008) - this node is a cross-community bridge._
-- **Why does `Tab` connect `ContextOrbitDeck.tsx` to `WebViewport.tsx`, `index.tsx`, `types.ts`?**
-  _High betweenness centrality (0.007) - this node is a cross-community bridge._
-- **What connects `Release Steps:`, `2. Architecture & Runtime Invariants`, `3. Secret & Instruction Handling` to the rest of the system?**
+- **Why does `ProjectWorkspace` connect `types.ts` to `ContextOrbitDeck.tsx`, `index.tsx`, `utils.ts`, `SettingsPanel.tsx`?**
+  _High betweenness centrality (0.006) - this node is a cross-community bridge._
+- **What connects `name`, `version`, `private` to the rest of the system?**
   _57 weakly-connected nodes found - possible documentation gaps or missing edges._
 - **Should `ContextOrbitDeck.tsx` be split into smaller, more focused modules?**
-  _Cohesion score 0.13107822410147993 - nodes in this community are weakly interconnected._
-- **Should `WebViewport.tsx` be split into smaller, more focused modules?**
-  _Cohesion score 0.1471861471861472 - nodes in this community are weakly interconnected._
+  _Cohesion score 0.1091581868640148 - nodes in this community are weakly interconnected._
 - **Should `package.json` be split into smaller, more focused modules?**
   _Cohesion score 0.1 - nodes in this community are weakly interconnected._
+- **Should `utils.ts` be split into smaller, more focused modules?**
+  _Cohesion score 0.11695906432748537 - nodes in this community are weakly interconnected._

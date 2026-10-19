@@ -1,5 +1,5 @@
 {
-  "0": "ContextOrbitDeck.tsx",
+  "0": "ContextCapsuleBar.tsx",
   "1": "WebViewport.tsx",
   "2": "compilerOptions",
   "3": "package.json",
@@ -12,8 +12,8 @@
   "10": "workflows/graphify.md",
   "11": "index.tsx",
   "12": "types.ts",
-  "13": "invoke",
+  "13": "getModifierKey",
   "14": "Project Guidelines & Invariants (GEMINI.md)",
   "15": "openInWebviewWindow",
-  "16": "initRestoredTabs"
+  "16": "addHistoryItem"
 }

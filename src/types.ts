@@ -75,6 +75,7 @@ export interface SmartRouterConfig {
 export interface SavedTabRecord {
   title: string;
   url: string;
+  favicon?: string;
   projectId?: string;
   intent?: TabIntent;
   parentId?: string;
@@ -106,6 +107,7 @@ export interface WebPluginSettings {
   orbitDeckLayout?: OrbitLayoutMode;
   workspaces?: ProjectWorkspace[];
   smartRouter?: SmartRouterConfig;
+  compactTabs?: boolean;
 }
 
 export interface MainPanelProps {

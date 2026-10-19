@@ -139,6 +139,16 @@ if (typeof document !== "undefined" && !document.getElementById(STYLE_ID)) {
       transform: scale(0.9) !important;
     }
 
+    .web-loader-tab-compact {
+      justify-content: center !important;
+    }
+    .web-loader-tab-compact:not(:hover):not(.active) .web-loader-tab-close {
+      display: none !important;
+    }
+    .web-loader-tab-compact:hover .web-loader-tab-close {
+      display: inline-flex !important;
+    }
+
     .web-loader-omnibox {
       transition: border-color 0.22s cubic-bezier(0.16, 1, 0.3, 1),
                   box-shadow 0.22s cubic-bezier(0.16, 1, 0.3, 1),
@@ -257,6 +267,7 @@ function initRestoredTabs(): { tabs: Tab[]; activeId: string } {
       if (s.intent) tab.intent = s.intent;
       if (s.pinned !== undefined) tab.pinned = s.pinned;
       if (s.position) tab.position = s.position;
+      if (s.favicon) tab.favicon = s.favicon;
       return tab;
     });
     const match = restored.find((t) => t.url === savedActive);
@@ -544,6 +555,7 @@ function WebBrowserPanel(props: MainPanelProps) {
       currentTabs.map((t) => ({
         title: t.title,
         url: t.url,
+        favicon: t.favicon,
         projectId: t.projectId,
         intent: t.intent,
         parentId: t.parentId,
@@ -992,6 +1004,12 @@ function WebBrowserPanel(props: MainPanelProps) {
             onResetZoom={handleResetZoom}
             onSwitchWorkspace={handleSwitchWorkspace}
             onOpenQuickSwitcher={() => setQuickSwitcherOpen(true)}
+            compactTabs={props.pluginSettings?.compactTabs ?? false}
+            onToggleCompactTabs={() =>
+              props.onPluginSettingsChange?.({
+                compactTabs: !(props.pluginSettings?.compactTabs ?? false),
+              })
+            }
           />
         }
       >
@@ -1000,11 +1018,17 @@ function WebBrowserPanel(props: MainPanelProps) {
             tabs={tabs()}
             activeTabId={activeTabId()}
             workspaces={workspaces()}
+            compactTabs={props.pluginSettings?.compactTabs ?? false}
             onSelectTab={handleSelectTab}
             onCloseTab={handleCloseTab}
             onNewTab={() => handleNewTab("about:blank")}
             onUpdateTabWorkspace={handleUpdateTabWorkspace}
             onOpenQuickSwitcher={() => setQuickSwitcherOpen(true)}
+            onToggleCompactTabs={() =>
+              props.onPluginSettingsChange?.({
+                compactTabs: !(props.pluginSettings?.compactTabs ?? false),
+              })
+            }
           />
 
           <NavigationBar

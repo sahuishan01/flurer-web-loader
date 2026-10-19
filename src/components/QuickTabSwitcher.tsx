@@ -1,6 +1,7 @@
 import { createSignal, createEffect, onMount, onCleanup, For, Show } from "solid-js";
 import { Tab, ProjectWorkspace } from "../types";
 import { GlobeIcon, CloseIcon } from "../icons";
+import { WebsiteIcon } from "./WebsiteIcon";
 import { getDomain, getModifierKey } from "../utils";
 
 interface QuickTabSwitcherProps {
@@ -231,7 +232,7 @@ export function QuickTabSwitcher(props: QuickTabSwitcherProps) {
                         "min-width": 0,
                       }}
                     >
-                      <GlobeIcon size={16} />
+                      <WebsiteIcon url={tab.url} favicon={tab.favicon} size={16} />
                       <div
                         style={{
                           display: "flex",

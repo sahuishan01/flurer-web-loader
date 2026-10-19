@@ -266,3 +266,14 @@ export function SearchIcon(props: { size?: number }) {
   );
 }
 
+export function CompactIcon(props: { size?: number }) {
+  const s = () => props.size || 16;
+  return (
+    <svg width={s()} height={s()} viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style={{ "flex-shrink": "0", display: "block" }}>
+      <rect x="3" y="5" width="4" height="14" rx="1.5" />
+      <rect x="10" y="5" width="4" height="14" rx="1.5" />
+      <rect x="17" y="5" width="4" height="14" rx="1.5" />
+    </svg>
+  );
+}
+

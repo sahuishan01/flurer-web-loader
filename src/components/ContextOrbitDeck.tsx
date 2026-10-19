@@ -21,6 +21,7 @@ import {
   GripIcon,
   LayersIcon,
 } from "../icons";
+import { WebsiteIcon } from "./WebsiteIcon";
 import { getDomain, getModifierKey } from "../utils";
 import {
   INTENT_COLORS,
@@ -840,7 +841,7 @@ export function ContextOrbitDeck(props: ContextOrbitDeckProps) {
                                 }}
                               >
                                 <div style={{ display: "flex", "align-items": "center", gap: "6px", "min-width": 0 }}>
-                                  <GlobeIcon size={14} />
+                                  <WebsiteIcon url={tab.url} favicon={tab.favicon} size={14} />
                                   <span
                                     style={{
                                       "font-size": "11px",

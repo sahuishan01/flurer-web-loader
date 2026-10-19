@@ -16,7 +16,9 @@ import {
   SparklesIcon,
   LayersIcon,
   SearchIcon,
+  CompactIcon,
 } from "../icons";
+import { WebsiteIcon } from "./WebsiteIcon";
 import { normalizeUrl, getModifierKey, getPlatformEngineName, getDomain } from "../utils";
 import { INTENT_COLORS, INTENT_LABELS } from "../smartRouter";
 
@@ -47,6 +49,8 @@ interface ContextCapsuleBarProps {
   onSwitchWorkspace: (workspaceId: string) => void;
   onOpenQuickSwitcher?: () => void;
   onUpdateTabWorkspace?: (tabId: string, projectId: string | undefined) => void;
+  compactTabs?: boolean;
+  onToggleCompactTabs?: () => void;
 }
 
 export function ContextCapsuleBar(props: ContextCapsuleBarProps) {
@@ -356,17 +360,19 @@ export function ContextCapsuleBar(props: ContextCapsuleBarProps) {
           <For each={visibleTabs()}>
             {(tab) => {
               const isActive = () => tab.id === props.activeTab?.id;
+              const isCompact = () => !!props.compactTabs;
               const intent = (): TabIntent => tab.intent || "general";
               const badgeColor = () => INTENT_COLORS[intent()];
 
               return (
                 <div
-                  class="web-loader-tab"
+                  class={`web-loader-tab ${isActive() ? "active" : ""} ${isCompact() ? "web-loader-tab-compact" : ""}`}
                   style={{
                     display: "inline-flex",
                     "align-items": "center",
-                    gap: "6px",
-                    padding: "5px 10px",
+                    "justify-content": isCompact() ? "center" : "flex-start",
+                    gap: isCompact() ? "4px" : "6px",
+                    padding: isCompact() ? "5px 7px" : "5px 10px",
                     "border-radius": "8px",
                     "font-size": "12px",
                     "font-family": "system-ui, sans-serif",
@@ -380,52 +386,62 @@ export function ContextCapsuleBar(props: ContextCapsuleBarProps) {
                     "box-shadow": isActive() ? "0 2px 8px rgba(0, 0, 0, 0.3)" : "none",
                     cursor: "pointer",
                     "flex-shrink": 0,
-                    "max-width": "200px",
-                    "min-width": "110px",
+                    "max-width": isCompact() ? "56px" : "200px",
+                    "min-width": isCompact() ? "34px" : "110px",
                     "user-select": "none",
                   }}
                   onClick={() => props.onSelectTab(tab.id)}
+                  onMouseDown={(e) => {
+                    // Middle click to close tab
+                    if (e.button === 1) {
+                      e.preventDefault();
+                      props.onCloseTab(tab.id);
+                    }
+                  }}
                   onContextMenu={(e) => {
                     e.preventDefault();
                     e.stopPropagation();
                     setTabMenu({ tabId: tab.id, x: e.clientX, y: e.clientY });
                   }}
-                  title={tab.url}
+                  title={`${tab.title || "New Tab"}\n${tab.url}`}
                 >
-                  <GlobeIcon size={14} />
-                  <span
-                    style={{
-                      overflow: "hidden",
-                      "text-overflow": "ellipsis",
-                      "white-space": "nowrap",
-                      flex: 1,
-                      "font-weight": isActive() ? 600 : 400,
-                    }}
-                  >
-                    {tab.title || "New Tab"}
-                  </span>
+                  <WebsiteIcon url={tab.url} favicon={tab.favicon} size={15} />
 
-                  {/* Intent tag pill on the tab - Click to group/ungroup */}
-                  <span
-                    style={{
-                      "font-size": "9px",
-                      "font-family": "Space Mono, monospace",
-                      padding: "1px 5px",
-                      "border-radius": "4px",
-                      background: "rgba(0, 0, 0, 0.35)",
-                      color: badgeColor(),
-                      "flex-shrink": 0,
-                      cursor: "pointer",
-                    }}
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      const rect = e.currentTarget.getBoundingClientRect();
-                      setTabMenu({ tabId: tab.id, x: rect.left, y: rect.bottom + 6 });
-                    }}
-                    title="Click or right-click tab to group/ungroup workspace"
-                  >
-                    {intent().slice(0, 3).toUpperCase()}
-                  </span>
+                  <Show when={!isCompact()}>
+                    <span
+                      style={{
+                        overflow: "hidden",
+                        "text-overflow": "ellipsis",
+                        "white-space": "nowrap",
+                        flex: 1,
+                        "font-weight": isActive() ? 600 : 400,
+                      }}
+                    >
+                      {tab.title || "New Tab"}
+                    </span>
+
+                    {/* Intent tag pill on the tab - Click to group/ungroup */}
+                    <span
+                      style={{
+                        "font-size": "9px",
+                        "font-family": "Space Mono, monospace",
+                        padding: "1px 5px",
+                        "border-radius": "4px",
+                        background: "rgba(0, 0, 0, 0.35)",
+                        color: badgeColor(),
+                        "flex-shrink": 0,
+                        cursor: "pointer",
+                      }}
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        const rect = e.currentTarget.getBoundingClientRect();
+                        setTabMenu({ tabId: tab.id, x: rect.left, y: rect.bottom + 6 });
+                      }}
+                      title="Click or right-click tab to group/ungroup workspace"
+                    >
+                      {intent().slice(0, 3).toUpperCase()}
+                    </span>
+                  </Show>
 
                   {/* Close Tab Button */}
                   <button
@@ -433,10 +449,11 @@ export function ContextCapsuleBar(props: ContextCapsuleBarProps) {
                     class="icon-btn web-loader-icon-btn web-loader-tab-close"
                     style={{
                       ...S.tabCloseBtn,
-                      width: "18px",
-                      height: "18px",
-                      "min-width": "18px",
-                      "min-height": "18px",
+                      width: isCompact() ? "14px" : "18px",
+                      height: isCompact() ? "14px" : "18px",
+                      "min-width": isCompact() ? "14px" : "18px",
+                      "min-height": isCompact() ? "14px" : "18px",
+                      ...(isCompact() && !isActive() ? { display: "none" } : {}),
                     }}
                     onClick={(e) => {
                       e.stopPropagation();
@@ -444,7 +461,7 @@ export function ContextCapsuleBar(props: ContextCapsuleBarProps) {
                     }}
                     title="Close Tab"
                   >
-                    <CloseIcon size={12} />
+                    <CloseIcon size={isCompact() ? 10 : 12} />
                   </button>
                 </div>
               );
@@ -489,6 +506,28 @@ export function ContextCapsuleBar(props: ContextCapsuleBarProps) {
             title={`Quick Tab Search & Jump (${mod}+P / ${mod}+O)`}
           >
             <SearchIcon size={15} />
+          </button>
+
+          {/* Compact View Toggle Button */}
+          <button
+            type="button"
+            class="icon-btn web-loader-icon-btn"
+            style={{
+              ...S.iconBtn,
+              width: "30px",
+              height: "30px",
+              "min-width": "30px",
+              "min-height": "30px",
+              "border-radius": "6px",
+              "flex-shrink": 0,
+              background: props.compactTabs ? "rgba(56, 189, 248, 0.18)" : "rgba(255, 255, 255, 0.04)",
+              color: props.compactTabs ? "var(--accent-default, #38bdf8)" : "var(--text-muted, #94a3b8)",
+              border: props.compactTabs ? "1px solid rgba(56, 189, 248, 0.4)" : "1px solid rgba(255, 255, 255, 0.08)",
+            }}
+            onClick={() => props.onToggleCompactTabs?.()}
+            title={props.compactTabs ? "Switch to Full Tab Titles" : "Switch to Compact Tab View (Favicons Only)"}
+          >
+            <CompactIcon size={14} />
           </button>
         </div>
 

@@ -20,6 +20,7 @@ import {
   SparklesIcon,
   BranchIcon,
   LayersIcon,
+  CompactIcon,
 } from "../icons";
 import {
   DEFAULT_WORKSPACES,
@@ -647,6 +648,48 @@ export function SettingsPanel(props: SettingsPanelProps) {
               </p>
             </div>
           </div>
+        </div>
+
+        {/* Compact Tab View Setting */}
+        <div
+          style={{
+            display: "flex",
+            "align-items": "center",
+            "justify-content": "space-between",
+            padding: "12px 14px",
+            background: "rgba(255, 255, 255, 0.03)",
+            border: "1px solid rgba(255, 255, 255, 0.08)",
+            "border-radius": "8px",
+          }}
+        >
+          <div style={{ display: "flex", "flex-direction": "column", gap: "2px" }}>
+            <div style={{ display: "flex", "align-items": "center", gap: "8px" }}>
+              <CompactIcon size={16} />
+              <span style={{ "font-size": "13px", "font-weight": 600 }}>
+                Compact Tab View (Favicons Only)
+              </span>
+            </div>
+            <p style={{ margin: 0, "font-size": "11px", color: "var(--text-secondary, #94a3b8)", "line-height": 1.4 }}>
+              Show only website favicons on the tab bar instead of full title and addresses.
+            </p>
+          </div>
+          <label style={{ display: "inline-flex", "align-items": "center", cursor: "pointer" }}>
+            <input
+              type="checkbox"
+              checked={props.pluginSettings?.compactTabs ?? false}
+              onChange={(e) =>
+                props.onPluginSettingsChange({
+                  compactTabs: e.currentTarget.checked,
+                })
+              }
+              style={{
+                width: "16px",
+                height: "16px",
+                "accent-color": "var(--accent-default, #38bdf8)",
+                cursor: "pointer",
+              }}
+            />
+          </label>
         </div>
 
         {/* Default Orbit Deck Layout */}
