@@ -1,14 +1,14 @@
 {
   "package.json": {
-    "mtime": 1792391659.2276585,
-    "seen": 1792391682.6663342,
-    "ast_hash": "499a3802fab39d49ce641b1f4f4a5752",
+    "mtime": 1792414526.02398,
+    "seen": 1792414546.2159927,
+    "ast_hash": "789d7136fab602ead73f10191f5668c1",
     "semantic_hash": ""
   },
   "plugin.json": {
-    "mtime": 1792392152.5618594,
-    "seen": 1792392172.0050926,
-    "ast_hash": "6473126e029e91ea59abc0bad48ff3a0",
+    "mtime": 1792414532.6080089,
+    "seen": 1792414546.2159965,
+    "ast_hash": "1d071cdc579187da21f14eca4df8f1c9",
     "semantic_hash": ""
   },
   "scripts/sync-version.cjs": {
@@ -42,9 +42,9 @@
     "semantic_hash": ""
   },
   "src/components/WebViewport.tsx": {
-    "mtime": 1792386440.3970196,
-    "seen": 1792386478.835296,
-    "ast_hash": "810786d6a4940676d4daf83c1800a14d",
+    "mtime": 1792406533.4048433,
+    "seen": 1792406597.708115,
+    "ast_hash": "73e9df54df3f1ca2415393c740c1f9c7",
     "semantic_hash": ""
   },
   "src/icons.tsx": {
@@ -54,9 +54,9 @@
     "semantic_hash": ""
   },
   "src/index.tsx": {
-    "mtime": 1792392146.7978315,
-    "seen": 1792392172.0051112,
-    "ast_hash": "39236b7675b31a874595f89283ea04b0",
+    "mtime": 1792406515.9007668,
+    "seen": 1792406597.7081182,
+    "ast_hash": "5400c1cab9f9d9230b5ada11ecb70290",
     "semantic_hash": ""
   },
   "src/styles.ts": {
@@ -72,9 +72,9 @@
     "semantic_hash": ""
   },
   "src/utils.ts": {
-    "mtime": 1792392111.261661,
-    "seen": 1792392172.005119,
-    "ast_hash": "7ff1668168f1348fccabe2826505c806",
+    "mtime": 1792406578.1570387,
+    "seen": 1792406597.7081263,
+    "ast_hash": "8654c1c92fa3115bf386c6a623b1631e",
     "semantic_hash": ""
   },
   "tsconfig.json": {
@@ -141,6 +141,18 @@
     "mtime": 1792045355.6203837,
     "seen": 1792045400.9930158,
     "ast_hash": "aeb99c7f18d530854723bb4f49f01a05",
+    "semantic_hash": ""
+  },
+  "GEMINI.md": {
+    "mtime": 1792414505.5718899,
+    "seen": 1792414546.2160382,
+    "ast_hash": "b8fdc0e9442520e4bcf659c014e99ca4",
+    "semantic_hash": ""
+  },
+  "gemini.md": {
+    "mtime": 1792414505.5718899,
+    "seen": 1792414546.2160408,
+    "ast_hash": "b8fdc0e9442520e4bcf659c014e99ca4",
     "semantic_hash": ""
   }
 }

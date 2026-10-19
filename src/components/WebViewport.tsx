@@ -75,50 +75,89 @@ export function WebViewport(props: WebViewportProps) {
     }
   };
 
+  let syncSeq = 0;
   let isSyncing = false;
+  let hasPendingSync = false;
+
   const syncCurrentTabDocked = async () => {
-    if (!containerRef || isSyncing) return;
+    if (!containerRef) return;
+
+    if (isSyncing) {
+      hasPendingSync = true;
+      return;
+    }
+
+    const currentSeq = ++syncSeq;
     const tab = props.activeTab;
+    const tabId = tab?.id;
+    const tabUrl = tab?.url;
     const isPanelActive = props.active !== false;
-
-    // 1. If blank tab (New Tab / Home Page), panel inactive, or overlay is open: hide all docked webviews!
-    if (!tab || isBlank() || !tab.url || !isPanelActive || props.isOverlayOpen) {
-      await hideAllDockedWebviews();
-      return;
-    }
-
-    // 2. If docked child webviews are disabled or tab forced embed: hide webviews
-    if (props.dockedChildWebview === false || forceEmbedTabs()[tab.id]) {
-      await hideAllDockedWebviews();
-      return;
-    }
-
-    const rect = containerRef.getBoundingClientRect();
-    if (rect.width <= 0 || rect.height <= 0) return;
 
     isSyncing = true;
     try {
-      const res = await createOrShowDockedWebview(tab.id, tab.url, {
+      // 1. If blank tab (New Tab / Home Page), panel inactive, or overlay is open: hide all docked webviews!
+      if (!tab || isBlank() || !tabUrl || !isPanelActive || props.isOverlayOpen) {
+        await hideAllDockedWebviews();
+        return;
+      }
+
+      // 2. If docked child webviews are disabled or tab forced embed: hide webviews
+      if (props.dockedChildWebview === false || (tabId && forceEmbedTabs()[tabId])) {
+        await hideAllDockedWebviews();
+        return;
+      }
+
+      const rect = containerRef.getBoundingClientRect();
+      if (rect.width <= 0 || rect.height <= 0) return;
+
+      const res = await createOrShowDockedWebview(tabId!, tabUrl, {
         x: rect.left,
         y: rect.top,
         width: rect.width,
         height: rect.height,
       });
 
+      // Stale check: if active tab changed while awaiting IPC, do not activate stale tab
+      if (currentSeq !== syncSeq || props.activeTab?.id !== tabId) {
+        return;
+      }
+
       if (res.success) {
-        setDockedActiveMap((prev) => ({ ...prev, [tab.id]: true }));
+        setDockedActiveMap((prev) => ({ ...prev, [tabId!]: true }));
         setDockedFailed(false);
       } else {
         console.warn("Native docked child webview unavailable, falling back:", res.error);
-        setDockedActiveMap((prev) => ({ ...prev, [tab.id]: false }));
+        setDockedActiveMap((prev) => ({ ...prev, [tabId!]: false }));
         setDockedFailed(true);
       }
     } catch (err) {
       console.error("syncCurrentTabDocked error:", err);
     } finally {
       isSyncing = false;
+      // If a newer sync was requested while busy or if activeTab changed in-flight, resync to latest state immediately!
+      if (hasPendingSync || currentSeq !== syncSeq || props.activeTab?.id !== tabId) {
+        hasPendingSync = false;
+        syncCurrentTabDocked();
+      }
     }
   };
+
+  // Synchronize dockedActiveMap when tabs are removed
+  createEffect(() => {
+    const currentTabIds = new Set((props.tabs || []).map((t) => t.id));
+    setDockedActiveMap((prev) => {
+      let changed = false;
+      const next: Record<string, boolean> = {};
+      for (const [k, v] of Object.entries(prev)) {
+        if (currentTabIds.has(k)) {
+          next[k] = v;
+        } else {
+          changed = true;
+        }
+      }
+      return changed ? next : prev;
+    });
+  });
 
   // Auto-launch separate native window ONLY if docked webview is disabled/failed and autoLaunchRestricted is enabled
   createEffect(() => {

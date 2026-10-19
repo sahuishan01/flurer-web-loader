@@ -1,4 +1,4 @@
-import { createSignal, createRoot, Show, onMount, onCleanup, createEffect } from "solid-js";
+import { createSignal, createRoot, Show, onMount, onCleanup, createEffect, batch } from "solid-js";
 import {
   MainPanelProps,
   Tab,
@@ -581,20 +581,21 @@ function WebBrowserPanel(props: MainPanelProps) {
   };
 
   const handleSelectTab = (id: string) => {
-    setOrbitDeckOpen(false);
-    setWorkspaceMenuOpen(false);
-    setActiveTabId(id);
     const target = tabs().find((t) => t.id === id);
-    if (target) {
-      if (target.url === "about:blank") {
-        hideAllDockedWebviews();
-        focusOmnibox();
-      }
-      saveActiveTab(target.url === "about:blank" ? null : target.url);
+    if (!target) return;
+    batch(() => {
+      setOrbitDeckOpen(false);
+      setWorkspaceMenuOpen(false);
+      setActiveTabId(id);
       if (target.projectId) {
         setCurrentWorkspaceId(target.projectId);
       }
+    });
+    if (target.url === "about:blank") {
+      hideAllDockedWebviews();
+      focusOmnibox();
     }
+    saveActiveTab(target.url === "about:blank" ? null : target.url);
   };
 
   const handleNewTab = (
@@ -614,9 +615,11 @@ function WebBrowserPanel(props: MainPanelProps) {
       targetWs
     );
     const nextTabs = [...tabs(), newTab];
-    setTabs(nextTabs);
-    setActiveTabId(newTab.id);
-    setCurrentWorkspaceId(targetWs);
+    batch(() => {
+      setActiveTabId(newTab.id);
+      setTabs(nextTabs);
+      setCurrentWorkspaceId(targetWs);
+    });
     persistCurrentTabs(nextTabs, newTab.url);
     if (url === "about:blank") {
       focusOmnibox();
@@ -635,26 +638,42 @@ function WebBrowserPanel(props: MainPanelProps) {
   const handleCloseTab = (id: string) => {
     closeTabWebview(id);
     const current = tabs();
-    if (current.length === 1) {
+    if (current.length <= 1) {
       // If closing last tab, reset it to about:blank
       const fresh = [createNewTab("about:blank", "New Tab", undefined, undefined, currentWorkspace().id)];
-      setTabs(fresh);
-      setActiveTabId(fresh[0].id);
+      batch(() => {
+        setActiveTabId(fresh[0].id);
+        setTabs(fresh);
+      });
       persistCurrentTabs(fresh, fresh[0].url);
       focusOmnibox();
       return;
     }
 
     const idx = current.findIndex((t) => t.id === id);
+    if (idx === -1) return;
     const updated = current.filter((t) => t.id !== id);
-    setTabs(updated);
 
     if (activeTabId() === id) {
       const nextIdx = Math.max(0, Math.min(idx, updated.length - 1));
       const nextTab = updated[nextIdx];
-      handleSelectTab(nextTab.id);
+      batch(() => {
+        setActiveTabId(nextTab.id);
+        setTabs(updated);
+        setOrbitDeckOpen(false);
+        setWorkspaceMenuOpen(false);
+        if (nextTab.projectId) {
+          setCurrentWorkspaceId(nextTab.projectId);
+        }
+      });
+      if (nextTab.url === "about:blank") {
+        hideAllDockedWebviews();
+        focusOmnibox();
+      }
+      saveActiveTab(nextTab.url === "about:blank" ? null : nextTab.url);
       persistCurrentTabs(updated, nextTab.url);
     } else {
+      setTabs(updated);
       persistCurrentTabs(updated, activeTab()?.url);
     }
   };

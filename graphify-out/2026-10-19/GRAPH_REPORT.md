@@ -1,21 +1,21 @@
 # Graph Report - flurer-web-loader-plugin  (2026-10-19)
 
 ## Corpus Check
-- 23 files · ~28,518 words
+- 23 files · ~28,913 words
 - Verdict: corpus is large enough that graph structure adds value.
 
 ## Summary
-- 215 nodes · 560 edges · 15 communities (12 shown, 3 thin omitted)
+- 215 nodes · 560 edges · 16 communities (13 shown, 3 thin omitted)
 - Extraction: 100% EXTRACTED · 0% INFERRED · 0% AMBIGUOUS
 - Token cost: 0 input · 0 output
 
 ## Graph Freshness
-- Built from commit: `fab367e1`
+- Built from commit: `3ec4524f`
 - Run `git rev-parse HEAD` and compare to check if the graph is stale.
 - Run `graphify update .` after code changes (no API cost).
 
 ## Community Hubs (Navigation)
-- ContextOrbitDeck.tsx
+- icons.tsx
 - QuickDial.tsx
 - compilerOptions
 - package.json
@@ -28,8 +28,9 @@
 - workflows/graphify.md
 - index.tsx
 - types.ts
+- QuickTabSwitcher.tsx
+- ContextOrbitDeck.tsx
 - TabBar.tsx
-- getPlatformEngineName
 
 ## God Nodes (most connected - your core abstractions)
 1. `WebBrowserPanel()` - 22 edges
@@ -44,25 +45,25 @@
 10. `compilerOptions` - 10 edges
 
 ## Surprising Connections (you probably didn't know these)
-- `ContextCapsuleBar()` --calls--> `getModifierKey()`  [EXTRACTED]
-  src/components/ContextCapsuleBar.tsx → src/utils.ts
 - `ContextOrbitDeck()` --calls--> `getModifierKey()`  [EXTRACTED]
   src/components/ContextOrbitDeck.tsx → src/utils.ts
-- `NavigationBar()` --calls--> `getModifierKey()`  [EXTRACTED]
-  src/components/NavigationBar.tsx → src/utils.ts
 - `WebViewportProps` --references--> `Tab`  [EXTRACTED]
   src/components/WebViewport.tsx → src/types.ts
 - `WebViewport()` --calls--> `getDomain()`  [EXTRACTED]
   src/components/WebViewport.tsx → src/utils.ts
+- `WebViewport()` --calls--> `getPlatformEngineName()`  [EXTRACTED]
+  src/components/WebViewport.tsx → src/utils.ts
+- `createNewTab()` --calls--> `classifyHeuristic()`  [EXTRACTED]
+  src/index.tsx → src/smartRouter.ts
 
 ## Import Cycles
 - None detected.
 
-## Communities (15 total, 3 thin omitted)
+## Communities (16 total, 3 thin omitted)
 
-### Community 0 - "ContextOrbitDeck.tsx"
-Cohesion: 0.18
-Nodes (20): ArrowLeftIcon(), ArrowRightIcon(), BranchIcon(), ExternalIcon(), GripIcon(), HomeIcon(), IncognitoIcon(), LayersIcon() (+12 more)
+### Community 0 - "icons.tsx"
+Cohesion: 0.24
+Nodes (13): ArrowLeftIcon(), ArrowRightIcon(), BranchIcon(), HomeIcon(), IncognitoIcon(), LayersIcon(), LockIcon(), OrbitIcon() (+5 more)
 
 ### Community 1 - "QuickDial.tsx"
 Cohesion: 0.21
@@ -100,13 +101,17 @@ Nodes (23): [activeTabId, setActiveTabId], [bookmarks, setBookmarks], createNewT
 Cohesion: 0.18
 Nodes (16): ContextCapsuleBarProps, ContextOrbitDeckProps, NavigationBarProps, QuickTabSwitcherProps, TabBarProps, MainPanelProps, NavDesignMode, OrbitLayoutMode (+8 more)
 
-### Community 13 - "TabBar.tsx"
-Cohesion: 0.33
-Nodes (7): QuickTabSwitcher(), TabBar(), CloseIcon(), GlobeIcon(), PlusIcon(), SearchIcon(), getModifierKey()
+### Community 13 - "QuickTabSwitcher.tsx"
+Cohesion: 0.27
+Nodes (9): ContextCapsuleBar(), NavigationBar(), QuickTabSwitcher(), TabBar(), CloseIcon(), GlobeIcon(), getModifierKey(), getPlatformEngineName() (+1 more)
 
-### Community 14 - "getPlatformEngineName"
-Cohesion: 0.67
-Nodes (4): ContextCapsuleBar(), NavigationBar(), getPlatformEngineName(), normalizeUrl()
+### Community 14 - "ContextOrbitDeck.tsx"
+Cohesion: 0.29
+Nodes (6): ExternalIcon(), GripIcon(), MatrixIcon(), PinIcon(), INTENT_COLORS, INTENT_LABELS
+
+### Community 15 - "TabBar.tsx"
+Cohesion: 0.50
+Nodes (3): PlusIcon(), SearchIcon(), S
 
 ## Knowledge Gaps
 - **53 isolated node(s):** `name`, `version`, `private`, `type`, `prebuild` (+48 more)
@@ -116,11 +121,11 @@ Nodes (4): ContextCapsuleBar(), NavigationBar(), getPlatformEngineName(), normal
 ## Suggested Questions
 _Questions this graph is uniquely positioned to answer:_
 
-- **Why does `getDomain()` connect `SettingsPanel.tsx` to `ContextOrbitDeck.tsx`, `index.tsx`, `utils.ts`, `TabBar.tsx`?**
+- **Why does `getDomain()` connect `SettingsPanel.tsx` to `icons.tsx`, `utils.ts`, `index.tsx`, `QuickTabSwitcher.tsx`, `ContextOrbitDeck.tsx`?**
   _High betweenness centrality (0.011) - this node is a cross-community bridge._
-- **Why does `Tab` connect `types.ts` to `ContextOrbitDeck.tsx`, `QuickDial.tsx`, `utils.ts`, `index.tsx`, `TabBar.tsx`?**
+- **Why does `Tab` connect `types.ts` to `icons.tsx`, `QuickDial.tsx`, `utils.ts`, `index.tsx`, `QuickTabSwitcher.tsx`, `ContextOrbitDeck.tsx`, `TabBar.tsx`?**
   _High betweenness centrality (0.009) - this node is a cross-community bridge._
-- **Why does `ProjectWorkspace` connect `types.ts` to `ContextOrbitDeck.tsx`, `utils.ts`, `SettingsPanel.tsx`, `index.tsx`, `TabBar.tsx`?**
+- **Why does `ProjectWorkspace` connect `types.ts` to `icons.tsx`, `utils.ts`, `SettingsPanel.tsx`, `index.tsx`, `QuickTabSwitcher.tsx`, `ContextOrbitDeck.tsx`, `TabBar.tsx`?**
   _High betweenness centrality (0.008) - this node is a cross-community bridge._
 - **What connects `name`, `version`, `private` to the rest of the system?**
   _53 weakly-connected nodes found - possible documentation gaps or missing edges._

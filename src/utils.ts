@@ -590,6 +590,14 @@ export async function createOrShowDockedWebview(
       for (const [otherId, other] of tabWebviewRegistry.entries()) {
         if (otherId !== tabId) {
           try {
+            await window.TauriCore.invoke("plugin:webview|set_webview_position", {
+              label: other.label,
+              value: { Logical: { x: -10000, y: -10000 } },
+            });
+            await window.TauriCore.invoke("plugin:webview|set_webview_size", {
+              label: other.label,
+              value: { Logical: { width: 0, height: 0 } },
+            });
             await window.TauriCore.invoke("plugin:webview|webview_hide", { label: other.label });
           } catch {}
         }
@@ -632,6 +640,14 @@ export async function createOrShowDockedWebview(
   for (const [otherId, other] of tabWebviewRegistry.entries()) {
     if (otherId !== tabId) {
       try {
+        await window.TauriCore.invoke("plugin:webview|set_webview_position", {
+          label: other.label,
+          value: { Logical: { x: -10000, y: -10000 } },
+        });
+        await window.TauriCore.invoke("plugin:webview|set_webview_size", {
+          label: other.label,
+          value: { Logical: { width: 0, height: 0 } },
+        });
         await window.TauriCore.invoke("plugin:webview|webview_hide", { label: other.label });
       } catch {}
     }
@@ -783,6 +799,15 @@ export async function closeTabWebview(tabId: string): Promise<void> {
     currentVisibleLabel = null;
   }
   try {
+    await window.TauriCore.invoke("plugin:webview|set_webview_position", {
+      label: entry.label,
+      value: { Logical: { x: -10000, y: -10000 } },
+    });
+    await window.TauriCore.invoke("plugin:webview|set_webview_size", {
+      label: entry.label,
+      value: { Logical: { width: 0, height: 0 } },
+    });
+    await window.TauriCore.invoke("plugin:webview|webview_hide", { label: entry.label });
     await window.TauriCore.invoke("plugin:webview|webview_close", { label: entry.label });
   } catch {}
 }
