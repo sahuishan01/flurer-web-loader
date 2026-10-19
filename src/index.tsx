@@ -673,6 +673,53 @@ function WebBrowserPanel(props: MainPanelProps) {
     }
   };
 
+  const handleReorderTabs = (
+    draggedTabId: string,
+    targetTabId: string,
+    insertBefore: boolean = true,
+    newWorkspaceId?: string
+  ) => {
+    if (!draggedTabId || !targetTabId || draggedTabId === targetTabId) return;
+    const currentTabs = [...tabs()];
+    const fromIndex = currentTabs.findIndex((t) => t.id === draggedTabId);
+    if (fromIndex === -1) return;
+
+    const [movedTab] = currentTabs.splice(fromIndex, 1);
+    if (newWorkspaceId) {
+      movedTab.projectId = newWorkspaceId;
+    }
+    let targetIndex = currentTabs.findIndex((t) => t.id === targetTabId);
+    if (targetIndex === -1) {
+      currentTabs.push(movedTab);
+    } else {
+      if (!insertBefore) targetIndex += 1;
+      currentTabs.splice(targetIndex, 0, movedTab);
+    }
+    setTabs(currentTabs);
+    persistCurrentTabs(currentTabs, activeTab()?.url);
+  };
+
+  const handleReorderWorkspaces = (
+    draggedWsId: string,
+    targetWsId: string,
+    insertBefore: boolean = true
+  ) => {
+    if (!draggedWsId || !targetWsId || draggedWsId === targetWsId) return;
+    const currentWs = [...workspaces()];
+    const fromIndex = currentWs.findIndex((w) => w.id === draggedWsId);
+    if (fromIndex === -1) return;
+
+    const [movedWs] = currentWs.splice(fromIndex, 1);
+    let targetIndex = currentWs.findIndex((w) => w.id === targetWsId);
+    if (targetIndex === -1) {
+      currentWs.push(movedWs);
+    } else {
+      if (!insertBefore) targetIndex += 1;
+      currentWs.splice(targetIndex, 0, movedWs);
+    }
+    setWorkspaces(currentWs);
+  };
+
   const tabMatchesWorkspace = (tab: Tab, wsId: string) => {
     if (tab.projectId) {
       return tab.projectId === wsId;
@@ -1050,6 +1097,8 @@ function WebBrowserPanel(props: MainPanelProps) {
             onResetZoom={handleResetZoom}
             onSwitchWorkspace={handleSwitchWorkspace}
             onOpenQuickSwitcher={() => setQuickSwitcherOpen(true)}
+            onReorderTabs={handleReorderTabs}
+            onReorderWorkspaces={handleReorderWorkspaces}
             compactTabs={props.pluginSettings?.compactTabs ?? false}
             onToggleCompactTabs={() =>
               props.onPluginSettingsChange?.({
@@ -1064,11 +1113,15 @@ function WebBrowserPanel(props: MainPanelProps) {
             tabs={tabs()}
             activeTabId={activeTabId()}
             workspaces={workspaces()}
+            currentWorkspace={currentWorkspace()}
             compactTabs={props.pluginSettings?.compactTabs ?? false}
             onSelectTab={handleSelectTab}
             onCloseTab={handleCloseTab}
             onNewTab={() => handleNewTab("about:blank")}
             onUpdateTabWorkspace={handleUpdateTabWorkspace}
+            onSwitchWorkspace={handleSwitchWorkspace}
+            onReorderTabs={handleReorderTabs}
+            onReorderWorkspaces={handleReorderWorkspaces}
             onOpenQuickSwitcher={() => setQuickSwitcherOpen(true)}
             onToggleCompactTabs={() =>
               props.onPluginSettingsChange?.({
@@ -1113,6 +1166,8 @@ function WebBrowserPanel(props: MainPanelProps) {
         }}
         onOpenExternal={handleOpenExternal}
         onSwitchWorkspace={handleSwitchWorkspace}
+        onReorderTabs={handleReorderTabs}
+        onReorderWorkspaces={handleReorderWorkspaces}
         onAddWorkspace={(name, color, keywords) => {
           const newWs = {
             id: `ws-${Date.now()}`,

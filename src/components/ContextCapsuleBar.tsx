@@ -21,6 +21,14 @@ import {
 import { WebsiteIcon } from "./WebsiteIcon";
 import { normalizeUrl, getModifierKey, getPlatformEngineName, getDomain } from "../utils";
 import { INTENT_COLORS, INTENT_LABELS } from "../smartRouter";
+import {
+  draggedTabId,
+  setDraggedTabId,
+  draggedWorkspaceId,
+  setDraggedWorkspaceId,
+  TAB_DRAG_MIME,
+  WORKSPACE_DRAG_MIME,
+} from "../dragDrop";
 
 interface ContextCapsuleBarProps {
   activeTab: Tab | undefined;
@@ -49,6 +57,8 @@ interface ContextCapsuleBarProps {
   onSwitchWorkspace: (workspaceId: string) => void;
   onOpenQuickSwitcher?: () => void;
   onUpdateTabWorkspace?: (tabId: string, projectId: string | undefined) => void;
+  onReorderTabs?: (draggedTabId: string, targetTabId: string, insertBefore: boolean) => void;
+  onReorderWorkspaces?: (draggedWsId: string, targetWsId: string, insertBefore: boolean) => void;
   compactTabs?: boolean;
   onToggleCompactTabs?: () => void;
 }
@@ -66,6 +76,12 @@ export function ContextCapsuleBar(props: ContextCapsuleBarProps) {
     props.onWsMenuToggle?.(open);
   };
   const [showAllWorkspaces, setShowAllWorkspaces] = createSignal(false);
+
+  // Drag and drop states for tabs and workspace reordering
+  const [tabDropTarget, setTabDropTarget] = createSignal<{ id: string; isBefore: boolean } | null>(null);
+  const [wsDropTarget, setWsDropTarget] = createSignal<{ id: string; isBefore: boolean } | null>(null);
+  const [wsTabHoverTarget, setWsTabHoverTarget] = createSignal<string | null>(null);
+  let wsHoverTimer: any = null;
 
   createEffect(() => {
     if (!tabMenu()) return;
@@ -90,6 +106,13 @@ export function ContextCapsuleBar(props: ContextCapsuleBarProps) {
     };
     window.addEventListener("keydown", handleKeyDown);
     onCleanup(() => window.removeEventListener("keydown", handleKeyDown));
+  });
+
+  onCleanup(() => {
+    if (wsHoverTimer) {
+      clearTimeout(wsHoverTimer);
+      wsHoverTimer = null;
+    }
   });
 
   let inputRef: HTMLInputElement | undefined;
@@ -203,7 +226,38 @@ export function ContextCapsuleBar(props: ContextCapsuleBarProps) {
         </div>
 
         {/* Workspace Pill Dropdown Button */}
-        <div style={{ position: "relative", "flex-shrink": 0 }}>
+        <div
+          style={{ position: "relative", "flex-shrink": 0 }}
+          onDragEnter={(e) => {
+            if (draggedTabId()) {
+              if (wsHoverTimer) clearTimeout(wsHoverTimer);
+              wsHoverTimer = setTimeout(() => {
+                setShowWsMenu(true);
+                wsHoverTimer = null;
+              }, 110);
+            }
+          }}
+          onDragOver={(e) => {
+            if (draggedTabId()) {
+              e.preventDefault();
+              e.dataTransfer!.dropEffect = "move";
+              if (!showWsMenu() && !wsHoverTimer) {
+                wsHoverTimer = setTimeout(() => {
+                  setShowWsMenu(true);
+                  wsHoverTimer = null;
+                }, 110);
+              }
+            }
+          }}
+          onDragLeave={(e) => {
+            const related = e.relatedTarget as Node;
+            if (related && (e.currentTarget as HTMLElement).contains(related)) return;
+            if (wsHoverTimer) {
+              clearTimeout(wsHoverTimer);
+              wsHoverTimer = null;
+            }
+          }}
+        >
           <button
             type="button"
             class="web-loader-action-btn"
@@ -232,7 +286,24 @@ export function ContextCapsuleBar(props: ContextCapsuleBarProps) {
               cursor: "pointer",
             }}
             onClick={() => setShowWsMenu(!showWsMenu())}
-            title="Switch Workspace / Project (or view All Tabs)"
+            onDragOver={(e) => {
+              if (draggedTabId()) {
+                e.preventDefault();
+                e.dataTransfer!.dropEffect = "move";
+              }
+            }}
+            onDrop={(e) => {
+              if (draggedTabId()) {
+                e.preventDefault();
+                e.stopPropagation();
+                props.onUpdateTabWorkspace?.(draggedTabId()!, props.currentWorkspace.id);
+                if (wsHoverTimer) {
+                  clearTimeout(wsHoverTimer);
+                  wsHoverTimer = null;
+                }
+              }
+            }}
+            title="Switch Workspace / Project (drag tab here to group)"
           >
             <span>{showAllWorkspaces() ? "❖" : props.currentWorkspace.icon || "✦"}</span>
             <span>{showAllWorkspaces() ? "All Tabs" : props.currentWorkspace.name}</span>
@@ -282,7 +353,7 @@ export function ContextCapsuleBar(props: ContextCapsuleBarProps) {
                 "border-radius": "10px",
                 padding: "8px",
                 "box-shadow": "0 16px 40px rgba(0, 0, 0, 0.7), 0 0 1px 1px rgba(255, 255, 255, 0.1)",
-                "min-width": "220px",
+                "min-width": "230px",
                 display: "flex",
                 "flex-direction": "column",
                 gap: "4px",
@@ -299,7 +370,7 @@ export function ContextCapsuleBar(props: ContextCapsuleBarProps) {
                   "letter-spacing": "0.1em",
                 }}
               >
-                Workspaces
+                Workspaces (drag to reorder / drop tab)
               </div>
 
               {/* View All Tabs Option */}
@@ -312,16 +383,42 @@ export function ContextCapsuleBar(props: ContextCapsuleBarProps) {
                   gap: "8px",
                   padding: "6px 8px",
                   "border-radius": "6px",
-                  background: showAllWorkspaces() ? "rgba(255, 255, 255, 0.12)" : "transparent",
-                  border: "none",
+                  background: wsTabHoverTarget() === "all"
+                    ? "rgba(56, 189, 248, 0.22)"
+                    : showAllWorkspaces()
+                    ? "rgba(255, 255, 255, 0.12)"
+                    : "transparent",
+                  border: wsTabHoverTarget() === "all"
+                    ? "1px dashed var(--accent-default, #38bdf8)"
+                    : "1px solid transparent",
                   color: "#ffffff",
                   "font-size": "12px",
                   cursor: "pointer",
                   "text-align": "left",
+                  transition: "all 0.15s ease",
                 }}
                 onClick={() => {
                   setShowAllWorkspaces(true);
                   setShowWsMenu(false);
+                }}
+                onDragOver={(e) => {
+                  if (draggedTabId()) {
+                    e.preventDefault();
+                    e.dataTransfer!.dropEffect = "move";
+                    setWsTabHoverTarget("all");
+                  }
+                }}
+                onDragLeave={() => {
+                  if (wsTabHoverTarget() === "all") setWsTabHoverTarget(null);
+                }}
+                onDrop={(e) => {
+                  if (draggedTabId()) {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    props.onUpdateTabWorkspace?.(draggedTabId()!, undefined);
+                    setWsTabHoverTarget(null);
+                    setShowWsMenu(false);
+                  }
                 }}
               >
                 <div style={{ display: "flex", "align-items": "center", gap: "6px" }}>
@@ -342,48 +439,120 @@ export function ContextCapsuleBar(props: ContextCapsuleBarProps) {
               <div style={{ height: "1px", background: "rgba(255, 255, 255, 0.08)", margin: "2px 0" }} />
 
               <For each={props.workspaces}>
-                {(ws) => (
-                  <button
-                    type="button"
-                    style={{
-                      display: "flex",
-                      "align-items": "center",
-                      "justify-content": "space-between",
-                      gap: "8px",
-                      padding: "6px 8px",
-                      "border-radius": "6px",
-                      background:
-                        !showAllWorkspaces() && ws.id === props.currentWorkspace.id
-                          ? "rgba(255, 255, 255, 0.1)"
-                          : "transparent",
-                      border: "none",
-                      color: ws.color,
-                      "font-size": "12px",
-                      cursor: "pointer",
-                      "text-align": "left",
-                      transition: "background 0.15s ease",
-                    }}
-                    onClick={() => {
-                      setShowAllWorkspaces(false);
-                      props.onSwitchWorkspace(ws.id);
-                      setShowWsMenu(false);
-                    }}
-                  >
-                    <div style={{ display: "flex", "align-items": "center", gap: "6px" }}>
-                      <span>{ws.icon || "✦"}</span>
-                      <span style={{ color: "var(--text-primary, #f8fafc)" }}>{ws.name}</span>
+                {(ws) => {
+                  const isHoveredForTab = () => wsTabHoverTarget() === ws.id;
+                  const isWsDrop = () => wsDropTarget()?.id === ws.id;
+                  const isDropBefore = () => wsDropTarget()?.isBefore;
+
+                  return (
+                    <div style={{ position: "relative" }}>
+                      {/* Drop indicator when reordering workspaces */}
+                      <Show when={isWsDrop() && draggedWorkspaceId() && draggedWorkspaceId() !== ws.id}>
+                        <div
+                          style={{
+                            position: "absolute",
+                            left: "4px",
+                            right: "4px",
+                            top: isDropBefore() ? "-2px" : "auto",
+                            bottom: !isDropBefore() ? "-2px" : "auto",
+                            height: "2px",
+                            "border-radius": "1px",
+                            background: "var(--accent-default, #38bdf8)",
+                            "box-shadow": "0 0 6px rgba(56, 189, 248, 0.8)",
+                            "z-index": 10,
+                            "pointer-events": "none",
+                          }}
+                        />
+                      </Show>
+
+                      <button
+                        type="button"
+                        draggable={true}
+                        style={{
+                          display: "flex",
+                          "align-items": "center",
+                          "justify-content": "space-between",
+                          gap: "8px",
+                          width: "100%",
+                          padding: "6px 8px",
+                          "border-radius": "6px",
+                          background: isHoveredForTab()
+                            ? "rgba(56, 189, 248, 0.22)"
+                            : !showAllWorkspaces() && ws.id === props.currentWorkspace.id
+                            ? "rgba(255, 255, 255, 0.1)"
+                            : "transparent",
+                          border: isHoveredForTab()
+                            ? "1px dashed var(--accent-default, #38bdf8)"
+                            : "1px solid transparent",
+                          color: ws.color,
+                          "font-size": "12px",
+                          cursor: "pointer",
+                          "text-align": "left",
+                          transition: "all 0.15s ease",
+                        }}
+                        onDragStart={(e) => {
+                          e.dataTransfer!.setData(WORKSPACE_DRAG_MIME, ws.id);
+                          e.dataTransfer!.effectAllowed = "move";
+                          setDraggedWorkspaceId(ws.id);
+                        }}
+                        onDragEnd={() => {
+                          setDraggedWorkspaceId(null);
+                          setWsDropTarget(null);
+                        }}
+                        onDragOver={(e) => {
+                          e.preventDefault();
+                          e.stopPropagation();
+                          if (draggedTabId()) {
+                            e.dataTransfer!.dropEffect = "move";
+                            setWsTabHoverTarget(ws.id);
+                          } else if (draggedWorkspaceId() && draggedWorkspaceId() !== ws.id) {
+                            e.dataTransfer!.dropEffect = "move";
+                            const rect = e.currentTarget.getBoundingClientRect();
+                            const isBefore = e.clientY < rect.top + rect.height / 2;
+                            setWsDropTarget({ id: ws.id, isBefore });
+                          }
+                        }}
+                        onDragLeave={() => {
+                          if (wsTabHoverTarget() === ws.id) setWsTabHoverTarget(null);
+                          if (wsDropTarget()?.id === ws.id) setWsDropTarget(null);
+                        }}
+                        onDrop={(e) => {
+                          e.preventDefault();
+                          e.stopPropagation();
+                          if (draggedTabId()) {
+                            props.onUpdateTabWorkspace?.(draggedTabId()!, ws.id);
+                            setWsTabHoverTarget(null);
+                            setShowWsMenu(false);
+                          } else if (draggedWorkspaceId() && draggedWorkspaceId() !== ws.id) {
+                            const isBefore = wsDropTarget()?.isBefore ?? true;
+                            props.onReorderWorkspaces?.(draggedWorkspaceId()!, ws.id, isBefore);
+                            setDraggedWorkspaceId(null);
+                            setWsDropTarget(null);
+                          }
+                        }}
+                        onClick={() => {
+                          setShowAllWorkspaces(false);
+                          props.onSwitchWorkspace(ws.id);
+                          setShowWsMenu(false);
+                        }}
+                      >
+                        <div style={{ display: "flex", "align-items": "center", gap: "6px" }}>
+                          <span>{ws.icon || "✦"}</span>
+                          <span style={{ color: "var(--text-primary, #f8fafc)" }}>{ws.name}</span>
+                        </div>
+                        <span
+                          style={{
+                            "font-size": "10px",
+                            "font-family": "Space Mono, monospace",
+                            color: "var(--text-muted, #94a3b8)",
+                          }}
+                        >
+                          {props.tabs.filter((t) => tabMatchesWorkspace(t, ws.id)).length}
+                        </span>
+                      </button>
                     </div>
-                    <span
-                      style={{
-                        "font-size": "10px",
-                        "font-family": "Space Mono, monospace",
-                        color: "var(--text-muted, #94a3b8)",
-                      }}
-                    >
-                      {props.tabs.filter((t) => tabMatchesWorkspace(t, ws.id)).length}
-                    </span>
-                  </button>
-                )}
+                  );
+                }}
               </For>
             </div>
           </Show>
@@ -408,47 +577,108 @@ export function ContextCapsuleBar(props: ContextCapsuleBarProps) {
               const intent = (): TabIntent => tab.intent || "general";
               const badgeColor = () => INTENT_COLORS[intent()];
 
+              const isTabDrop = () => tabDropTarget()?.id === tab.id;
+              const isTabDropBefore = () => tabDropTarget()?.isBefore;
+
               return (
-                <div
-                  class={`web-loader-tab ${isActive() ? "active" : ""} ${isCompact() ? "web-loader-tab-compact" : ""}`}
-                  style={{
-                    display: "inline-flex",
-                    "align-items": "center",
-                    "justify-content": isCompact() ? "center" : "flex-start",
-                    gap: isCompact() ? "4px" : "6px",
-                    padding: isCompact() ? "5px 7px" : "5px 10px",
-                    "border-radius": "8px",
-                    "font-size": "12px",
-                    "font-family": "system-ui, sans-serif",
-                    color: isActive() ? "#38bdf8" : "var(--text-secondary, #cbd5e1)",
-                    background: isActive()
-                      ? "rgba(56, 189, 248, 0.18)"
-                      : "rgba(255, 255, 255, 0.05)",
-                    border: isActive()
-                      ? "1px solid rgba(56, 189, 248, 0.45)"
-                      : "1px solid rgba(255, 255, 255, 0.08)",
-                    "box-shadow": isActive() ? "0 2px 8px rgba(0, 0, 0, 0.3)" : "none",
-                    cursor: "pointer",
-                    "flex-shrink": 0,
-                    "max-width": isCompact() ? "56px" : "200px",
-                    "min-width": isCompact() ? "34px" : "110px",
-                    "user-select": "none",
-                  }}
-                  onClick={() => props.onSelectTab(tab.id)}
-                  onMouseDown={(e) => {
-                    // Middle click to close tab
-                    if (e.button === 1) {
+                <div style={{ position: "relative", display: "inline-flex", "align-items": "center", "flex-shrink": 0 }}>
+                  {/* Drop indicator line */}
+                  <Show when={isTabDrop() && draggedTabId() && draggedTabId() !== tab.id}>
+                    <div
+                      style={{
+                        position: "absolute",
+                        top: "2px",
+                        bottom: "2px",
+                        left: isTabDropBefore() ? "-2px" : "auto",
+                        right: !isTabDropBefore() ? "-2px" : "auto",
+                        width: "3px",
+                        "border-radius": "2px",
+                        background: "var(--accent-default, #38bdf8)",
+                        "box-shadow": "0 0 8px rgba(56, 189, 248, 0.9)",
+                        "z-index": 100,
+                        "pointer-events": "none",
+                      }}
+                    />
+                  </Show>
+
+                  <div
+                    draggable={true}
+                    class={`web-loader-tab ${isActive() ? "active" : ""} ${isCompact() ? "web-loader-tab-compact" : ""}`}
+                    style={{
+                      display: "inline-flex",
+                      "align-items": "center",
+                      "justify-content": isCompact() ? "center" : "flex-start",
+                      gap: isCompact() ? "4px" : "6px",
+                      padding: isCompact() ? "5px 7px" : "5px 10px",
+                      "border-radius": "8px",
+                      "font-size": "12px",
+                      "font-family": "system-ui, sans-serif",
+                      color: isActive() ? "#38bdf8" : "var(--text-secondary, #cbd5e1)",
+                      background: isActive()
+                        ? "rgba(56, 189, 248, 0.18)"
+                        : "rgba(255, 255, 255, 0.05)",
+                      border: isActive()
+                        ? "1px solid rgba(56, 189, 248, 0.45)"
+                        : "1px solid rgba(255, 255, 255, 0.08)",
+                      "box-shadow": isActive() ? "0 2px 8px rgba(0, 0, 0, 0.3)" : "none",
+                      cursor: "pointer",
+                      "flex-shrink": 0,
+                      "max-width": isCompact() ? "56px" : "200px",
+                      "min-width": isCompact() ? "34px" : "110px",
+                      "user-select": "none",
+                      opacity: draggedTabId() === tab.id ? 0.45 : 1,
+                      transition: "opacity 0.15s ease",
+                    }}
+                    onDragStart={(e) => {
+                      e.dataTransfer!.setData(TAB_DRAG_MIME, tab.id);
+                      e.dataTransfer!.setData("text/plain", tab.id);
+                      e.dataTransfer!.effectAllowed = "move";
+                      setDraggedTabId(tab.id);
+                    }}
+                    onDragEnd={() => {
+                      setDraggedTabId(null);
+                      setTabDropTarget(null);
+                    }}
+                    onDragOver={(e) => {
+                      if (draggedTabId() && draggedTabId() !== tab.id) {
+                        e.preventDefault();
+                        e.stopPropagation();
+                        e.dataTransfer!.dropEffect = "move";
+                        const rect = e.currentTarget.getBoundingClientRect();
+                        const isBefore = e.clientX < rect.left + rect.width / 2;
+                        setTabDropTarget({ id: tab.id, isBefore });
+                      }
+                    }}
+                    onDragLeave={(e) => {
+                      const related = e.relatedTarget as Node;
+                      if (related && (e.currentTarget as HTMLElement).contains(related)) return;
+                      if (tabDropTarget()?.id === tab.id) setTabDropTarget(null);
+                    }}
+                    onDrop={(e) => {
+                      if (draggedTabId() && draggedTabId() !== tab.id) {
+                        e.preventDefault();
+                        e.stopPropagation();
+                        const isBefore = tabDropTarget()?.isBefore ?? true;
+                        props.onReorderTabs?.(draggedTabId()!, tab.id, isBefore);
+                        setDraggedTabId(null);
+                        setTabDropTarget(null);
+                      }
+                    }}
+                    onClick={() => props.onSelectTab(tab.id)}
+                    onMouseDown={(e) => {
+                      // Middle click to close tab
+                      if (e.button === 1) {
+                        e.preventDefault();
+                        props.onCloseTab(tab.id);
+                      }
+                    }}
+                    onContextMenu={(e) => {
                       e.preventDefault();
-                      props.onCloseTab(tab.id);
-                    }
-                  }}
-                  onContextMenu={(e) => {
-                    e.preventDefault();
-                    e.stopPropagation();
-                    setTabMenu({ tabId: tab.id, x: e.clientX, y: e.clientY });
-                  }}
-                  title={`${tab.title || "New Tab"}\n${tab.url}`}
-                >
+                      e.stopPropagation();
+                      setTabMenu({ tabId: tab.id, x: e.clientX, y: e.clientY });
+                    }}
+                    title={`${tab.title || "New Tab"}\n${tab.url} (Drag to reorder / move to group)`}
+                  >
                   <WebsiteIcon url={tab.url} favicon={tab.favicon} size={15} />
 
                   <Show when={!isCompact()}>
@@ -508,8 +738,9 @@ export function ContextCapsuleBar(props: ContextCapsuleBarProps) {
                     <CloseIcon size={isCompact() ? 10 : 12} />
                   </button>
                 </div>
-              );
-            }}
+              </div>
+            );
+          }}
           </For>
 
           {/* New Tab Button */}

@@ -31,6 +31,14 @@ import {
   isLayaOfflineDownloaded,
   downloadAndSetupLayaOffline,
 } from "../smartRouter";
+import {
+  draggedTabId,
+  setDraggedTabId,
+  draggedWorkspaceId,
+  setDraggedWorkspaceId,
+  TAB_DRAG_MIME,
+  WORKSPACE_DRAG_MIME,
+} from "../dragDrop";
 
 interface ContextOrbitDeckProps {
   tabs: Tab[];
@@ -52,6 +60,8 @@ interface ContextOrbitDeckProps {
   onUpdateTabPosition: (tabId: string, x: number, y: number) => void;
   onToggleLayoutMode: (mode: OrbitLayoutMode) => void;
   onUpdateSmartRouter: (patch: Partial<SmartRouterConfig>) => void;
+  onReorderTabs?: (draggedTabId: string, targetTabId: string, insertBefore: boolean, newWorkspaceId?: string) => void;
+  onReorderWorkspaces?: (draggedWsId: string, targetWsId: string, insertBefore: boolean) => void;
 }
 
 export function ContextOrbitDeck(props: ContextOrbitDeckProps) {
@@ -71,6 +81,16 @@ export function ContextOrbitDeck(props: ContextOrbitDeckProps) {
   const [isDownloadingLaya, setIsDownloadingLaya] = createSignal(false);
   const [layaDownloadPct, setLayaDownloadPct] = createSignal(0);
 
+  // Orbit Groups Menu state
+  const [showOrbitWsMenu, setShowOrbitWsMenu] = createSignal(false);
+  const [orbitWsTabHoverTarget, setOrbitWsTabHoverTarget] = createSignal<string | null>(null);
+  const [orbitWsDropTarget, setOrbitWsDropTarget] = createSignal<{ id: string; isBefore: boolean } | null>(null);
+  let orbitWsHoverTimer: any = null;
+
+  // Matrix view drag-and-drop state
+  const [matrixWsDropTarget, setMatrixWsDropTarget] = createSignal<{ id: string; isBefore: boolean } | null>(null);
+  const [matrixCardDropTarget, setMatrixCardDropTarget] = createSignal<{ id: string; isBefore: boolean } | null>(null);
+
   // Dragging state for Spatial Canvas
   const [draggingTabId, setDraggingTabId] = createSignal<string | null>(null);
   const [dragOffset, setDragOffset] = createSignal<{ x: number; y: number }>({ x: 0, y: 0 });
@@ -78,6 +98,13 @@ export function ContextOrbitDeck(props: ContextOrbitDeckProps) {
   const [canvasZoom, setCanvasZoom] = createSignal(1.0);
   const [isPanningCanvas, setIsPanningCanvas] = createSignal(false);
   const [panStart, setPanStart] = createSignal<{ x: number; y: number }>({ x: 0, y: 0 });
+
+  onCleanup(() => {
+    if (orbitWsHoverTimer) {
+      clearTimeout(orbitWsHoverTimer);
+      orbitWsHoverTimer = null;
+    }
+  });
 
   // Escape key handler
   const handleKeyDown = (e: KeyboardEvent) => {
@@ -377,6 +404,251 @@ export function ContextOrbitDeck(props: ContextOrbitDeckProps) {
             <span>{props.workspaces.length} Workspaces</span>
             <span>•</span>
             <span style={{ color: "var(--accent-default, #38bdf8)" }}>{props.tabs.length} Tabs active</span>
+          </div>
+
+          {/* Groups Dropdown Button in Orbit Header */}
+          <div
+            style={{ position: "relative" }}
+            onDragEnter={(e) => {
+              if (draggedTabId()) {
+                if (orbitWsHoverTimer) clearTimeout(orbitWsHoverTimer);
+                orbitWsHoverTimer = setTimeout(() => {
+                  setShowOrbitWsMenu(true);
+                  orbitWsHoverTimer = null;
+                }, 110);
+              }
+            }}
+            onDragOver={(e) => {
+              if (draggedTabId()) {
+                e.preventDefault();
+                e.dataTransfer!.dropEffect = "move";
+                if (!showOrbitWsMenu() && !orbitWsHoverTimer) {
+                  orbitWsHoverTimer = setTimeout(() => {
+                    setShowOrbitWsMenu(true);
+                    orbitWsHoverTimer = null;
+                  }, 110);
+                }
+              }
+            }}
+            onDragLeave={(e) => {
+              const related = e.relatedTarget as Node;
+              if (related && (e.currentTarget as HTMLElement).contains(related)) return;
+              if (orbitWsHoverTimer) {
+                clearTimeout(orbitWsHoverTimer);
+                orbitWsHoverTimer = null;
+              }
+            }}
+          >
+            <button
+              type="button"
+              class="web-loader-action-btn"
+              style={{
+                display: "inline-flex",
+                "align-items": "center",
+                gap: "6px",
+                padding: "4px 10px",
+                "border-radius": "8px",
+                background: `rgba(56, 189, 248, 0.14)`,
+                border: `1px solid ${props.currentWorkspace.color || "#38bdf8"}`,
+                color: props.currentWorkspace.color || "#38bdf8",
+                "font-family": "Space Mono, monospace",
+                "font-size": "11px",
+                "font-weight": 600,
+                cursor: "pointer",
+              }}
+              onClick={() => setShowOrbitWsMenu(!showOrbitWsMenu())}
+              onDragOver={(e) => {
+                if (draggedTabId()) {
+                  e.preventDefault();
+                  e.dataTransfer!.dropEffect = "move";
+                }
+              }}
+              onDrop={(e) => {
+                if (draggedTabId()) {
+                  e.preventDefault();
+                  e.stopPropagation();
+                  props.onUpdateTabProject(draggedTabId()!, props.currentWorkspace.id);
+                  if (orbitWsHoverTimer) {
+                    clearTimeout(orbitWsHoverTimer);
+                    orbitWsHoverTimer = null;
+                  }
+                }
+              }}
+              title="Groups Menu (drag tab card here to assign group)"
+            >
+              <span>{props.currentWorkspace.icon || "✦"}</span>
+              <span>{props.currentWorkspace.name}</span>
+              <span style={{ "font-size": "9px", opacity: 0.8 }}>▾</span>
+            </button>
+
+            {/* Backdrop */}
+            <Show when={showOrbitWsMenu()}>
+              <div
+                style={{
+                  position: "fixed",
+                  inset: 0,
+                  "z-index": 9998,
+                  background: "rgba(0, 0, 0, 0.25)",
+                }}
+                onClick={(e) => {
+                  e.stopPropagation();
+                  setShowOrbitWsMenu(false);
+                }}
+              />
+            </Show>
+
+            {/* Orbit Groups Popover */}
+            <Show when={showOrbitWsMenu()}>
+              <div
+                style={{
+                  position: "absolute",
+                  top: "100%",
+                  left: "0",
+                  "margin-top": "6px",
+                  "z-index": 9999,
+                  background: "rgba(15, 23, 42, 0.98)",
+                  "backdrop-filter": "blur(20px)",
+                  "-webkit-backdrop-filter": "blur(20px)",
+                  border: "1px solid rgba(255, 255, 255, 0.22)",
+                  "border-radius": "10px",
+                  padding: "8px",
+                  "box-shadow": "0 16px 40px rgba(0, 0, 0, 0.7)",
+                  "min-width": "230px",
+                  display: "flex",
+                  "flex-direction": "column",
+                  gap: "4px",
+                  animation: "web-loader-card-enter 0.18s cubic-bezier(0.16, 1, 0.3, 1) both",
+                }}
+              >
+                <div
+                  style={{
+                    padding: "4px 8px",
+                    "font-size": "10px",
+                    "font-family": "Space Mono, monospace",
+                    color: "var(--text-muted, #94a3b8)",
+                    "text-transform": "uppercase",
+                    "letter-spacing": "0.1em",
+                  }}
+                >
+                  Workspaces (drag to reorder / drop tab)
+                </div>
+
+                <For each={props.workspaces}>
+                  {(ws) => {
+                    const isHoveredForTab = () => orbitWsTabHoverTarget() === ws.id;
+                    const isWsDrop = () => orbitWsDropTarget()?.id === ws.id;
+                    const isDropBefore = () => orbitWsDropTarget()?.isBefore;
+
+                    return (
+                      <div style={{ position: "relative" }}>
+                        <Show when={isWsDrop() && draggedWorkspaceId() && draggedWorkspaceId() !== ws.id}>
+                          <div
+                            style={{
+                              position: "absolute",
+                              left: "4px",
+                              right: "4px",
+                              top: isDropBefore() ? "-2px" : "auto",
+                              bottom: !isDropBefore() ? "-2px" : "auto",
+                              height: "2px",
+                              "border-radius": "1px",
+                              background: "var(--accent-default, #38bdf8)",
+                              "box-shadow": "0 0 6px rgba(56, 189, 248, 0.8)",
+                              "z-index": 10,
+                              "pointer-events": "none",
+                            }}
+                          />
+                        </Show>
+
+                        <button
+                          type="button"
+                          draggable={true}
+                          style={{
+                            display: "flex",
+                            "align-items": "center",
+                            "justify-content": "space-between",
+                            gap: "8px",
+                            width: "100%",
+                            padding: "6px 8px",
+                            "border-radius": "6px",
+                            background: isHoveredForTab()
+                              ? "rgba(56, 189, 248, 0.22)"
+                              : ws.id === props.currentWorkspace.id
+                              ? "rgba(255, 255, 255, 0.1)"
+                              : "transparent",
+                            border: isHoveredForTab()
+                              ? "1px dashed var(--accent-default, #38bdf8)"
+                              : "1px solid transparent",
+                            color: ws.color,
+                            "font-size": "12px",
+                            cursor: "pointer",
+                            "text-align": "left",
+                            transition: "all 0.15s ease",
+                          }}
+                          onDragStart={(e) => {
+                            e.dataTransfer!.setData(WORKSPACE_DRAG_MIME, ws.id);
+                            e.dataTransfer!.effectAllowed = "move";
+                            setDraggedWorkspaceId(ws.id);
+                          }}
+                          onDragEnd={() => {
+                            setDraggedWorkspaceId(null);
+                            setOrbitWsDropTarget(null);
+                          }}
+                          onDragOver={(e) => {
+                            e.preventDefault();
+                            e.stopPropagation();
+                            if (draggedTabId()) {
+                              e.dataTransfer!.dropEffect = "move";
+                              setOrbitWsTabHoverTarget(ws.id);
+                            } else if (draggedWorkspaceId() && draggedWorkspaceId() !== ws.id) {
+                              e.dataTransfer!.dropEffect = "move";
+                              const rect = e.currentTarget.getBoundingClientRect();
+                              const isBefore = e.clientY < rect.top + rect.height / 2;
+                              setOrbitWsDropTarget({ id: ws.id, isBefore });
+                            }
+                          }}
+                          onDragLeave={() => {
+                            if (orbitWsTabHoverTarget() === ws.id) setOrbitWsTabHoverTarget(null);
+                            if (orbitWsDropTarget()?.id === ws.id) setOrbitWsDropTarget(null);
+                          }}
+                          onDrop={(e) => {
+                            e.preventDefault();
+                            e.stopPropagation();
+                            if (draggedTabId()) {
+                              props.onUpdateTabProject(draggedTabId()!, ws.id);
+                              setOrbitWsTabHoverTarget(null);
+                              setShowOrbitWsMenu(false);
+                            } else if (draggedWorkspaceId() && draggedWorkspaceId() !== ws.id) {
+                              const isBefore = orbitWsDropTarget()?.isBefore ?? true;
+                              props.onReorderWorkspaces?.(draggedWorkspaceId()!, ws.id, isBefore);
+                              setDraggedWorkspaceId(null);
+                              setOrbitWsDropTarget(null);
+                            }
+                          }}
+                          onClick={() => {
+                            props.onSwitchWorkspace(ws.id);
+                            setShowOrbitWsMenu(false);
+                          }}
+                        >
+                          <div style={{ display: "flex", "align-items": "center", gap: "6px" }}>
+                            <span>{ws.icon || "✦"}</span>
+                            <span style={{ color: "var(--text-primary, #f8fafc)" }}>{ws.name}</span>
+                          </div>
+                          <span
+                            style={{
+                              "font-size": "10px",
+                              "font-family": "Space Mono, monospace",
+                              color: "var(--text-muted, #94a3b8)",
+                            }}
+                          >
+                            {props.tabs.filter((t) => (t.projectId || "general") === ws.id).length}
+                          </span>
+                        </button>
+                      </div>
+                    );
+                  }}
+                </For>
+              </div>
+            </Show>
           </div>
         </div>
 
@@ -697,42 +969,97 @@ export function ContextOrbitDeck(props: ContextOrbitDeckProps) {
           <For each={props.workspaces}>
             {(ws) => {
               const wsTabs = () => tabsByWorkspace().get(ws.id) || [];
+              const isWsDrop = () => matrixWsDropTarget()?.id === ws.id;
+              const isDropBefore = () => matrixWsDropTarget()?.isBefore;
+
               return (
-                <div
-                  style={{
-                    display: "flex",
-                    "flex-direction": "column",
-                    width: "320px",
-                    "min-width": "300px",
-                    "max-height": "100%",
-                    background: "rgba(15, 23, 42, 0.6)",
-                    border: `1px solid rgba(255, 255, 255, 0.08)`,
-                    "border-top": `3px solid ${ws.color}`,
-                    "border-radius": "12px",
-                    overflow: "hidden",
-                    "box-shadow": "0 8px 24px rgba(0, 0, 0, 0.3)",
-                    "flex-shrink": 0,
-                  }}
-                  onDragOver={(e) => e.preventDefault()}
-                  onDrop={(e) => {
-                    e.preventDefault();
-                    const tabId = e.dataTransfer?.getData("text/plain");
-                    if (tabId) {
-                      props.onUpdateTabProject(tabId, ws.id);
-                    }
-                  }}
-                >
-                  {/* Column Header */}
+                <div style={{ position: "relative", display: "flex", "flex-shrink": 0 }}>
+                  {/* Drop indicator line when reordering workspace columns */}
+                  <Show when={isWsDrop() && draggedWorkspaceId() && draggedWorkspaceId() !== ws.id}>
+                    <div
+                      style={{
+                        position: "absolute",
+                        top: 0,
+                        bottom: 0,
+                        left: isDropBefore() ? "-4px" : "auto",
+                        right: !isDropBefore() ? "-4px" : "auto",
+                        width: "3px",
+                        "border-radius": "2px",
+                        background: "var(--accent-default, #38bdf8)",
+                        "box-shadow": "0 0 8px rgba(56, 189, 248, 0.9)",
+                        "z-index": 100,
+                        "pointer-events": "none",
+                      }}
+                    />
+                  </Show>
+
                   <div
                     style={{
                       display: "flex",
-                      "align-items": "center",
-                      "justify-content": "space-between",
-                      padding: "10px 14px",
-                      background: "rgba(255, 255, 255, 0.03)",
-                      "border-bottom": "1px solid rgba(255, 255, 255, 0.06)",
+                      "flex-direction": "column",
+                      width: "320px",
+                      "min-width": "300px",
+                      "max-height": "100%",
+                      background: "rgba(15, 23, 42, 0.6)",
+                      border: `1px solid rgba(255, 255, 255, 0.08)`,
+                      "border-top": `3px solid ${ws.color}`,
+                      "border-radius": "12px",
+                      overflow: "hidden",
+                      "box-shadow": "0 8px 24px rgba(0, 0, 0, 0.3)",
+                      "flex-shrink": 0,
+                    }}
+                    onDragOver={(e) => {
+                      e.preventDefault();
+                      if (draggedWorkspaceId() && draggedWorkspaceId() !== ws.id) {
+                        e.dataTransfer!.dropEffect = "move";
+                        const rect = e.currentTarget.getBoundingClientRect();
+                        const isBefore = e.clientX < rect.left + rect.width / 2;
+                        setMatrixWsDropTarget({ id: ws.id, isBefore });
+                      } else if (draggedTabId()) {
+                        e.dataTransfer!.dropEffect = "move";
+                      }
+                    }}
+                    onDragLeave={(e) => {
+                      const related = e.relatedTarget as Node;
+                      if (related && (e.currentTarget as HTMLElement).contains(related)) return;
+                      if (matrixWsDropTarget()?.id === ws.id) setMatrixWsDropTarget(null);
+                    }}
+                    onDrop={(e) => {
+                      e.preventDefault();
+                      if (draggedWorkspaceId() && draggedWorkspaceId() !== ws.id) {
+                        const isBefore = matrixWsDropTarget()?.isBefore ?? true;
+                        props.onReorderWorkspaces?.(draggedWorkspaceId()!, ws.id, isBefore);
+                        setDraggedWorkspaceId(null);
+                        setMatrixWsDropTarget(null);
+                      } else if (draggedTabId()) {
+                        props.onUpdateTabProject(draggedTabId()!, ws.id);
+                        setDraggedTabId(null);
+                      }
                     }}
                   >
+                    {/* Column Header: Draggable to reorder columns */}
+                    <div
+                      draggable={true}
+                      style={{
+                        display: "flex",
+                        "align-items": "center",
+                        "justify-content": "space-between",
+                        padding: "10px 14px",
+                        background: "rgba(255, 255, 255, 0.03)",
+                        "border-bottom": "1px solid rgba(255, 255, 255, 0.06)",
+                        cursor: "grab",
+                      }}
+                      onDragStart={(e) => {
+                        e.dataTransfer!.setData(WORKSPACE_DRAG_MIME, ws.id);
+                        e.dataTransfer!.effectAllowed = "move";
+                        setDraggedWorkspaceId(ws.id);
+                      }}
+                      onDragEnd={() => {
+                        setDraggedWorkspaceId(null);
+                        setMatrixWsDropTarget(null);
+                      }}
+                      title="Drag column to reorder workspace"
+                    >
                     <div style={{ display: "flex", "align-items": "center", gap: "8px" }}>
                       <span style={{ color: ws.color, "font-size": "14px" }}>{ws.icon || "✦"}</span>
                       <span style={{ "font-size": "13px", "font-weight": 600, color: "var(--text-primary, #f8fafc)" }}>
@@ -802,35 +1129,95 @@ export function ContextOrbitDeck(props: ContextOrbitDeckProps) {
                           const isActive = () => tab.id === props.activeTabId;
                           const intent = (): TabIntent => tab.intent || "general";
                           const badgeColor = () => INTENT_COLORS[intent()];
+                          const isCardDrop = () => matrixCardDropTarget()?.id === tab.id;
+                          const isCardDropBefore = () => matrixCardDropTarget()?.isBefore;
 
                           return (
-                            <div
-                              class="web-loader-card"
-                              style={{
-                                display: "flex",
-                                "flex-direction": "column",
-                                gap: "6px",
-                                padding: "10px",
-                                "border-radius": "8px",
-                                background: isActive()
-                                  ? "rgba(56, 189, 248, 0.16)"
-                                  : "rgba(255, 255, 255, 0.05)",
-                                border: isActive()
-                                  ? "1px solid rgba(56, 189, 248, 0.5)"
-                                  : "1px solid rgba(255, 255, 255, 0.08)",
-                                "box-shadow": isActive()
-                                  ? "0 0 16px rgba(56, 189, 248, 0.25)"
-                                  : "none",
-                                cursor: "pointer",
-                                transition: "all 0.18s cubic-bezier(0.16, 1, 0.3, 1)",
-                              }}
-                              onClick={(e) => {
-                                e.preventDefault();
-                                e.stopPropagation();
-                                props.onSelectTab(tab.id);
-                                props.onClose();
-                              }}
-                            >
+                            <div style={{ position: "relative" }}>
+                              {/* Drop indicator line when dragging tabs in matrix */}
+                              <Show when={isCardDrop() && draggedTabId() && draggedTabId() !== tab.id}>
+                                <div
+                                  style={{
+                                    position: "absolute",
+                                    left: "0",
+                                    right: "0",
+                                    top: isCardDropBefore() ? "-4px" : "auto",
+                                    bottom: !isCardDropBefore() ? "-4px" : "auto",
+                                    height: "3px",
+                                    "border-radius": "2px",
+                                    background: "var(--accent-default, #38bdf8)",
+                                    "box-shadow": "0 0 8px rgba(56, 189, 248, 0.9)",
+                                    "z-index": 100,
+                                    "pointer-events": "none",
+                                  }}
+                                />
+                              </Show>
+
+                              <div
+                                draggable={true}
+                                class="web-loader-card"
+                                style={{
+                                  display: "flex",
+                                  "flex-direction": "column",
+                                  gap: "6px",
+                                  padding: "10px",
+                                  "border-radius": "8px",
+                                  background: isActive()
+                                    ? "rgba(56, 189, 248, 0.16)"
+                                    : "rgba(255, 255, 255, 0.05)",
+                                  border: isActive()
+                                    ? "1px solid rgba(56, 189, 248, 0.5)"
+                                    : "1px solid rgba(255, 255, 255, 0.08)",
+                                  "box-shadow": isActive()
+                                    ? "0 0 16px rgba(56, 189, 248, 0.25)"
+                                    : "none",
+                                  cursor: "pointer",
+                                  transition: "all 0.18s cubic-bezier(0.16, 1, 0.3, 1)",
+                                  opacity: draggedTabId() === tab.id ? 0.45 : 1,
+                                }}
+                                onDragStart={(e) => {
+                                  e.dataTransfer!.setData(TAB_DRAG_MIME, tab.id);
+                                  e.dataTransfer!.setData("text/plain", tab.id);
+                                  e.dataTransfer!.effectAllowed = "move";
+                                  setDraggedTabId(tab.id);
+                                }}
+                                onDragEnd={() => {
+                                  setDraggedTabId(null);
+                                  setMatrixCardDropTarget(null);
+                                }}
+                                onDragOver={(e) => {
+                                  if (draggedTabId() && draggedTabId() !== tab.id) {
+                                    e.preventDefault();
+                                    e.stopPropagation();
+                                    e.dataTransfer!.dropEffect = "move";
+                                    const rect = e.currentTarget.getBoundingClientRect();
+                                    const isBefore = e.clientY < rect.top + rect.height / 2;
+                                    setMatrixCardDropTarget({ id: tab.id, isBefore });
+                                  }
+                                }}
+                                onDragLeave={(e) => {
+                                  const related = e.relatedTarget as Node;
+                                  if (related && (e.currentTarget as HTMLElement).contains(related)) return;
+                                  if (matrixCardDropTarget()?.id === tab.id) setMatrixCardDropTarget(null);
+                                }}
+                                onDrop={(e) => {
+                                  if (draggedTabId() && draggedTabId() !== tab.id) {
+                                    e.preventDefault();
+                                    e.stopPropagation();
+                                    const isBefore = matrixCardDropTarget()?.isBefore ?? true;
+                                    props.onReorderTabs?.(draggedTabId()!, tab.id, isBefore, ws.id);
+                                    props.onUpdateTabProject(draggedTabId()!, ws.id);
+                                    setDraggedTabId(null);
+                                    setMatrixCardDropTarget(null);
+                                  }
+                                }}
+                                onClick={(e) => {
+                                  e.preventDefault();
+                                  e.stopPropagation();
+                                  props.onSelectTab(tab.id);
+                                  props.onClose();
+                                }}
+                              >
                               {/* Card Header: Favicon + Domain + Intent Chip + Close */}
                               <div
                                 style={{
@@ -1007,14 +1394,16 @@ export function ContextOrbitDeck(props: ContextOrbitDeckProps) {
                                 </div>
                               </div>
                             </div>
-                          );
-                        }}
-                      </For>
-                    </Show>
-                  </div>
+                          </div>
+                        );
+                      }}
+                    </For>
+                  </Show>
                 </div>
-              );
-            }}
+              </div>
+            </div>
+          );
+        }}
           </For>
 
           {/* Add Workspace Action Card */}
@@ -1229,6 +1618,14 @@ export function ContextOrbitDeck(props: ContextOrbitDeckProps) {
                       cursor: "pointer",
                       "z-index": isActive() ? 5 : 2,
                     }}
+                    draggable={true}
+                    onDragStart={(e) => {
+                      e.dataTransfer!.setData(TAB_DRAG_MIME, tab.id);
+                      e.dataTransfer!.setData("text/plain", tab.id);
+                      e.dataTransfer!.effectAllowed = "move";
+                      setDraggedTabId(tab.id);
+                    }}
+                    onDragEnd={() => setDraggedTabId(null)}
                     onClick={(e) => {
                       e.preventDefault();
                       e.stopPropagation();
