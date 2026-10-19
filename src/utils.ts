@@ -679,6 +679,25 @@ export async function createOrShowDockedWebview(
     currentVisibleTabId = tabId;
     currentVisibleLabel = newLabel;
     dockedWebviewSupported = true;
+
+    // Attach native OS accelerator key interception (Flurer Core & Global System)
+    try {
+      if ((window as any).attachChildWebviewShortcuts) {
+        await (window as any).attachChildWebviewShortcuts(newLabel, "web-loader");
+      } else {
+        await window.TauriCore.invoke("attach_child_webview_shortcuts", {
+          label: newLabel,
+          pluginId: "web-loader",
+        });
+      }
+    } catch {
+      try {
+        await window.TauriCore.invoke("attach_docked_webview_shortcuts", { label: newLabel });
+      } catch (shortcutErr) {
+        console.warn("attach_child_webview_shortcuts not supported or failed:", shortcutErr);
+      }
+    }
+
     return { success: true, reused: false };
   } catch (err: any) {
     const errStr = String(err?.message || err);

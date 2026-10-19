@@ -432,19 +432,30 @@ function WebBrowserPanel(props: MainPanelProps) {
     window.addEventListener("keydown", handleGlobalKey, true);
     document.addEventListener("keydown", handleGlobalKey, true);
 
-    // Tauri bridge listener for child webviews emitting "web-loader:shortcut"
+    // Tauri bridge listener for child webviews emitting "web-loader:shortcut" and global "flurer:webview-shortcut"
     let unlistenTauriShortcut: (() => void) | undefined;
+    let unlistenFlurerShortcut: (() => void) | undefined;
     let unlistenPageLoad: (() => void) | undefined;
     let unlistenNavigated: (() => void) | undefined;
 
     if (window.TauriEvent?.listen) {
-      window.TauriEvent.listen("web-loader:shortcut", (event: any) => {
+      const handlePayloadShortcut = (event: any) => {
         const p = event?.payload;
         if (p) {
+          // If event has pluginId, verify it matches our plugin or is meant for us
+          if (p.pluginId && p.pluginId !== "web-loader" && !String(p.sourceWebview || "").startsWith("web-")) {
+            return;
+          }
           handleShortcutAction(p.key, p.code, !!p.ctrlKey || !!p.metaKey, !!p.shiftKey, !!p.altKey);
         }
-      }).then((unlisten: () => void) => {
+      };
+
+      window.TauriEvent.listen("web-loader:shortcut", handlePayloadShortcut).then((unlisten: () => void) => {
         unlistenTauriShortcut = unlisten;
+      }).catch(() => {});
+
+      window.TauriEvent.listen("flurer:webview-shortcut", handlePayloadShortcut).then((unlisten: () => void) => {
+        unlistenFlurerShortcut = unlisten;
       }).catch(() => {});
 
       window.TauriEvent.listen("tauri://page-load", (event: any) => {
@@ -502,6 +513,9 @@ function WebBrowserPanel(props: MainPanelProps) {
       if (unlistenTauriShortcut) {
         unlistenTauriShortcut();
       }
+      if (unlistenFlurerShortcut) {
+        unlistenFlurerShortcut();
+      }
       if (unlistenPageLoad) {
         unlistenPageLoad();
       }
@@ -536,6 +550,9 @@ function WebBrowserPanel(props: MainPanelProps) {
   };
 
   const focusOmnibox = () => {
+    try {
+      window.focus();
+    } catch {}
     // Retry across immediate tick, next frame, 50ms, 150ms, and 300ms to guarantee focus
     const tryFocus = () => {
       const omni = document.querySelector(".web-loader-omnibox input") as HTMLInputElement | null;

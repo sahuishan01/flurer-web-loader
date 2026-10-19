@@ -1,7 +1,7 @@
-# Graph Report - flurer-web-loader-plugin  (2026-10-16)
+# Graph Report - flurer-web-loader-plugin  (2026-10-19)
 
 ## Corpus Check
-- 23 files · ~28,158 words
+- 23 files · ~28,609 words
 - Verdict: corpus is large enough that graph structure adds value.
 
 ## Summary
@@ -10,7 +10,7 @@
 - Token cost: 0 input · 0 output
 
 ## Graph Freshness
-- Built from commit: `e9926033`
+- Built from commit: `fab367e1`
 - Run `git rev-parse HEAD` and compare to check if the graph is stale.
 - Run `graphify update .` after code changes (no API cost).
 
