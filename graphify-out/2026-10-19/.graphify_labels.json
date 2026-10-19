@@ -1,6 +1,6 @@
 {
-  "0": "icons.tsx",
-  "1": "QuickDial.tsx",
+  "0": "ContextOrbitDeck.tsx",
+  "1": "WebViewport.tsx",
   "2": "compilerOptions",
   "3": "package.json",
   "4": "utils.ts",
@@ -12,7 +12,8 @@
   "10": "workflows/graphify.md",
   "11": "index.tsx",
   "12": "types.ts",
-  "13": "QuickTabSwitcher.tsx",
-  "14": "ContextOrbitDeck.tsx",
-  "15": "TabBar.tsx"
+  "13": "invoke",
+  "14": "Project Guidelines & Invariants (GEMINI.md)",
+  "15": "openInWebviewWindow",
+  "16": "initRestoredTabs"
 }

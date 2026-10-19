@@ -117,14 +117,18 @@ export function ContextCapsuleBar(props: ContextCapsuleBarProps) {
     props.onNavigate(targetUrl);
   };
 
+  const tabMatchesWorkspace = (tab: Tab, wsId: string) => {
+    if (tab.projectId) {
+      return tab.projectId === wsId;
+    }
+    return wsId === "flurer" || wsId === "general";
+  };
+
   const visibleTabs = () => {
     if (showAllWorkspaces()) {
       return props.tabs;
     }
-    const currentWsId = props.currentWorkspace.id;
-    const inWs = props.tabs.filter((t) => (t.projectId || "general") === currentWsId);
-    // If no tabs in selected workspace, fall back to all tabs so user is never stranded
-    return inWs.length > 0 ? inWs : props.tabs;
+    return props.tabs.filter((t) => tabMatchesWorkspace(t, props.currentWorkspace.id));
   };
 
   const activeIntent = (): TabIntent => props.activeTab?.intent || "general";
@@ -328,7 +332,7 @@ export function ContextCapsuleBar(props: ContextCapsuleBarProps) {
                         color: "var(--text-muted, #94a3b8)",
                       }}
                     >
-                      {props.tabs.filter((t) => (t.projectId || "general") === ws.id).length}
+                      {props.tabs.filter((t) => tabMatchesWorkspace(t, ws.id)).length}
                     </span>
                   </button>
                 )}

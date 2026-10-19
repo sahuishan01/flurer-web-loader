@@ -1,14 +1,14 @@
 {
   "package.json": {
-    "mtime": 1792395045.8266273,
-    "seen": 1792395159.3583598,
-    "ast_hash": "7699af45d1fedcd6045e4a778a5060cb",
+    "mtime": 1792414526.02398,
+    "seen": 1792414546.2159927,
+    "ast_hash": "789d7136fab602ead73f10191f5668c1",
     "semantic_hash": ""
   },
   "plugin.json": {
-    "mtime": 1792406589.2850873,
-    "seen": 1792406597.7081003,
-    "ast_hash": "a0a091efb4806a475e7b4bce83c8649e",
+    "mtime": 1792414532.6080089,
+    "seen": 1792414546.2159965,
+    "ast_hash": "1d071cdc579187da21f14eca4df8f1c9",
     "semantic_hash": ""
   },
   "scripts/sync-version.cjs": {
@@ -141,6 +141,18 @@
     "mtime": 1792045355.6203837,
     "seen": 1792045400.9930158,
     "ast_hash": "aeb99c7f18d530854723bb4f49f01a05",
+    "semantic_hash": ""
+  },
+  "GEMINI.md": {
+    "mtime": 1792414505.5718899,
+    "seen": 1792414546.2160382,
+    "ast_hash": "b8fdc0e9442520e4bcf659c014e99ca4",
+    "semantic_hash": ""
+  },
+  "gemini.md": {
+    "mtime": 1792414505.5718899,
+    "seen": 1792414546.2160408,
+    "ast_hash": "b8fdc0e9442520e4bcf659c014e99ca4",
     "semantic_hash": ""
   }
 }

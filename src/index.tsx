@@ -1,4 +1,4 @@
-import { createSignal, createRoot, Show, onMount, onCleanup, createEffect, batch } from "solid-js";
+import { createSignal, createRoot, Show, onMount, onCleanup, createEffect, batch, untrack } from "solid-js";
 import {
   MainPanelProps,
   Tab,
@@ -302,13 +302,18 @@ function WebBrowserPanel(props: MainPanelProps) {
   const [quickSwitcherOpen, setQuickSwitcherOpen] = createSignal(false);
   const orbitLayoutMode = () => props.pluginSettings?.orbitDeckLayout ?? "matrix";
 
-  // Sync currentWorkspaceId with active tab if active tab changes
+  // Sync currentWorkspaceId only when activeTabId changes to a different tab
+  let lastSyncedActiveId = activeTabId();
   createEffect(() => {
-    const cur = activeTab();
-    if (cur?.projectId && cur.projectId !== currentWorkspaceId()) {
-      const exists = workspaces().some((w) => w.id === cur.projectId);
-      if (exists) {
-        setCurrentWorkspaceId(cur.projectId);
+    const curId = activeTabId();
+    if (curId !== lastSyncedActiveId) {
+      lastSyncedActiveId = curId;
+      const cur = tabs().find((t) => t.id === curId);
+      if (cur?.projectId && cur.projectId !== untrack(currentWorkspaceId)) {
+        const exists = workspaces().some((w) => w.id === cur.projectId);
+        if (exists) {
+          setCurrentWorkspaceId(cur.projectId);
+        }
       }
     }
   });
@@ -678,6 +683,48 @@ function WebBrowserPanel(props: MainPanelProps) {
     }
   };
 
+  const tabMatchesWorkspace = (tab: Tab, wsId: string) => {
+    if (tab.projectId) {
+      return tab.projectId === wsId;
+    }
+    return wsId === "flurer" || wsId === "general";
+  };
+
+  const handleSwitchWorkspace = (wsId: string) => {
+    const allTabs = tabs();
+    const wsTabs = allTabs.filter((t) => tabMatchesWorkspace(t, wsId));
+
+    batch(() => {
+      setCurrentWorkspaceId(wsId);
+      setOrbitDeckOpen(false);
+      setWorkspaceMenuOpen(false);
+
+      if (wsTabs.length > 0) {
+        const targetTab = [...wsTabs].sort((a, b) => (b.lastActiveAt || 0) - (a.lastActiveAt || 0))[0];
+        setActiveTabId(targetTab.id);
+        saveActiveTab(targetTab.url === "about:blank" ? null : targetTab.url);
+        if (targetTab.url === "about:blank") {
+          hideAllDockedWebviews();
+          focusOmnibox();
+        }
+      } else {
+        const newTab = createNewTab(
+          "about:blank",
+          "New Tab",
+          undefined,
+          undefined,
+          wsId
+        );
+        const nextTabs = [...allTabs, newTab];
+        setTabs(nextTabs);
+        setActiveTabId(newTab.id);
+        persistCurrentTabs(nextTabs, newTab.url);
+        hideAllDockedWebviews();
+        focusOmnibox();
+      }
+    });
+  };
+
   const handleNavigate = (url: string) => {
     const id = activeTabId();
     const domain = getDomain(url);
@@ -943,7 +990,7 @@ function WebBrowserPanel(props: MainPanelProps) {
             onZoomIn={() => handleZoom(0.1)}
             onZoomOut={() => handleZoom(-0.1)}
             onResetZoom={handleResetZoom}
-            onSwitchWorkspace={(wsId) => setCurrentWorkspaceId(wsId)}
+            onSwitchWorkspace={handleSwitchWorkspace}
             onOpenQuickSwitcher={() => setQuickSwitcherOpen(true)}
           />
         }
@@ -995,7 +1042,7 @@ function WebBrowserPanel(props: MainPanelProps) {
           openInWebviewWindow(url, title || getDomain(url), getLaunchOptions());
         }}
         onOpenExternal={handleOpenExternal}
-        onSwitchWorkspace={(wsId) => setCurrentWorkspaceId(wsId)}
+        onSwitchWorkspace={handleSwitchWorkspace}
         onAddWorkspace={(name, color, keywords) => {
           const newWs = {
             id: `ws-${Date.now()}`,
