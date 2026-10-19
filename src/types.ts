@@ -82,6 +82,7 @@ export interface SavedTabRecord {
   parentTitle?: string;
   pinned?: boolean;
   position?: { x: number; y: number };
+  lastActiveAt?: number;
 }
 
 export interface WebPluginSettings {

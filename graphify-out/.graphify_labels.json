@@ -12,8 +12,7 @@
   "10": "workflows/graphify.md",
   "11": "index.tsx",
   "12": "types.ts",
-  "13": "getModifierKey",
+  "13": "openInWebviewWindow",
   "14": "Project Guidelines & Invariants (GEMINI.md)",
-  "15": "openInWebviewWindow",
   "16": "addHistoryItem"
 }

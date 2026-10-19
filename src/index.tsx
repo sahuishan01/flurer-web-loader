@@ -226,6 +226,16 @@ if (typeof document !== "undefined" && !document.getElementById(STYLE_ID)) {
 }
 
 let tabCounter = 0;
+let lastAssignedActiveTime = Date.now();
+export function getMonotonicTimestamp(): number {
+  const now = Date.now();
+  if (now > lastAssignedActiveTime) {
+    lastAssignedActiveTime = now;
+  } else {
+    lastAssignedActiveTime += 1;
+  }
+  return lastAssignedActiveTime;
+}
 
 function createNewTab(
   url: string = "about:blank",
@@ -236,6 +246,7 @@ function createNewTab(
 ): Tab {
   const domain = url === "about:blank" ? "" : getDomain(url);
   const decision = classifyHeuristic(url, title || domain, getSavedWorkspaces(), projectId);
+  const now = getMonotonicTimestamp();
   return {
     id: `tab-${++tabCounter}`,
     title: title || (url === "about:blank" ? "New Tab" : domain),
@@ -249,8 +260,8 @@ function createNewTab(
     intent: decision.intent,
     parentId,
     parentTitle,
-    createdAt: Date.now(),
-    lastActiveAt: Date.now(),
+    createdAt: now,
+    lastActiveAt: now,
     position: {
       x: 180 + Math.floor(Math.random() * 450),
       y: 140 + Math.floor(Math.random() * 320),
@@ -262,18 +273,23 @@ function initRestoredTabs(): { tabs: Tab[]; activeId: string } {
   const saved = getSavedTabs();
   const savedActive = getSavedActiveTab();
   if (saved.length > 0) {
-    const restored = saved.map((s) => {
+    const baseTime = Date.now() - saved.length * 1000;
+    const restored = saved.map((s, idx) => {
       const tab = createNewTab(s.url, s.title, s.parentId, s.parentTitle, s.projectId);
       if (s.intent) tab.intent = s.intent;
       if (s.pinned !== undefined) tab.pinned = s.pinned;
       if (s.position) tab.position = s.position;
       if (s.favicon) tab.favicon = s.favicon;
+      tab.lastActiveAt = s.lastActiveAt || (baseTime + idx * 1000);
       return tab;
     });
     const match = restored.find((t) => t.url === savedActive);
+    const activeId = match ? match.id : restored[0].id;
+    const now = getMonotonicTimestamp();
+    const finalTabs = restored.map((t) => (t.id === activeId ? { ...t, lastActiveAt: now } : t));
     return {
-      tabs: restored,
-      activeId: match ? match.id : restored[0].id,
+      tabs: finalTabs,
+      activeId,
     };
   }
   const defaultTab = createNewTab();
@@ -562,6 +578,7 @@ function WebBrowserPanel(props: MainPanelProps) {
         parentTitle: t.parentTitle,
         pinned: t.pinned,
         position: t.position,
+        lastActiveAt: t.lastActiveAt,
       }))
     );
     if (activeUrl !== undefined) {
@@ -600,9 +617,12 @@ function WebBrowserPanel(props: MainPanelProps) {
   const handleSelectTab = (id: string) => {
     const target = tabs().find((t) => t.id === id);
     if (!target) return;
+    const now = getMonotonicTimestamp();
+    const nextTabs = tabs().map((t) => (t.id === id ? { ...t, lastActiveAt: now } : t));
     batch(() => {
       setOrbitDeckOpen(false);
       setWorkspaceMenuOpen(false);
+      setTabs(nextTabs);
       setActiveTabId(id);
       if (target.projectId) {
         setCurrentWorkspaceId(target.projectId);
@@ -613,6 +633,7 @@ function WebBrowserPanel(props: MainPanelProps) {
       focusOmnibox();
     }
     saveActiveTab(target.url === "about:blank" ? null : target.url);
+    persistCurrentTabs(nextTabs, target.url);
   };
 
   const handleNewTab = (
@@ -652,6 +673,13 @@ function WebBrowserPanel(props: MainPanelProps) {
     }
   };
 
+  const tabMatchesWorkspace = (tab: Tab, wsId: string) => {
+    if (tab.projectId) {
+      return tab.projectId === wsId;
+    }
+    return wsId === "flurer" || wsId === "general";
+  };
+
   const handleCloseTab = (id: string) => {
     closeTabWebview(id);
     const current = tabs();
@@ -667,16 +695,37 @@ function WebBrowserPanel(props: MainPanelProps) {
       return;
     }
 
-    const idx = current.findIndex((t) => t.id === id);
-    if (idx === -1) return;
+    const closingTab = current.find((t) => t.id === id);
+    if (!closingTab) return;
     const updated = current.filter((t) => t.id !== id);
 
     if (activeTabId() === id) {
-      const nextIdx = Math.max(0, Math.min(idx, updated.length - 1));
-      const nextTab = updated[nextIdx];
+      // Determine the group / workspace of the closing tab
+      const targetWsId = closingTab.projectId || currentWorkspace().id;
+
+      // Filter remaining tabs that belong to the SAME group/workspace
+      const groupTabs = updated.filter((t) => tabMatchesWorkspace(t, targetWsId));
+
+      let nextTab: Tab;
+      let finalTabs = updated;
+
+      if (groupTabs.length > 0) {
+        // Go to the last visited (most recently active) tab in that group
+        nextTab = [...groupTabs].sort((a, b) => (b.lastActiveAt || 0) - (a.lastActiveAt || 0))[0];
+      } else {
+        // If no more tabs in this group, create a fresh tab in this workspace so user stays in the group
+        const fresh = createNewTab("about:blank", "New Tab", undefined, undefined, targetWsId);
+        finalTabs = [...updated, fresh];
+        nextTab = fresh;
+      }
+
+      // Mark the selected tab with latest active timestamp
+      const now = getMonotonicTimestamp();
+      const updatedWithActive = finalTabs.map((t) => (t.id === nextTab.id ? { ...t, lastActiveAt: now } : t));
+
       batch(() => {
         setActiveTabId(nextTab.id);
-        setTabs(updated);
+        setTabs(updatedWithActive);
         setOrbitDeckOpen(false);
         setWorkspaceMenuOpen(false);
         if (nextTab.projectId) {
@@ -688,18 +737,11 @@ function WebBrowserPanel(props: MainPanelProps) {
         focusOmnibox();
       }
       saveActiveTab(nextTab.url === "about:blank" ? null : nextTab.url);
-      persistCurrentTabs(updated, nextTab.url);
+      persistCurrentTabs(updatedWithActive, nextTab.url);
     } else {
       setTabs(updated);
       persistCurrentTabs(updated, activeTab()?.url);
     }
-  };
-
-  const tabMatchesWorkspace = (tab: Tab, wsId: string) => {
-    if (tab.projectId) {
-      return tab.projectId === wsId;
-    }
-    return wsId === "flurer" || wsId === "general";
   };
 
   const handleSwitchWorkspace = (wsId: string) => {
@@ -713,8 +755,12 @@ function WebBrowserPanel(props: MainPanelProps) {
 
       if (wsTabs.length > 0) {
         const targetTab = [...wsTabs].sort((a, b) => (b.lastActiveAt || 0) - (a.lastActiveAt || 0))[0];
+        const now = getMonotonicTimestamp();
+        const nextTabs = allTabs.map((t) => (t.id === targetTab.id ? { ...t, lastActiveAt: now } : t));
         setActiveTabId(targetTab.id);
+        setTabs(nextTabs);
         saveActiveTab(targetTab.url === "about:blank" ? null : targetTab.url);
+        persistCurrentTabs(nextTabs, targetTab.url);
         if (targetTab.url === "about:blank") {
           hideAllDockedWebviews();
           focusOmnibox();
@@ -760,7 +806,7 @@ function WebBrowserPanel(props: MainPanelProps) {
             title: domain,
             projectId: t.projectId || decision.projectId,
             intent: decision.intent,
-            lastActiveAt: Date.now(),
+            lastActiveAt: getMonotonicTimestamp(),
           }
         : t
     );
@@ -817,7 +863,7 @@ function WebBrowserPanel(props: MainPanelProps) {
             title: domain,
             projectId: t.projectId || decision.projectId,
             intent: decision.intent,
-            lastActiveAt: Date.now(),
+            lastActiveAt: getMonotonicTimestamp(),
           }
         : t
     );
