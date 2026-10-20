@@ -889,14 +889,55 @@ export async function setDockedWebviewZoom(zoom: number, tabId?: string): Promis
   } catch {}
 }
 
-export async function queryDockedWebviewUrl(tabId?: string): Promise<string | null> {
+export async function queryDockedWebviewUrl(
+  tabId?: string,
+  onNewWindow?: (url: string) => void
+): Promise<string | null> {
   if (!window.TauriCore) return null;
   const targetLabel = tabId ? tabWebviewRegistry.get(tabId)?.label : currentVisibleLabel;
   if (!targetLabel) return null;
   try {
-    const url = await window.TauriCore.invoke("get_docked_webview_url", { label: targetLabel });
-    if (typeof url === "string" && url.length > 0 && url !== "about:blank") {
-      return url;
+    const rawResult = await window.TauriCore.invoke<any>("get_docked_webview_url", { label: targetLabel });
+    if (!rawResult) return null;
+
+    let targetUrl: string | null = null;
+
+    if (typeof rawResult === "string" && rawResult.length > 0 && rawResult !== "about:blank") {
+      const trimmed = rawResult.trim();
+      if (trimmed.startsWith("{") && trimmed.endsWith("}")) {
+        try {
+          const parsed = JSON.parse(trimmed);
+          if (parsed && typeof parsed.url === "string") {
+            targetUrl = parsed.url;
+            if (Array.isArray(parsed.nw) && onNewWindow) {
+              for (const nwUrl of parsed.nw) {
+                if (typeof nwUrl === "string" && nwUrl && nwUrl !== "about:blank") {
+                  onNewWindow(nwUrl);
+                }
+              }
+            }
+          }
+        } catch {
+          targetUrl = trimmed;
+        }
+      } else {
+        targetUrl = trimmed;
+      }
+    } else if (typeof rawResult === "object" && rawResult !== null) {
+      if (typeof rawResult.url === "string") {
+        targetUrl = rawResult.url;
+      }
+      if (Array.isArray(rawResult.nw) && onNewWindow) {
+        for (const nwUrl of rawResult.nw) {
+          if (typeof nwUrl === "string" && nwUrl && nwUrl !== "about:blank") {
+            onNewWindow(nwUrl);
+          }
+        }
+      }
+    }
+
+    if (targetUrl && targetUrl.length > 0 && targetUrl !== "about:blank" && !targetUrl.startsWith("{")) {
+      return targetUrl;
     }
   } catch {}
   return null;
@@ -915,7 +956,20 @@ export function getSavedTabs(): SavedTabRecord[] {
   try {
     const raw = localStorage.getItem(TABS_KEY);
     if (!raw) return [];
-    return JSON.parse(raw);
+    const list: SavedTabRecord[] = JSON.parse(raw);
+    if (!Array.isArray(list)) return [];
+    return list.map((tab) => {
+      let url = tab.url;
+      if (typeof url === "string" && url.startsWith("{") && url.endsWith("}")) {
+        try {
+          const parsed = JSON.parse(url);
+          if (parsed && typeof parsed.url === "string") {
+            url = parsed.url;
+          }
+        } catch {}
+      }
+      return { ...tab, url };
+    });
   } catch {
     return [];
   }

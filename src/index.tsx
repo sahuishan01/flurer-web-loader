@@ -247,6 +247,17 @@ function createNewTab(
   parentTitle?: string,
   projectId?: string
 ): Tab {
+  let cleanUrl = url.trim();
+  if (cleanUrl.startsWith("{") && cleanUrl.endsWith("}")) {
+    try {
+      const parsed = JSON.parse(cleanUrl);
+      if (parsed && typeof parsed.url === "string") {
+        cleanUrl = parsed.url;
+      }
+    } catch {}
+  }
+  url = cleanUrl;
+
   const domain = url === "about:blank" ? "" : getDomain(url);
   const decision = classifyHeuristic(url, title || domain, getSavedWorkspaces(), projectId);
   const now = getMonotonicTimestamp();
@@ -530,11 +541,22 @@ function WebBrowserPanel(props: MainPanelProps) {
 
     const handleNewWindowRequested = (rawUrl: string, sourceWebview?: string) => {
       if (!rawUrl || rawUrl === "about:blank" || rawUrl.startsWith("javascript:")) return;
+      let cleanUrl = rawUrl.trim();
+      if (cleanUrl.startsWith("{") && cleanUrl.endsWith("}")) {
+        try {
+          const parsed = JSON.parse(cleanUrl);
+          if (parsed && typeof parsed.url === "string") {
+            cleanUrl = parsed.url;
+          }
+        } catch {}
+      }
+      if (!cleanUrl || cleanUrl.startsWith("{") || cleanUrl === "about:blank") return;
+
       const now = Date.now();
-      if (rawUrl === lastNewWindowUrl && now - lastNewWindowTime < 800) {
+      if (cleanUrl === lastNewWindowUrl && now - lastNewWindowTime < 800) {
         return;
       }
-      lastNewWindowUrl = rawUrl;
+      lastNewWindowUrl = cleanUrl;
       lastNewWindowTime = now;
 
       const currentTabs = tabs();
@@ -546,7 +568,7 @@ function WebBrowserPanel(props: MainPanelProps) {
         : activeTab();
 
       const targetWs = parentTab?.projectId || currentWorkspace().id;
-      handleNewTab(rawUrl, parentTab?.id, targetWs);
+      handleNewTab(cleanUrl, parentTab?.id, targetWs);
     };
 
     if (window.TauriEvent?.listen) {
@@ -638,7 +660,9 @@ function WebBrowserPanel(props: MainPanelProps) {
     const pollInterval = setInterval(async () => {
       const curTab = activeTab();
       if (!curTab || curTab.url === "about:blank" || props.active === false) return;
-      const liveUrl = await queryDockedWebviewUrl(curTab.id);
+      const liveUrl = await queryDockedWebviewUrl(curTab.id, (nwUrl) => {
+        handleNewWindowRequested(nwUrl, getDockedWebviewEntry(curTab.id)?.label);
+      });
       if (liveUrl && liveUrl !== curTab.url && liveUrl !== "about:blank" && !liveUrl.startsWith("javascript:")) {
         handleWebviewNavigated(liveUrl, curTab.id);
       }
@@ -1014,6 +1038,25 @@ function WebBrowserPanel(props: MainPanelProps) {
 
   const handleWebviewNavigated = (newUrl: string, targetTabId?: string) => {
     if (!newUrl || newUrl === "about:blank" || newUrl.startsWith("javascript:")) return;
+    let cleanUrl = newUrl.trim();
+    if (cleanUrl.startsWith("{") && cleanUrl.endsWith("}")) {
+      try {
+        const parsed = JSON.parse(cleanUrl);
+        if (parsed && typeof parsed.url === "string") {
+          cleanUrl = parsed.url;
+          if (Array.isArray(parsed.nw)) {
+            for (const nwUrl of parsed.nw) {
+              if (typeof nwUrl === "string" && nwUrl && nwUrl !== "about:blank") {
+                handleNewWindowRequested(nwUrl);
+              }
+            }
+          }
+        }
+      } catch {}
+    }
+    if (!cleanUrl || cleanUrl.startsWith("{") || cleanUrl === "about:blank") return;
+    newUrl = cleanUrl;
+
     const id = targetTabId || activeTabId();
     const cur = tabs().find((t) => t.id === id);
     if (!cur) return;
