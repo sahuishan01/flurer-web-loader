@@ -525,9 +525,18 @@ function WebBrowserPanel(props: MainPanelProps) {
     let unlistenNewWindow: (() => void) | undefined;
     let unlistenFlurerNewWindow: (() => void) | undefined;
     let unlistenOpenTab: (() => void) | undefined;
+    let lastNewWindowUrl = "";
+    let lastNewWindowTime = 0;
 
     const handleNewWindowRequested = (rawUrl: string, sourceWebview?: string) => {
       if (!rawUrl || rawUrl === "about:blank" || rawUrl.startsWith("javascript:")) return;
+      const now = Date.now();
+      if (rawUrl === lastNewWindowUrl && now - lastNewWindowTime < 800) {
+        return;
+      }
+      lastNewWindowUrl = rawUrl;
+      lastNewWindowTime = now;
+
       const currentTabs = tabs();
       const parentTab = sourceWebview
         ? currentTabs.find((t) => {
