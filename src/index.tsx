@@ -37,6 +37,7 @@ import {
   closeAllDockedWebviews,
   hideAllDockedWebviews,
   restoreMainWebviewFocus,
+  tabMatchesWorkspace,
   setDockedWebviewZoom,
   getSavedWorkspaces,
   saveWorkspaces,
@@ -408,23 +409,27 @@ function WebBrowserPanel(props: MainPanelProps) {
         return true;
       }
 
-      // 7. Cycle Tabs: Ctrl+Tab (next) and Ctrl+Shift+Tab (prev)
+      // 7. Cycle Tabs: Ctrl+Tab (next) and Ctrl+Shift+Tab (prev) within current workspace
       if (isMod && (key === "tab" || c === "Tab")) {
         preventDefault?.();
-        const currentList = tabs();
+        const currentWsId = currentWorkspace().id;
+        const currentList = tabs().filter((t) => tabMatchesWorkspace(t, currentWsId));
         if (currentList.length <= 1) return true;
         const currentIdx = currentList.findIndex((t) => t.id === activeTabId());
-        const nextIdx = isShift
+        const nextIdx = currentIdx < 0
+          ? 0
+          : isShift
           ? (currentIdx - 1 + currentList.length) % currentList.length
           : (currentIdx + 1) % currentList.length;
         handleSelectTab(currentList[nextIdx].id);
         return true;
       }
 
-      // 8. Numbered Tab Switch: Ctrl+1..Ctrl+8 (direct), Ctrl+9 (last tab)
+      // 8. Numbered Tab Switch: Ctrl+1..Ctrl+8 (direct), Ctrl+9 (last tab) within current workspace
       if (isMod && !isShift && (/^[1-9]$/.test(key) || /^Digit[1-9]$/.test(c))) {
         preventDefault?.();
-        const currentList = tabs();
+        const currentWsId = currentWorkspace().id;
+        const currentList = tabs().filter((t) => tabMatchesWorkspace(t, currentWsId));
         if (currentList.length === 0) return true;
         const digitChar = /^[1-9]$/.test(key) ? key : c.replace("Digit", "");
         const num = parseInt(digitChar, 10);
@@ -718,13 +723,6 @@ function WebBrowserPanel(props: MainPanelProps) {
       currentWs.splice(targetIndex, 0, movedWs);
     }
     setWorkspaces(currentWs);
-  };
-
-  const tabMatchesWorkspace = (tab: Tab, wsId: string) => {
-    if (tab.projectId) {
-      return tab.projectId === wsId;
-    }
-    return wsId === "flurer" || wsId === "general";
   };
 
   const handleCloseTab = (id: string) => {

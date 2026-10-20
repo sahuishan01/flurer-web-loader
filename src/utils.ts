@@ -770,6 +770,13 @@ export async function hideTabWebview(tabId: string): Promise<void> {
   }
 }
 
+export function tabMatchesWorkspace(tab: { projectId?: string }, wsId: string): boolean {
+  if (tab.projectId) {
+    return tab.projectId === wsId;
+  }
+  return wsId === "flurer" || wsId === "general";
+}
+
 export function restoreMainWebviewFocus(): void {
   if (typeof window === "undefined" || !window.TauriCore) return;
   const winLabel = (window as any).__TAURI_INTERNALS__?.metadata?.currentWindow?.label || "main";

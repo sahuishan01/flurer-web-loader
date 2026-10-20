@@ -3,7 +3,7 @@ import { Tab, ProjectWorkspace } from "../types";
 import { S } from "../styles";
 import { PlusIcon, CloseIcon, GlobeIcon, SearchIcon, CompactIcon } from "../icons";
 import { WebsiteIcon } from "./WebsiteIcon";
-import { getModifierKey } from "../utils";
+import { getModifierKey, tabMatchesWorkspace } from "../utils";
 import {
   draggedTabId,
   setDraggedTabId,
@@ -70,6 +70,11 @@ export function TabBar(props: TabBarProps) {
       wsHoverTimer = null;
     }
   });
+
+  const visibleTabs = () => {
+    if (!props.currentWorkspace) return props.tabs;
+    return props.tabs.filter((t) => tabMatchesWorkspace(t, props.currentWorkspace!.id));
+  };
 
   return (
     <div
@@ -356,7 +361,7 @@ export function TabBar(props: TabBarProps) {
                             color: "var(--text-muted, #94a3b8)",
                           }}
                         >
-                          {props.tabs.filter((t) => t.projectId === ws.id).length}
+                          {props.tabs.filter((t) => tabMatchesWorkspace(t, ws.id)).length}
                         </span>
                       </button>
                     </div>
@@ -376,7 +381,7 @@ export function TabBar(props: TabBarProps) {
           "min-width": 0,
         }}
       >
-        <For each={props.tabs}>
+        <For each={visibleTabs()}>
           {(tab) => {
             const isActive = () => tab.id === props.activeTabId;
             const isCompact = () => !!props.compactTabs;

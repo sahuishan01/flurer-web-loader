@@ -1,9 +1,10 @@
 {
   "0": "ContextCapsuleBar.tsx",
+  "1": "WebViewport.tsx",
   "2": "compilerOptions",
   "3": "package.json",
   "4": "utils.ts",
-  "5": "ContextOrbitDeck.tsx",
+  "5": "SettingsPanel.tsx",
   "6": "Flurer Web Loader Plugin (`web-loader`)",
   "7": "sync-version.cjs",
   "8": "vite.config.ts",
@@ -11,5 +12,9 @@
   "10": "workflows/graphify.md",
   "11": "index.tsx",
   "12": "types.ts",
-  "14": "Project Guidelines & Invariants (GEMINI.md)"
+  "13": "invoke",
+  "14": "Project Guidelines & Invariants (GEMINI.md)",
+  "15": "addHistoryItem",
+  "16": "openInWebviewWindow",
+  "17": "getModifierKey"
 }

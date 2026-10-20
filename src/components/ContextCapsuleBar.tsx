@@ -19,7 +19,7 @@ import {
   CompactIcon,
 } from "../icons";
 import { WebsiteIcon } from "./WebsiteIcon";
-import { normalizeUrl, getModifierKey, getPlatformEngineName, getDomain } from "../utils";
+import { normalizeUrl, getModifierKey, getPlatformEngineName, getDomain, tabMatchesWorkspace } from "../utils";
 import { INTENT_COLORS, INTENT_LABELS } from "../smartRouter";
 import {
   draggedTabId,
@@ -149,13 +149,6 @@ export function ContextCapsuleBar(props: ContextCapsuleBarProps) {
     e.preventDefault();
     const targetUrl = normalizeUrl(inputValue(), props.searchEngine);
     props.onNavigate(targetUrl);
-  };
-
-  const tabMatchesWorkspace = (tab: Tab, wsId: string) => {
-    if (tab.projectId) {
-      return tab.projectId === wsId;
-    }
-    return wsId === "flurer" || wsId === "general";
   };
 
   const visibleTabs = () => {
