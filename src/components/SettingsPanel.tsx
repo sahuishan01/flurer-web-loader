@@ -1,5 +1,5 @@
-import { For, Show, createSignal } from "solid-js";
-import { SettingsPanelProps, SearchEngine } from "../types";
+import { For, Show, createSignal, createEffect, onCleanup } from "solid-js";
+import { SettingsPanelProps, SearchEngine, ShortcutActionId } from "../types";
 import {
   themeConfig,
   setThemeConfig,
@@ -21,7 +21,20 @@ import {
   BranchIcon,
   LayersIcon,
   CompactIcon,
+  KeyboardIcon,
+  SearchIcon,
+  ReloadIcon,
 } from "../icons";
+import {
+  SHORTCUT_METADATA,
+  DEFAULT_SHORTCUTS,
+  getEffectiveShortcuts,
+  saveShortcuts,
+  normalizeShortcutString,
+  eventToShortcutString,
+  findShortcutConflict,
+  formatShortcutParts,
+} from "../shortcuts";
 import {
   DEFAULT_WORKSPACES,
   isLayaOfflineDownloaded,
@@ -144,6 +157,92 @@ export function SettingsPanel(props: SettingsPanelProps) {
   const [newWsName, setNewWsName] = createSignal("");
   const [newWsColor, setNewWsColor] = createSignal("#38bdf8");
   const [newWsKeywords, setNewWsKeywords] = createSignal("");
+
+  // Shortcuts Studio state & handlers
+  const effectiveShortcuts = () => getEffectiveShortcuts(props.pluginSettings.shortcuts);
+  const [shortcutFilter, setShortcutFilter] = createSignal("");
+  const [selectedCategory, setSelectedCategory] = createSignal<string>("All");
+  const [recordingActionId, setRecordingActionId] = createSignal<ShortcutActionId | null>(null);
+  const [recordingWarning, setRecordingWarning] = createSignal<string | null>(null);
+  const [shortcutSuccessNotice, setShortcutSuccessNotice] = createSignal<string | null>(null);
+
+  const handleUpdateShortcut = (id: ShortcutActionId, newShortcut: string) => {
+    const current = props.pluginSettings.shortcuts || {};
+    const updated = { ...current, [id]: newShortcut };
+    saveShortcuts(updated);
+    props.onPluginSettingsChange({ shortcuts: updated });
+    setShortcutSuccessNotice(`✓ Updated shortcut for ${SHORTCUT_METADATA.find((m) => m.id === id)?.label || id} to ${newShortcut}`);
+    setTimeout(() => setShortcutSuccessNotice(null), 3000);
+  };
+
+  const handleResetSingleShortcut = (id: ShortcutActionId) => {
+    const current = { ...(props.pluginSettings.shortcuts || {}) };
+    delete current[id];
+    saveShortcuts(current);
+    props.onPluginSettingsChange({ shortcuts: current });
+    setShortcutSuccessNotice(`✓ Restored default shortcut for ${SHORTCUT_METADATA.find((m) => m.id === id)?.label || id}`);
+    setTimeout(() => setShortcutSuccessNotice(null), 3000);
+  };
+
+  const handleResetAllShortcuts = () => {
+    saveShortcuts({});
+    props.onPluginSettingsChange({ shortcuts: {} });
+    setShortcutSuccessNotice("✓ All keyboard shortcuts restored to defaults");
+    setTimeout(() => setShortcutSuccessNotice(null), 3500);
+  };
+
+  // Keyboard shortcut live recording listener
+  createEffect(() => {
+    const actionId = recordingActionId();
+    if (!actionId) return;
+
+    const handleRecordKeyDown = (e: KeyboardEvent) => {
+      e.preventDefault();
+      e.stopPropagation();
+
+      if (e.key === "Escape") {
+        setRecordingActionId(null);
+        setRecordingWarning(null);
+        return;
+      }
+
+      const combo = eventToShortcutString(e);
+      if (!combo) {
+        if (["Control", "Shift", "Alt", "Meta"].includes(e.key)) {
+          return;
+        }
+        setRecordingWarning("Please include Ctrl, Alt, or Cmd, or use a Function key (F1-F12)");
+        return;
+      }
+
+      handleUpdateShortcut(actionId, combo);
+      setRecordingActionId(null);
+      setRecordingWarning(null);
+    };
+
+    window.addEventListener("keydown", handleRecordKeyDown, true);
+    onCleanup(() => {
+      window.removeEventListener("keydown", handleRecordKeyDown, true);
+    });
+  });
+
+  const filteredShortcuts = () => {
+    const q = shortcutFilter().trim().toLowerCase();
+    const cat = selectedCategory();
+    const all = effectiveShortcuts();
+
+    return SHORTCUT_METADATA.filter((meta) => {
+      if (cat !== "All" && meta.category !== cat) return false;
+      if (!q) return true;
+      const currentSc = (all[meta.id] || meta.defaultShortcut).toLowerCase();
+      return (
+        meta.label.toLowerCase().includes(q) ||
+        meta.description.toLowerCase().includes(q) ||
+        meta.category.toLowerCase().includes(q) ||
+        currentSc.includes(q)
+      );
+    });
+  };
 
   const handleAddWorkspace = () => {
     if (!newWsName().trim()) return;
@@ -1229,6 +1328,393 @@ export function SettingsPanel(props: SettingsPanelProps) {
             >
               + Add Workspace
             </button>
+          </div>
+        </div>
+      </div>
+
+      {/* KEYBOARD SHORTCUTS STUDIO */}
+      <div
+        style={{
+          display: "flex",
+          "flex-direction": "column",
+          gap: "16px",
+          background: "var(--card-bg, rgba(255, 255, 255, 0.04))",
+          border: "1px solid var(--card-border, rgba(255, 255, 255, 0.08))",
+          padding: "20px",
+          "border-radius": "10px",
+        }}
+      >
+        <div style={{ display: "flex", "align-items": "center", "justify-content": "space-between", "flex-wrap": "wrap", gap: "10px" }}>
+          <div>
+            <div style={{ display: "flex", "align-items": "center", gap: "8px" }}>
+              <KeyboardIcon size={16} />
+              <span
+                style={{
+                  "font-size": "11px",
+                  "font-family": "Space Mono, monospace",
+                  "text-transform": "uppercase",
+                  "letter-spacing": "0.12em",
+                  color: "var(--accent-default, #38bdf8)",
+                }}
+              >
+                Keybindings & Hotkeys
+              </span>
+            </div>
+            <h4 style={{ margin: "4px 0 2px 0", "font-size": "15px", "font-weight": 600 }}>
+              Keyboard Shortcuts Studio
+            </h4>
+            <p style={{ margin: 0, "font-size": "12px", color: "var(--text-secondary, #94a3b8)" }}>
+              Customize global browser hotkeys. Click any shortcut to record a new key combination or restore defaults.
+            </p>
+          </div>
+
+          <button
+            type="button"
+            style={{
+              display: "inline-flex",
+              "align-items": "center",
+              gap: "6px",
+              padding: "6px 12px",
+              background: "rgba(255, 255, 255, 0.06)",
+              border: "1px solid rgba(255, 255, 255, 0.12)",
+              color: "var(--text-primary, #f8fafc)",
+              "border-radius": "6px",
+              "font-size": "12px",
+              "font-family": "Space Mono, monospace",
+              cursor: "pointer",
+            }}
+            onClick={handleResetAllShortcuts}
+            title="Reset all keyboard shortcuts to factory defaults"
+          >
+            <ReloadIcon size={13} />
+            <span>Reset All to Defaults</span>
+          </button>
+        </div>
+
+        {/* Feedback / Notification alerts */}
+        <Show when={shortcutSuccessNotice()}>
+          <div
+            style={{
+              padding: "8px 12px",
+              background: "rgba(56, 189, 248, 0.15)",
+              border: "1px solid rgba(56, 189, 248, 0.4)",
+              "border-radius": "6px",
+              color: "var(--accent-default, #38bdf8)",
+              "font-size": "12px",
+              "font-family": "Space Mono, monospace",
+            }}
+          >
+            {shortcutSuccessNotice()}
+          </div>
+        </Show>
+
+        <Show when={recordingWarning()}>
+          <div
+            style={{
+              padding: "8px 12px",
+              background: "rgba(245, 158, 11, 0.15)",
+              border: "1px solid rgba(245, 158, 11, 0.4)",
+              "border-radius": "6px",
+              color: "#f59e0b",
+              "font-size": "12px",
+              "font-family": "Space Mono, monospace",
+            }}
+          >
+            ⚠️ {recordingWarning()}
+          </div>
+        </Show>
+
+        {/* Toolbar: Category tabs + Search Filter */}
+        <div style={{ display: "flex", "align-items": "center", "justify-content": "space-between", "flex-wrap": "wrap", gap: "10px" }}>
+          <div style={{ display: "flex", gap: "6px", "flex-wrap": "wrap" }}>
+            <For each={["All", "Tabs", "Navigation", "View & Bookmarks"]}>
+              {(cat) => (
+                <button
+                  type="button"
+                  style={{
+                    padding: "4px 10px",
+                    "border-radius": "6px",
+                    "font-size": "11.5px",
+                    "font-family": "Space Mono, monospace",
+                    background: selectedCategory() === cat ? "var(--accent-default, #38bdf8)" : "rgba(255, 255, 255, 0.05)",
+                    color: selectedCategory() === cat ? "#0f172a" : "var(--text-secondary, #94a3b8)",
+                    border: selectedCategory() === cat ? "none" : "1px solid rgba(255, 255, 255, 0.08)",
+                    cursor: "pointer",
+                    "font-weight": selectedCategory() === cat ? 600 : 400,
+                  }}
+                  onClick={() => setSelectedCategory(cat)}
+                >
+                  {cat}
+                </button>
+              )}
+            </For>
+          </div>
+
+          <div
+            style={{
+              display: "flex",
+              "align-items": "center",
+              gap: "6px",
+              background: "rgba(255, 255, 255, 0.05)",
+              border: "1px solid rgba(255, 255, 255, 0.1)",
+              "border-radius": "6px",
+              padding: "4px 8px",
+            }}
+          >
+            <SearchIcon size={14} />
+            <input
+              type="text"
+              placeholder="Filter shortcuts..."
+              value={shortcutFilter()}
+              onInput={(e) => setShortcutFilter(e.currentTarget.value)}
+              style={{
+                background: "transparent",
+                border: "none",
+                outline: "none",
+                color: "var(--text-primary, #f8fafc)",
+                "font-size": "12px",
+                "font-family": "Space Mono, monospace",
+                width: "140px",
+              }}
+            />
+            <Show when={shortcutFilter()}>
+              <button
+                type="button"
+                onClick={() => setShortcutFilter("")}
+                style={{
+                  background: "transparent",
+                  border: "none",
+                  color: "var(--text-muted, #94a3b8)",
+                  cursor: "pointer",
+                  padding: "0 2px",
+                }}
+              >
+                ×
+              </button>
+            </Show>
+          </div>
+        </div>
+
+        {/* Shortcuts List */}
+        <div style={{ display: "flex", "flex-direction": "column", gap: "8px" }}>
+          <For each={filteredShortcuts()}>
+            {(meta) => {
+              const sc = () => effectiveShortcuts()[meta.id] || meta.defaultShortcut;
+              const isCustom = () => effectiveShortcuts()[meta.id] !== meta.defaultShortcut;
+              const isRecording = () => recordingActionId() === meta.id;
+              const conflict = () => findShortcutConflict(meta.id, sc(), effectiveShortcuts());
+              const parts = () => formatShortcutParts(sc());
+
+              return (
+                <div
+                  style={{
+                    display: "flex",
+                    "align-items": "center",
+                    "justify-content": "space-between",
+                    gap: "14px",
+                    padding: "10px 14px",
+                    background: isRecording()
+                      ? "rgba(56, 189, 248, 0.12)"
+                      : "rgba(255, 255, 255, 0.025)",
+                    border: isRecording()
+                      ? "1px solid var(--accent-default, #38bdf8)"
+                      : "1px solid rgba(255, 255, 255, 0.06)",
+                    "border-radius": "8px",
+                    transition: "all 0.15s ease",
+                  }}
+                >
+                  {/* Action information */}
+                  <div style={{ display: "flex", "flex-direction": "column", gap: "2px", "min-width": "0", flex: "1 1 auto" }}>
+                    <div style={{ display: "flex", "align-items": "center", gap: "8px" }}>
+                      <span
+                        style={{
+                          "font-size": "9.5px",
+                          "font-family": "Space Mono, monospace",
+                          "text-transform": "uppercase",
+                          "letter-spacing": "0.08em",
+                          padding: "2px 6px",
+                          "border-radius": "4px",
+                          background: "rgba(255, 255, 255, 0.06)",
+                          color: "var(--text-muted, #94a3b8)",
+                        }}
+                      >
+                        {meta.category}
+                      </span>
+                      <span style={{ "font-size": "13px", "font-weight": 600, color: "var(--text-primary, #f8fafc)" }}>
+                        {meta.label}
+                      </span>
+                      <Show when={isCustom()}>
+                        <span
+                          style={{
+                            "font-size": "10px",
+                            "font-family": "Space Mono, monospace",
+                            color: "var(--accent-default, #38bdf8)",
+                            background: "rgba(56, 189, 248, 0.15)",
+                            padding: "1px 5px",
+                            "border-radius": "4px",
+                          }}
+                        >
+                          Customized
+                        </span>
+                      </Show>
+                    </div>
+                    <span style={{ "font-size": "12px", color: "var(--text-secondary, #94a3b8)" }}>
+                      {meta.description}
+                    </span>
+                  </div>
+
+                  {/* Shortcut Controls */}
+                  <div style={{ display: "flex", "align-items": "center", gap: "10px", "flex-shrink": 0 }}>
+                    {/* Conflict indicator */}
+                    <Show when={conflict()}>
+                      <span
+                        style={{
+                          "font-size": "11px",
+                          "font-family": "Space Mono, monospace",
+                          color: "#f59e0b",
+                          background: "rgba(245, 158, 11, 0.15)",
+                          border: "1px solid rgba(245, 158, 11, 0.3)",
+                          padding: "3px 7px",
+                          "border-radius": "4px",
+                        }}
+                        title={`Conflicts with ${conflict()!.label}`}
+                      >
+                        ⚠️ Conflicts with {conflict()!.label}
+                      </span>
+                    </Show>
+
+                    {/* Keycap Badge or Recording Button */}
+                    <Show
+                      when={isRecording()}
+                      fallback={
+                        <button
+                          type="button"
+                          style={{
+                            display: "inline-flex",
+                            "align-items": "center",
+                            gap: "4px",
+                            padding: "4px 8px",
+                            background: "rgba(255, 255, 255, 0.06)",
+                            border: "1px solid rgba(255, 255, 255, 0.15)",
+                            "border-radius": "6px",
+                            cursor: "pointer",
+                            transition: "all 0.15s ease",
+                          }}
+                          onClick={() => {
+                            setRecordingActionId(meta.id);
+                            setRecordingWarning(null);
+                          }}
+                          title="Click to record a new shortcut"
+                        >
+                          <For each={parts()}>
+                            {(part, idx) => (
+                              <>
+                                <Show when={idx() > 0}>
+                                  <span style={{ color: "var(--text-muted, #94a3b8)", "font-size": "11px", "font-weight": 600 }}>+</span>
+                                </Show>
+                                <kbd
+                                  style={{
+                                    background: "rgba(255, 255, 255, 0.1)",
+                                    border: "1px solid rgba(255, 255, 255, 0.2)",
+                                    "box-shadow": "0 2px 0 rgba(0, 0, 0, 0.35)",
+                                    "border-radius": "4px",
+                                    padding: "2px 7px",
+                                    "font-size": "11.5px",
+                                    "font-family": "Space Mono, monospace",
+                                    "font-weight": 600,
+                                    color: "var(--accent-default, #38bdf8)",
+                                  }}
+                                >
+                                  {part}
+                                </kbd>
+                              </>
+                            )}
+                          </For>
+                        </button>
+                      }
+                    >
+                      <div style={{ display: "flex", "align-items": "center", gap: "6px" }}>
+                        <span
+                          style={{
+                            padding: "4px 10px",
+                            background: "var(--accent-default, #38bdf8)",
+                            color: "#0f172a",
+                            "border-radius": "6px",
+                            "font-size": "11.5px",
+                            "font-family": "Space Mono, monospace",
+                            "font-weight": 600,
+                          }}
+                        >
+                          Press key combo...
+                        </span>
+                        <button
+                          type="button"
+                          style={{
+                            padding: "4px 8px",
+                            background: "rgba(255, 255, 255, 0.08)",
+                            border: "1px solid rgba(255, 255, 255, 0.15)",
+                            color: "var(--text-secondary, #94a3b8)",
+                            "border-radius": "6px",
+                            "font-size": "11px",
+                            cursor: "pointer",
+                          }}
+                          onClick={() => {
+                            setRecordingActionId(null);
+                            setRecordingWarning(null);
+                          }}
+                          title="Cancel recording"
+                        >
+                          Cancel
+                        </button>
+                      </div>
+                    </Show>
+
+                    {/* Reset single to default */}
+                    <Show when={isCustom()}>
+                      <button
+                        type="button"
+                        style={{
+                          padding: "4px 8px",
+                          background: "transparent",
+                          border: "1px solid rgba(255, 255, 255, 0.12)",
+                          color: "var(--text-muted, #94a3b8)",
+                          "border-radius": "6px",
+                          "font-size": "11px",
+                          "font-family": "Space Mono, monospace",
+                          cursor: "pointer",
+                        }}
+                        onClick={() => handleResetSingleShortcut(meta.id)}
+                        title={`Reset to default (${meta.defaultShortcut})`}
+                      >
+                        Reset
+                      </button>
+                    </Show>
+                  </div>
+                </div>
+              );
+            }}
+          </For>
+        </div>
+
+        {/* Quick Tab Switching Info Banner */}
+        <div
+          style={{
+            display: "flex",
+            "align-items": "flex-start",
+            gap: "10px",
+            padding: "12px",
+            background: "rgba(56, 189, 248, 0.06)",
+            border: "1px solid rgba(56, 189, 248, 0.2)",
+            "border-radius": "6px",
+            "font-size": "12px",
+            color: "var(--text-secondary, #94a3b8)",
+            "line-height": 1.5,
+          }}
+        >
+          <div style={{ "margin-top": "1px", color: "var(--accent-default, #38bdf8)" }}>✦</div>
+          <div>
+            <strong style={{ color: "var(--text-primary, #f8fafc)" }}>Direct Tab Switching:</strong>{" "}
+            <kbd style={{ background: "rgba(255, 255, 255, 0.08)", padding: "1px 5px", "border-radius": "3px", "font-family": "Space Mono, monospace" }}>Ctrl+1</kbd> through <kbd style={{ background: "rgba(255, 255, 255, 0.08)", padding: "1px 5px", "border-radius": "3px", "font-family": "Space Mono, monospace" }}>Ctrl+8</kbd> jump directly to tabs 1–8 in the active group, and <kbd style={{ background: "rgba(255, 255, 255, 0.08)", padding: "1px 5px", "border-radius": "3px", "font-family": "Space Mono, monospace" }}>Ctrl+9</kbd> jumps directly to the last tab.
           </div>
         </div>
       </div>

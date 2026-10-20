@@ -1,16 +1,16 @@
 # Graph Report - flurer-web-loader-plugin  (2026-10-20)
 
 ## Corpus Check
-- 27 files · ~34,061 words
+- 27 files · ~35,344 words
 - Verdict: corpus is large enough that graph structure adds value.
 
 ## Summary
-- 234 nodes · 609 edges · 14 communities (11 shown, 3 thin omitted)
+- 234 nodes · 611 edges · 14 communities (11 shown, 3 thin omitted)
 - Extraction: 100% EXTRACTED · 0% INFERRED · 0% AMBIGUOUS
 - Token cost: 0 input · 0 output
 
 ## Graph Freshness
-- Built from commit: `e1a177e1`
+- Built from commit: `f3059448`
 - Run `git rev-parse HEAD` and compare to check if the graph is stale.
 - Run `graphify update .` after code changes (no API cost).
 
@@ -32,10 +32,10 @@
 
 ## God Nodes (most connected - your core abstractions)
 1. `WebBrowserPanel()` - 25 edges
-2. `getDomain()` - 20 edges
+2. `getDomain()` - 22 edges
 3. `invoke()` - 14 edges
-4. `getModifierKey()` - 12 edges
-5. `Tab` - 12 edges
+4. `Tab` - 12 edges
+5. `getModifierKey()` - 12 edges
 6. `WebViewport()` - 11 edges
 7. `SettingsPanel()` - 11 edges
 8. `ProjectWorkspace` - 10 edges
@@ -43,16 +43,16 @@
 10. `compilerOptions` - 10 edges
 
 ## Surprising Connections (you probably didn't know these)
+- `ContextCapsuleBar()` --calls--> `getDomain()`  [EXTRACTED]
+  src/components/ContextCapsuleBar.tsx → src/utils.ts
 - `ContextCapsuleBar()` --calls--> `tabMatchesWorkspace()`  [EXTRACTED]
   src/components/ContextCapsuleBar.tsx → src/utils.ts
+- `TabBar()` --calls--> `getDomain()`  [EXTRACTED]
+  src/components/TabBar.tsx → src/utils.ts
 - `TabBar()` --calls--> `getModifierKey()`  [EXTRACTED]
   src/components/TabBar.tsx → src/utils.ts
 - `createNewTab()` --calls--> `classifyHeuristic()`  [EXTRACTED]
   src/index.tsx → src/smartRouter.ts
-- `createNewTab()` --calls--> `getDomain()`  [EXTRACTED]
-  src/index.tsx → src/utils.ts
-- `[history, setHistory]` --calls--> `getSavedHistory()`  [EXTRACTED]
-  src/index.tsx → src/utils.ts
 
 ## Import Cycles
 - None detected.
@@ -111,8 +111,8 @@ Nodes (5): 1. Automatic Version Bumping & Release Workflow, 2. Architecture & Ru
 ## Suggested Questions
 _Questions this graph is uniquely positioned to answer:_
 
-- **Why does `getDomain()` connect `SettingsPanel.tsx` to `ContextCapsuleBar.tsx`, `index.tsx`, `utils.ts`?**
-  _High betweenness centrality (0.013) - this node is a cross-community bridge._
+- **Why does `getDomain()` connect `SettingsPanel.tsx` to `ContextCapsuleBar.tsx`, `getModifierKey`, `index.tsx`, `utils.ts`?**
+  _High betweenness centrality (0.014) - this node is a cross-community bridge._
 - **Why does `Tab` connect `ContextCapsuleBar.tsx` to `index.tsx`, `types.ts`, `utils.ts`?**
   _High betweenness centrality (0.006) - this node is a cross-community bridge._
 - **Why does `Bookmark` connect `types.ts` to `ContextCapsuleBar.tsx`, `index.tsx`, `utils.ts`?**

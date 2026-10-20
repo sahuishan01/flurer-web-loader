@@ -1,6 +1,6 @@
 {
   "0": "ContextCapsuleBar.tsx",
-  "1": "ContextOrbitDeck.tsx",
+  "1": "smartRouter.ts",
   "2": "compilerOptions",
   "3": "package.json",
   "4": "utils.ts",
@@ -12,5 +12,8 @@
   "10": "workflows/graphify.md",
   "11": "index.tsx",
   "12": "types.ts",
-  "14": "Project Guidelines & Invariants (GEMINI.md)"
+  "13": "WebViewport.tsx",
+  "14": "Project Guidelines & Invariants (GEMINI.md)",
+  "15": "invoke",
+  "16": "addHistoryItem"
 }

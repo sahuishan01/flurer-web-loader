@@ -85,6 +85,24 @@ export interface SavedTabRecord {
   lastActiveAt?: number;
 }
 
+export type ShortcutActionId =
+  | "newTab"
+  | "closeTab"
+  | "nextTab"
+  | "prevTab"
+  | "newWorkspace"
+  | "toggleCompact"
+  | "focusOmnibox"
+  | "reload"
+  | "quickSwitcher"
+  | "orbitDeck"
+  | "zoomIn"
+  | "zoomOut"
+  | "resetZoom"
+  | "toggleBookmark";
+
+export type CustomShortcuts = Partial<Record<ShortcutActionId, string>>;
+
 export interface WebPluginSettings {
   searchEngine?: SearchEngine;
   homeUrl?: string;
@@ -109,6 +127,7 @@ export interface WebPluginSettings {
   workspaces?: ProjectWorkspace[];
   smartRouter?: SmartRouterConfig;
   compactTabs?: boolean;
+  shortcuts?: CustomShortcuts;
 }
 
 export interface MainPanelProps {

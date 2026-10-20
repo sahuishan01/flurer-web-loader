@@ -461,17 +461,12 @@ export function WebViewport(props: WebViewportProps) {
                         if (frameWindow && frameWindow.document) {
                           frameWindow.addEventListener("keydown", (evt: KeyboardEvent) => {
                             const isMod = evt.ctrlKey || evt.metaKey;
-                            const isShift = evt.shiftKey;
                             const isAlt = evt.altKey;
                             const k = evt.key?.toLowerCase();
-                            const c = evt.code;
+                            const isFunc = /^f\d+$/i.test(k);
 
-                            // Check if this is a web-loader shortcut
-                            if (
-                              (isMod && (k === "t" || k === "w" || k === "r" || k === "l" || k === "p" || k === "o" || k === "e" || k === "k" || k === "d" || k === "tab" || /^[1-9]$/.test(k) || k === "=" || k === "+" || k === "-" || k === "0")) ||
-                              (isAlt && (k === "d" || c === "KeyD")) ||
-                              k === "f5"
-                            ) {
+                            // Forward shortcuts: any modifier combo (Ctrl/Cmd, Alt) or Function keys (F1-F12)
+                            if (isMod || isAlt || isFunc) {
                               evt.preventDefault();
                               evt.stopPropagation();
                               window.postMessage(

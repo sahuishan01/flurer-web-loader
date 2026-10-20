@@ -29,6 +29,7 @@ interface TabBarProps {
   onReorderWorkspaces?: (draggedWsId: string, targetWsId: string, insertBefore: boolean) => void;
   onAddWorkspace?: (name: string, color?: string, icon?: string, keywords?: string[]) => string;
   onToggleCompactTabs?: () => void;
+  shortcuts?: Record<string, string>;
 }
 
 export function TabBar(props: TabBarProps) {
@@ -124,7 +125,7 @@ export function TabBar(props: TabBarProps) {
             color: "var(--text-muted, #94a3b8)",
           }}
           onClick={() => props.onOpenQuickSwitcher?.()}
-          title={`Quick Tab Search & Jump (${mod}+P / ${mod}+O)`}
+          title={`Quick Tab Search & Jump (${props.shortcuts?.quickSwitcher || "Ctrl+P"})`}
         >
           <SearchIcon size={16} />
         </button>
@@ -143,7 +144,7 @@ export function TabBar(props: TabBarProps) {
             border: props.compactTabs ? "1px solid rgba(56, 189, 248, 0.4)" : "none",
           }}
           onClick={() => props.onToggleCompactTabs?.()}
-          title={props.compactTabs ? "Switch to Full Tab View" : "Switch to Compact Tab View (Favicons Only)"}
+          title={props.compactTabs ? `Switch to Full Tab View (${props.shortcuts?.toggleCompact || "Ctrl+Shift+C"})` : `Switch to Compact Tab View (${props.shortcuts?.toggleCompact || "Ctrl+Shift+C"})`}
         >
           <CompactIcon size={16} />
         </button>
@@ -454,7 +455,7 @@ export function TabBar(props: TabBarProps) {
                         setShowWsMenu(false);
                       }
                     }}
-                    title="Create a new group / workspace"
+                    title={`Create a new group / workspace (${props.shortcuts?.newWorkspace || "Ctrl+Shift+G"})`}
                   >
                     <PlusIcon size={14} />
                     <span>New Group</span>
@@ -694,7 +695,7 @@ export function TabBar(props: TabBarProps) {
                           }
                         : {}),
                     }}
-                    title="Close Tab"
+                    title={`Close Tab (${props.shortcuts?.closeTab || "Ctrl+W"})`}
                     onClick={(e) => {
                       e.stopPropagation();
                       props.onCloseTab(tab.id);
@@ -721,7 +722,7 @@ export function TabBar(props: TabBarProps) {
           }}
           onMouseDown={(e) => e.preventDefault()}
           onClick={props.onNewTab}
-          title={`Open New Tab (${mod}+T)`}
+          title={`Open New Tab (${props.shortcuts?.newTab || "Ctrl+T"})`}
         >
           <PlusIcon size={18} />
         </button>

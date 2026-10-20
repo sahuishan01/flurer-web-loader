@@ -62,6 +62,7 @@ interface ContextCapsuleBarProps {
   onAddWorkspace?: (name: string, color?: string, icon?: string, keywords?: string[]) => string;
   compactTabs?: boolean;
   onToggleCompactTabs?: () => void;
+  shortcuts?: Record<string, string>;
 }
 
 export function ContextCapsuleBar(props: ContextCapsuleBarProps) {
@@ -226,7 +227,7 @@ export function ContextCapsuleBar(props: ContextCapsuleBarProps) {
               color: "var(--text-muted, #94a3b8)",
             }}
             onClick={() => props.onOpenQuickSwitcher?.()}
-            title={`Quick Tab Search & Jump (${mod}+P / ${mod}+O)`}
+            title={`Quick Tab Search & Jump (${props.shortcuts?.quickSwitcher || "Ctrl+P"})`}
           >
             <SearchIcon size={15} />
           </button>
@@ -247,7 +248,7 @@ export function ContextCapsuleBar(props: ContextCapsuleBarProps) {
               border: props.compactTabs ? "1px solid rgba(56, 189, 248, 0.4)" : "1px solid rgba(255, 255, 255, 0.08)",
             }}
             onClick={() => props.onToggleCompactTabs?.()}
-            title={props.compactTabs ? "Switch to Full Tab Titles" : "Switch to Compact Tab View (Favicons Only)"}
+            title={props.compactTabs ? `Switch to Full Tab Titles (${props.shortcuts?.toggleCompact || "Ctrl+Shift+C"})` : `Switch to Compact Tab View (${props.shortcuts?.toggleCompact || "Ctrl+Shift+C"})`}
           >
             <CompactIcon size={14} />
           </button>
@@ -645,7 +646,7 @@ export function ContextCapsuleBar(props: ContextCapsuleBarProps) {
                         setShowWsMenu(false);
                       }
                     }}
-                    title="Create a new group / workspace"
+                    title={`Create a new group / workspace (${props.shortcuts?.newWorkspace || "Ctrl+Shift+G"})`}
                   >
                     <PlusIcon size={14} />
                     <span>New Group</span>
@@ -935,7 +936,7 @@ export function ContextCapsuleBar(props: ContextCapsuleBarProps) {
                       e.stopPropagation();
                       props.onCloseTab(tab.id);
                     }}
-                    title="Close Tab"
+                    title={`Close Tab (${props.shortcuts?.closeTab || "Ctrl+W"})`}
                   >
                     <CloseIcon size={isCompact() ? 10 : 12} />
                   </button>
@@ -960,7 +961,7 @@ export function ContextCapsuleBar(props: ContextCapsuleBarProps) {
             }}
             onMouseDown={(e) => e.preventDefault()}
             onClick={() => props.onNewTab("about:blank", props.activeTab?.id)}
-            title={`Open New Tab in ${props.currentWorkspace.name} (${mod}+T)`}
+            title={`Open New Tab in ${props.currentWorkspace.name} (${props.shortcuts?.newTab || "Ctrl+T"})`}
           >
             <PlusIcon size={16} />
           </button>
@@ -993,7 +994,7 @@ export function ContextCapsuleBar(props: ContextCapsuleBarProps) {
               : "none",
           }}
           onClick={props.onToggleOrbitDeck}
-          title={`Toggle Workspace Orbit Canvas (${mod}+E / ${mod}+K)`}
+          title={`Toggle Workspace Orbit Canvas (${props.shortcuts?.orbitDeck || "Ctrl+E"})`}
         >
           <OrbitIcon size={15} />
           <span>Orbit Canvas</span>
@@ -1148,7 +1149,7 @@ export function ContextCapsuleBar(props: ContextCapsuleBarProps) {
               "font-weight": 700,
             }}
             onClick={props.onZoomOut}
-            title="Zoom Out"
+            title={`Zoom Out (${props.shortcuts?.zoomOut || "Ctrl+-"})`}
           >
             -
           </button>
@@ -1165,7 +1166,7 @@ export function ContextCapsuleBar(props: ContextCapsuleBarProps) {
               padding: "0 4px",
             }}
             onClick={props.onResetZoom}
-            title="Reset Zoom"
+            title={`Reset Zoom (${props.shortcuts?.resetZoom || "Ctrl+0"})`}
           >
             {Math.round((props.activeTab?.zoom ?? 1) * 100)}%
           </button>
@@ -1181,7 +1182,7 @@ export function ContextCapsuleBar(props: ContextCapsuleBarProps) {
               "font-weight": 700,
             }}
             onClick={props.onZoomIn}
-            title="Zoom In"
+            title={`Zoom In (${props.shortcuts?.zoomIn || "Ctrl+="})`}
           >
             +
           </button>

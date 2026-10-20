@@ -18,6 +18,7 @@ import { WebViewport } from "./components/WebViewport";
 import { SettingsPanel } from "./components/SettingsPanel";
 import { themeConfig, getEffectiveThemeStyles } from "./theme";
 import { DEFAULT_WORKSPACES, classifyHeuristic, routeTab } from "./smartRouter";
+import { getEffectiveShortcuts, matchesAction } from "./shortcuts";
 import {
   openInWebviewWindow,
   openInExternalBrowser,
@@ -310,6 +311,7 @@ const [history, setHistory] = createRoot(() => createSignal<HistoryItem[]>(getSa
 
 function WebBrowserPanel(props: MainPanelProps) {
   const activeTab = () => tabs().find((t) => t.id === activeTabId()) || tabs()[0];
+  const effectiveShortcuts = () => getEffectiveShortcuts(props.pluginSettings?.shortcuts);
 
   const workspaces = () => props.pluginSettings?.workspaces ?? getSavedWorkspaces();
   const setWorkspaces = (ws: ProjectWorkspace[]) => {
@@ -363,31 +365,32 @@ function WebBrowserPanel(props: MainPanelProps) {
 
       const key = (k || "").toLowerCase();
       const c = code || "";
+      const sc = effectiveShortcuts();
 
-      // 1. Fast Tab Switcher / Palette: Ctrl+P, Ctrl+O, or Ctrl+Shift+A
-      if (isMod && (key === "p" || c === "KeyP" || key === "o" || c === "KeyO" || (isShift && (key === "a" || c === "KeyA")))) {
+      // 1. Fast Tab Switcher / Palette
+      if (matchesAction("quickSwitcher", sc, key, c, isMod, isShift, isAlt)) {
         preventDefault?.();
         setQuickSwitcherOpen((prev) => !prev);
         return true;
       }
 
-      // 2. Orbit Canvas: Ctrl+E or Ctrl+K
-      if (isMod && (key === "e" || c === "KeyE" || key === "k" || c === "KeyK")) {
+      // 2. Orbit Canvas
+      if (matchesAction("orbitDeck", sc, key, c, isMod, isShift, isAlt)) {
         preventDefault?.();
         setOrbitDeckOpen((prev) => !prev);
         return true;
       }
 
-      // 3. New Tab: Ctrl+T
-      if (isMod && !isShift && (key === "t" || c === "KeyT")) {
+      // 3. New Tab
+      if (matchesAction("newTab", sc, key, c, isMod, isShift, isAlt)) {
         preventDefault?.();
         handleNewTab("about:blank", activeTab()?.id, currentWorkspace().id);
         setTimeout(focusOmnibox, 0);
         return true;
       }
 
-      // 4. Close Tab: Ctrl+W
-      if (isMod && (key === "w" || c === "KeyW")) {
+      // 4. Close Tab
+      if (matchesAction("closeTab", sc, key, c, isMod, isShift, isAlt)) {
         preventDefault?.();
         if (activeTab()) {
           handleCloseTab(activeTab().id);
@@ -395,22 +398,22 @@ function WebBrowserPanel(props: MainPanelProps) {
         return true;
       }
 
-      // 5. Reload Page: Ctrl+R or F5
-      if ((isMod && (key === "r" || c === "KeyR")) || key === "f5" || c === "F5") {
+      // 5. Reload Page
+      if (matchesAction("reload", sc, key, c, isMod, isShift, isAlt)) {
         preventDefault?.();
         handleReload();
         return true;
       }
 
-      // 6. Focus Address Bar / Omnibox: Ctrl+L or Alt+D
-      if ((isMod && (key === "l" || c === "KeyL")) || (isAlt && (key === "d" || c === "KeyD"))) {
+      // 6. Focus Address Bar / Omnibox
+      if (matchesAction("focusOmnibox", sc, key, c, isMod, isShift, isAlt)) {
         preventDefault?.();
         focusOmnibox();
         return true;
       }
 
-      // 7. Cycle Tabs: Ctrl+Tab (next) and Ctrl+Shift+Tab (prev) within current workspace
-      if (isMod && (key === "tab" || c === "Tab")) {
+      // 7. Cycle Tabs: Next Tab
+      if (matchesAction("nextTab", sc, key, c, isMod, isShift, isAlt)) {
         preventDefault?.();
         const currentWsId = currentWorkspace().id;
         const currentList = tabs().filter((t) => tabMatchesWorkspace(t, currentWsId));
@@ -418,14 +421,71 @@ function WebBrowserPanel(props: MainPanelProps) {
         const currentIdx = currentList.findIndex((t) => t.id === activeTabId());
         const nextIdx = currentIdx < 0
           ? 0
-          : isShift
-          ? (currentIdx - 1 + currentList.length) % currentList.length
           : (currentIdx + 1) % currentList.length;
         handleSelectTab(currentList[nextIdx].id);
         return true;
       }
 
-      // 8. Numbered Tab Switch: Ctrl+1..Ctrl+8 (direct), Ctrl+9 (last tab) within current workspace
+      // 8. Cycle Tabs: Previous Tab
+      if (matchesAction("prevTab", sc, key, c, isMod, isShift, isAlt)) {
+        preventDefault?.();
+        const currentWsId = currentWorkspace().id;
+        const currentList = tabs().filter((t) => tabMatchesWorkspace(t, currentWsId));
+        if (currentList.length <= 1) return true;
+        const currentIdx = currentList.findIndex((t) => t.id === activeTabId());
+        const prevIdx = currentIdx < 0
+          ? 0
+          : (currentIdx - 1 + currentList.length) % currentList.length;
+        handleSelectTab(currentList[prevIdx].id);
+        return true;
+      }
+
+      // 9. Zoom In
+      if (matchesAction("zoomIn", sc, key, c, isMod, isShift, isAlt)) {
+        preventDefault?.();
+        handleZoom(0.1);
+        return true;
+      }
+
+      // 10. Zoom Out
+      if (matchesAction("zoomOut", sc, key, c, isMod, isShift, isAlt)) {
+        preventDefault?.();
+        handleZoom(-0.1);
+        return true;
+      }
+
+      // 11. Reset Zoom
+      if (matchesAction("resetZoom", sc, key, c, isMod, isShift, isAlt)) {
+        preventDefault?.();
+        handleResetZoom();
+        return true;
+      }
+
+      // 12. Bookmark Toggle
+      if (matchesAction("toggleBookmark", sc, key, c, isMod, isShift, isAlt)) {
+        preventDefault?.();
+        handleToggleBookmark();
+        return true;
+      }
+
+      // 13. New Group / Workspace
+      if (matchesAction("newWorkspace", sc, key, c, isMod, isShift, isAlt)) {
+        preventDefault?.();
+        const name = `Group ${workspaces().length + 1}`;
+        handleAddWorkspace(name);
+        return true;
+      }
+
+      // 14. Toggle Compact Tabs
+      if (matchesAction("toggleCompact", sc, key, c, isMod, isShift, isAlt)) {
+        preventDefault?.();
+        props.onPluginSettingsChange?.({
+          compactTabs: !(props.pluginSettings?.compactTabs ?? false),
+        });
+        return true;
+      }
+
+      // 15. Numbered Tab Switch: Ctrl+1..Ctrl+8 (direct), Ctrl+9 (last tab) within current workspace
       if (isMod && !isShift && (/^[1-9]$/.test(key) || /^Digit[1-9]$/.test(c))) {
         preventDefault?.();
         const currentWsId = currentWorkspace().id;
@@ -438,30 +498,6 @@ function WebBrowserPanel(props: MainPanelProps) {
         } else if (num - 1 < currentList.length) {
           handleSelectTab(currentList[num - 1].id);
         }
-        return true;
-      }
-
-      // 9. Zoom: Ctrl+= / Ctrl++ (zoom in), Ctrl+- (zoom out), Ctrl+0 (reset)
-      if (isMod && (key === "=" || key === "+" || c === "Equal" || c === "NumpadAdd")) {
-        preventDefault?.();
-        handleZoom(0.1);
-        return true;
-      }
-      if (isMod && (key === "-" || c === "Minus" || c === "NumpadSubtract")) {
-        preventDefault?.();
-        handleZoom(-0.1);
-        return true;
-      }
-      if (isMod && (key === "0" || c === "Digit0" || c === "Numpad0")) {
-        preventDefault?.();
-        handleResetZoom();
-        return true;
-      }
-
-      // 10. Bookmark Toggle: Ctrl+D
-      if (isMod && !isAlt && (key === "d" || c === "KeyD")) {
-        preventDefault?.();
-        handleToggleBookmark();
         return true;
       }
 
@@ -1121,6 +1157,7 @@ function WebBrowserPanel(props: MainPanelProps) {
             onReorderWorkspaces={handleReorderWorkspaces}
             onAddWorkspace={handleAddWorkspace}
             compactTabs={props.pluginSettings?.compactTabs ?? false}
+            shortcuts={effectiveShortcuts()}
             onToggleCompactTabs={() =>
               props.onPluginSettingsChange?.({
                 compactTabs: !(props.pluginSettings?.compactTabs ?? false),
@@ -1136,6 +1173,7 @@ function WebBrowserPanel(props: MainPanelProps) {
             workspaces={workspaces()}
             currentWorkspace={currentWorkspace()}
             compactTabs={props.pluginSettings?.compactTabs ?? false}
+            shortcuts={effectiveShortcuts()}
             onSelectTab={handleSelectTab}
             onCloseTab={handleCloseTab}
             onNewTab={() => handleNewTab("about:blank")}

@@ -277,3 +277,14 @@ export function CompactIcon(props: { size?: number }) {
   );
 }
 
+export function KeyboardIcon(props: { size?: number }) {
+  const s = () => props.size || 16;
+  return (
+    <svg width={s()} height={s()} viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style={{ "flex-shrink": "0", display: "block" }}>
+      <rect width="20" height="16" x="2" y="4" rx="2" />
+      <path d="M6 8h.001M10 8h.001M14 8h.001M18 8h.001M8 12h.001M12 12h.001M16 12h.001M7 16h10" />
+    </svg>
+  );
+}
+
+
