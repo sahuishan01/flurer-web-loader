@@ -1,14 +1,14 @@
 {
   "package.json": {
-    "mtime": 1792419048.0598452,
-    "seen": 1792419062.3053186,
-    "ast_hash": "bf0f51b6fc3f46c0c235c7c914538767",
+    "mtime": 1792420728.5512223,
+    "seen": 1792420752.586533,
+    "ast_hash": "8428de9e5954a6677774ebe089682991",
     "semantic_hash": ""
   },
   "plugin.json": {
-    "mtime": 1792419052.1438632,
-    "seen": 1792419062.3053222,
-    "ast_hash": "88c08ecb423fb7eedce69dcb8b074766",
+    "mtime": 1792420731.8432367,
+    "seen": 1792420752.5865371,
+    "ast_hash": "f046b457f4d9b6a017d254fda890b87f",
     "semantic_hash": ""
   },
   "scripts/sync-version.cjs": {
@@ -36,9 +36,9 @@
     "semantic_hash": ""
   },
   "src/components/TabBar.tsx": {
-    "mtime": 1792418159.7919688,
-    "seen": 1792418189.5183551,
-    "ast_hash": "e942b4660994ddd1345da8f836cbf6f9",
+    "mtime": 1792420366.757634,
+    "seen": 1792420752.5865529,
+    "ast_hash": "377f7ea1c14b30b7c08b89709469f958",
     "semantic_hash": ""
   },
   "src/components/WebViewport.tsx": {
@@ -54,9 +54,9 @@
     "semantic_hash": ""
   },
   "src/index.tsx": {
-    "mtime": 1792419032.1357753,
-    "seen": 1792419062.3053463,
-    "ast_hash": "90b2345d7ee8a77d3053c63debe3bf40",
+    "mtime": 1792420180.8848174,
+    "seen": 1792420752.586563,
+    "ast_hash": "c2a34a656bac6e926d1013b94f9f270f",
     "semantic_hash": ""
   },
   "src/styles.ts": {
@@ -120,15 +120,15 @@
     "semantic_hash": ""
   },
   "src/components/ContextCapsuleBar.tsx": {
-    "mtime": 1792418125.607819,
-    "seen": 1792418189.5183449,
-    "ast_hash": "30fd8986b2f597ac0abc19947533a855",
+    "mtime": 1792420671.1629705,
+    "seen": 1792420752.5865424,
+    "ast_hash": "cd22666435c9edd06dc7a79e00a1e2da",
     "semantic_hash": ""
   },
   "src/components/ContextOrbitDeck.tsx": {
-    "mtime": 1792417261.712033,
-    "seen": 1792417334.6273265,
-    "ast_hash": "dfe4e2018604005ee74c49c0f7787812",
+    "mtime": 1792420649.146874,
+    "seen": 1792420752.5865438,
+    "ast_hash": "498cd4fd637ca0772b1fae2937dcbd7e",
     "semantic_hash": ""
   },
   "src/smartRouter.ts": {
@@ -159,6 +159,12 @@
     "mtime": 1792416762.0098524,
     "seen": 1792417334.6273406,
     "ast_hash": "fb6c41b80d91fdbded06019eedd33ac1",
+    "semantic_hash": ""
+  },
+  "src/dragDrop.ts": {
+    "mtime": 1792420143.732654,
+    "seen": 1792420752.5865586,
+    "ast_hash": "fa61da9efaacbbcc3e7900cdce836a33",
     "semantic_hash": ""
   }
 }

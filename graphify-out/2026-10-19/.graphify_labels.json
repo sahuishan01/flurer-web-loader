@@ -1,6 +1,6 @@
 {
   "0": "ContextCapsuleBar.tsx",
-  "1": "WebViewport.tsx",
+  "1": "invoke",
   "2": "compilerOptions",
   "3": "package.json",
   "4": "utils.ts",
@@ -12,7 +12,8 @@
   "10": "workflows/graphify.md",
   "11": "index.tsx",
   "12": "types.ts",
-  "13": "openInWebviewWindow",
+  "13": "getModifierKey",
   "14": "Project Guidelines & Invariants (GEMINI.md)",
+  "15": "getDomain",
   "16": "addHistoryItem"
 }

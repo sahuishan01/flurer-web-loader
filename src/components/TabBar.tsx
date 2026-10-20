@@ -517,6 +517,7 @@ export function TabBar(props: TabBarProps) {
             "min-height": "32px",
             "flex-shrink": 0,
           }}
+          onMouseDown={(e) => e.preventDefault()}
           onClick={props.onNewTab}
           title={`Open New Tab (${mod}+T)`}
         >

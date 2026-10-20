@@ -588,30 +588,32 @@ function WebBrowserPanel(props: MainPanelProps) {
 
   const focusOmnibox = () => {
     try {
+      (window as any).TauriCore?.invoke("plugin:window|set_focus");
+    } catch {}
+    try {
       window.focus();
     } catch {}
-    // Retry across immediate tick, next frame, 50ms, 150ms, and 300ms to guarantee focus
-    const tryFocus = () => {
+
+    const doFocus = () => {
       const omni = document.querySelector(".web-loader-omnibox input") as HTMLInputElement | null;
       if (omni) {
-        omni.focus();
-        omni.select();
-        return true;
+        if (document.activeElement !== omni) {
+          try {
+            (document.activeElement as HTMLElement)?.blur();
+          } catch {}
+          omni.focus({ preventScroll: true });
+          omni.select();
+        }
+        return document.activeElement === omni;
       }
       return false;
     };
 
-    if (!tryFocus()) {
-      requestAnimationFrame(() => {
-        if (!tryFocus()) {
-          setTimeout(tryFocus, 50);
-          setTimeout(tryFocus, 150);
-          setTimeout(tryFocus, 300);
-        }
-      });
-    } else {
-      setTimeout(tryFocus, 60);
-    }
+    doFocus();
+    requestAnimationFrame(() => doFocus());
+    [10, 30, 60, 100, 150, 220, 320, 500, 750].forEach((delay) => {
+      setTimeout(doFocus, delay);
+    });
   };
 
   const handleSelectTab = (id: string) => {
@@ -654,6 +656,9 @@ function WebBrowserPanel(props: MainPanelProps) {
     );
     const nextTabs = [...tabs(), newTab];
     batch(() => {
+      setOrbitDeckOpen(false);
+      setWorkspaceMenuOpen(false);
+      setQuickSwitcherOpen(false);
       setActiveTabId(newTab.id);
       setTabs(nextTabs);
       setCurrentWorkspaceId(targetWs);

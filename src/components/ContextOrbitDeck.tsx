@@ -1090,6 +1090,7 @@ export function ContextOrbitDeck(props: ContextOrbitDeckProps) {
                         "min-height": "26px",
                         "border-radius": "6px",
                       }}
+                      onMouseDown={(e) => e.preventDefault()}
                       onClick={() => props.onNewTab("about:blank", undefined, ws.id)}
                       title={`Open new tab in ${ws.name}`}
                     >

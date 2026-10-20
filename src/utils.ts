@@ -787,6 +787,12 @@ export async function hideAllDockedWebviews(): Promise<void> {
   }
   currentVisibleTabId = null;
   currentVisibleLabel = null;
+  try {
+    await window.TauriCore.invoke("plugin:window|set_focus");
+  } catch {}
+  try {
+    window.focus();
+  } catch {}
 }
 
 export async function closeTabWebview(tabId: string): Promise<void> {

@@ -121,20 +121,25 @@ export function ContextCapsuleBar(props: ContextCapsuleBarProps) {
   createEffect(() => {
     const tab = props.activeTab;
     const tabId = tab?.id;
-    if (!isFocused() && tab) {
-      setInputValue(tab.url === "about:blank" ? "" : tab.url);
-    }
     if (tab && tab.url === "about:blank") {
+      setInputValue("");
+      setIsFocused(true);
       const doFocus = () => {
         if (inputRef) {
-          inputRef.focus();
-          inputRef.select();
+          if (document.activeElement !== inputRef) {
+            try {
+              (document.activeElement as HTMLElement)?.blur();
+            } catch {}
+            inputRef.focus({ preventScroll: true });
+            inputRef.select();
+          }
         }
       };
       doFocus();
       requestAnimationFrame(doFocus);
-      setTimeout(doFocus, 50);
-      setTimeout(doFocus, 150);
+      [10, 30, 60, 100, 150, 220, 320, 500, 750].forEach((d) => setTimeout(doFocus, d));
+    } else if (!isFocused() && tab) {
+      setInputValue(tab.url);
     }
   });
 
@@ -756,6 +761,7 @@ export function ContextCapsuleBar(props: ContextCapsuleBarProps) {
               "border-radius": "6px",
               "flex-shrink": 0,
             }}
+            onMouseDown={(e) => e.preventDefault()}
             onClick={() => props.onNewTab("about:blank", props.activeTab?.id)}
             title={`Open New Tab in ${props.currentWorkspace.name} (${mod}+T)`}
           >
