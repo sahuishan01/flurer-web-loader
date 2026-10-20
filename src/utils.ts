@@ -770,6 +770,19 @@ export async function hideTabWebview(tabId: string): Promise<void> {
   }
 }
 
+export function restoreMainWebviewFocus(): void {
+  if (typeof window === "undefined" || !window.TauriCore) return;
+  const winLabel = (window as any).__TAURI_INTERNALS__?.metadata?.currentWindow?.label || "main";
+  const webviewLabel = (window as any).__TAURI_INTERNALS__?.metadata?.currentWebview?.label || "main";
+
+  try {
+    window.TauriCore.invoke("plugin:window|set_focus", { label: winLabel })?.catch?.(() => {});
+  } catch {}
+  try {
+    window.TauriCore.invoke("plugin:webview|set_webview_focus", { label: webviewLabel })?.catch?.(() => {});
+  } catch {}
+}
+
 export async function hideAllDockedWebviews(): Promise<void> {
   if (!window.TauriCore) return;
   for (const entry of tabWebviewRegistry.values()) {
@@ -787,12 +800,7 @@ export async function hideAllDockedWebviews(): Promise<void> {
   }
   currentVisibleTabId = null;
   currentVisibleLabel = null;
-  try {
-    await window.TauriCore.invoke("plugin:window|set_focus");
-  } catch {}
-  try {
-    window.focus();
-  } catch {}
+  restoreMainWebviewFocus();
 }
 
 export async function closeTabWebview(tabId: string): Promise<void> {

@@ -1,4 +1,4 @@
-import { createSignal, createEffect } from "solid-js";
+import { createSignal, createEffect, untrack } from "solid-js";
 import { S } from "../styles";
 import {
   ArrowLeftIcon,
@@ -40,26 +40,28 @@ export function NavigationBar(props: NavigationBarProps) {
   // Sync omnibox with active tab's URL unless the user is actively typing, and autofocus on new tab
   createEffect(() => {
     const tab = props.activeTab;
-    const tabId = tab?.id;
-    if (tab && tab.url === "about:blank") {
+    if (!tab) return;
+    const url = tab.url;
+
+    if (url === "about:blank") {
       setInputValue("");
       setIsFocused(true);
       const doFocus = () => {
         if (inputRef) {
-          if (document.activeElement !== inputRef) {
-            try {
-              (document.activeElement as HTMLElement)?.blur();
-            } catch {}
-            inputRef.focus({ preventScroll: true });
+          inputRef.focus();
+          if (inputRef.value) {
             inputRef.select();
           }
         }
       };
       doFocus();
       requestAnimationFrame(doFocus);
-      [10, 30, 60, 100, 150, 220, 320, 500, 750].forEach((d) => setTimeout(doFocus, d));
-    } else if (!isFocused() && tab) {
-      setInputValue(tab.url);
+      setTimeout(doFocus, 25);
+      setTimeout(doFocus, 75);
+      setTimeout(doFocus, 150);
+      setTimeout(doFocus, 300);
+    } else if (!untrack(isFocused)) {
+      setInputValue(url);
     }
   });
 

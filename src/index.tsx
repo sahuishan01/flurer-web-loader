@@ -36,6 +36,7 @@ import {
   closeTabWebview,
   closeAllDockedWebviews,
   hideAllDockedWebviews,
+  restoreMainWebviewFocus,
   setDockedWebviewZoom,
   getSavedWorkspaces,
   saveWorkspaces,
@@ -380,6 +381,7 @@ function WebBrowserPanel(props: MainPanelProps) {
       if (isMod && !isShift && (key === "t" || c === "KeyT")) {
         preventDefault?.();
         handleNewTab("about:blank", activeTab()?.id, currentWorkspace().id);
+        setTimeout(focusOmnibox, 0);
         return true;
       }
 
@@ -587,21 +589,13 @@ function WebBrowserPanel(props: MainPanelProps) {
   };
 
   const focusOmnibox = () => {
-    try {
-      (window as any).TauriCore?.invoke("plugin:window|set_focus");
-    } catch {}
-    try {
-      window.focus();
-    } catch {}
+    restoreMainWebviewFocus();
 
     const doFocus = () => {
       const omni = document.querySelector(".web-loader-omnibox input") as HTMLInputElement | null;
       if (omni) {
-        if (document.activeElement !== omni) {
-          try {
-            (document.activeElement as HTMLElement)?.blur();
-          } catch {}
-          omni.focus({ preventScroll: true });
+        omni.focus();
+        if (omni.value) {
           omni.select();
         }
         return document.activeElement === omni;
@@ -610,10 +604,11 @@ function WebBrowserPanel(props: MainPanelProps) {
     };
 
     doFocus();
-    requestAnimationFrame(() => doFocus());
-    [10, 30, 60, 100, 150, 220, 320, 500, 750].forEach((delay) => {
-      setTimeout(doFocus, delay);
-    });
+    requestAnimationFrame(doFocus);
+    setTimeout(doFocus, 25);
+    setTimeout(doFocus, 75);
+    setTimeout(doFocus, 150);
+    setTimeout(doFocus, 300);
   };
 
   const handleSelectTab = (id: string) => {
