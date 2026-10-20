@@ -77,7 +77,7 @@ export const SHORTCUT_METADATA: ShortcutMeta[] = [
     description: "Focus search bar to enter URL or query",
     category: "Navigation",
     defaultShortcut: "Ctrl+L",
-    secondaryDefaults: ["Alt+D"],
+    secondaryDefaults: ["Alt+D", "Ctrl+K", "F6"],
   },
   {
     id: "reload",

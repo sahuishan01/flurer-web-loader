@@ -1098,7 +1098,27 @@ export function ContextCapsuleBar(props: ContextCapsuleBarProps) {
             onInput={(e) => setInputValue(e.currentTarget.value)}
             onFocus={() => setIsFocused(true)}
             onBlur={() => setIsFocused(false)}
+            title={`Address & Search Bar (${props.shortcuts?.focusOmnibox || "Ctrl+L"})`}
           />
+          <Show when={!isFocused() && !inputValue()}>
+            <span
+              style={{
+                "font-size": "10px",
+                "font-family": "Space Mono, monospace",
+                color: "var(--text-muted, #94a3b8)",
+                padding: "2px 6px",
+                background: "rgba(255, 255, 255, 0.06)",
+                "border-radius": "4px",
+                border: "1px solid rgba(255, 255, 255, 0.08)",
+                "pointer-events": "none",
+                "user-select": "none",
+                "flex-shrink": 0,
+                "margin-right": "4px",
+              }}
+            >
+              {props.shortcuts?.focusOmnibox || "Ctrl+L"}
+            </span>
+          </Show>
           {inputValue() && (
             <button
               type="button"

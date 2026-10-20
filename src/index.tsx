@@ -344,6 +344,22 @@ function WebBrowserPanel(props: MainPanelProps) {
   const [quickSwitcherOpen, setQuickSwitcherOpen] = createSignal(false);
   const orbitLayoutMode = () => props.pluginSettings?.orbitDeckLayout ?? "matrix";
 
+  // Reactive compact tabs state with instant local response
+  const [compactTabs, setCompactTabs] = createSignal<boolean>(
+    props.pluginSettings?.compactTabs ?? false
+  );
+  createEffect(() => {
+    if (props.pluginSettings?.compactTabs !== undefined) {
+      setCompactTabs(props.pluginSettings.compactTabs);
+    }
+  });
+
+  const handleToggleCompactTabs = () => {
+    const next = !compactTabs();
+    setCompactTabs(next);
+    props.onPluginSettingsChange?.({ compactTabs: next });
+  };
+
   // Sync currentWorkspaceId only when activeTabId changes to a different tab
   let lastSyncedActiveId = activeTabId();
   createEffect(() => {
@@ -490,9 +506,7 @@ function WebBrowserPanel(props: MainPanelProps) {
       // 14. Toggle Compact Tabs
       if (matchesAction("toggleCompact", sc, key, c, isMod, isShift, isAlt)) {
         preventDefault?.();
-        props.onPluginSettingsChange?.({
-          compactTabs: !(props.pluginSettings?.compactTabs ?? false),
-        });
+        handleToggleCompactTabs();
         return true;
       }
 
@@ -1266,13 +1280,9 @@ function WebBrowserPanel(props: MainPanelProps) {
             onReorderTabs={handleReorderTabs}
             onReorderWorkspaces={handleReorderWorkspaces}
             onAddWorkspace={handleAddWorkspace}
-            compactTabs={props.pluginSettings?.compactTabs ?? false}
+            compactTabs={compactTabs()}
             shortcuts={effectiveShortcuts()}
-            onToggleCompactTabs={() =>
-              props.onPluginSettingsChange?.({
-                compactTabs: !(props.pluginSettings?.compactTabs ?? false),
-              })
-            }
+            onToggleCompactTabs={handleToggleCompactTabs}
           />
         }
       >
@@ -1282,7 +1292,7 @@ function WebBrowserPanel(props: MainPanelProps) {
             activeTabId={activeTabId()}
             workspaces={workspaces()}
             currentWorkspace={currentWorkspace()}
-            compactTabs={props.pluginSettings?.compactTabs ?? false}
+            compactTabs={compactTabs()}
             shortcuts={effectiveShortcuts()}
             onSelectTab={handleSelectTab}
             onCloseTab={handleCloseTab}
@@ -1293,11 +1303,7 @@ function WebBrowserPanel(props: MainPanelProps) {
             onReorderWorkspaces={handleReorderWorkspaces}
             onAddWorkspace={handleAddWorkspace}
             onOpenQuickSwitcher={() => setQuickSwitcherOpen(true)}
-            onToggleCompactTabs={() =>
-              props.onPluginSettingsChange?.({
-                compactTabs: !(props.pluginSettings?.compactTabs ?? false),
-              })
-            }
+            onToggleCompactTabs={handleToggleCompactTabs}
           />
 
           <NavigationBar
@@ -1305,6 +1311,7 @@ function WebBrowserPanel(props: MainPanelProps) {
             searchEngine={props.pluginSettings?.searchEngine ?? "duckduckgo"}
             homeUrl={props.pluginSettings?.homeUrl ?? ""}
             isBookmarked={isCurrentBookmarked()}
+            shortcuts={effectiveShortcuts()}
             onNavigate={handleNavigate}
             onReload={handleReload}
             onGoHome={handleGoHome}
