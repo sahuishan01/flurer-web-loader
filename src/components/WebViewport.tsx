@@ -457,8 +457,55 @@ export function WebViewport(props: WebViewportProps) {
                           props.onOpenUrl(frameHref);
                         }
 
-                        // Attach keydown forwarder if iframe document is accessible (same-origin / about:blank)
+                        // Intercept target="_blank" and new-tab link clicks / window.open
                         if (frameWindow && frameWindow.document) {
+                          // 1. Intercept link clicks with target="_blank", middle-click, or Ctrl/Cmd-click
+                          frameWindow.document.addEventListener(
+                            "click",
+                            (evt: MouseEvent) => {
+                              const target = evt.target as HTMLElement | null;
+                              const a = target?.closest?.("a");
+                              if (a && a.href) {
+                                const isBlank =
+                                  a.target === "_blank" ||
+                                  a.getAttribute("target") === "_blank";
+                                const isMiddleClick = evt.button === 1;
+                                const isCtrlClick =
+                                  (evt.ctrlKey || evt.metaKey) && evt.button === 0;
+
+                                if (isBlank || isMiddleClick || isCtrlClick) {
+                                  evt.preventDefault();
+                                  evt.stopPropagation();
+                                  props.onNewTab(a.href);
+                                }
+                              }
+                            },
+                            true
+                          );
+
+                          // 2. Intercept window.open calls
+                          try {
+                            const origOpen = frameWindow.open;
+                            frameWindow.open = function (
+                              url?: string | URL,
+                              target?: string,
+                              features?: string
+                            ) {
+                              if (url) {
+                                const finalUrl =
+                                  typeof url === "string" ? url : url.toString();
+                                if (finalUrl && finalUrl !== "about:blank") {
+                                  props.onNewTab(finalUrl);
+                                  return null;
+                                }
+                              }
+                              return origOpen
+                                ? origOpen.apply(frameWindow, arguments as any)
+                                : null;
+                            };
+                          } catch {}
+
+                          // 3. Attach keydown forwarder
                           frameWindow.addEventListener("keydown", (evt: KeyboardEvent) => {
                             const isMod = evt.ctrlKey || evt.metaKey;
                             const isAlt = evt.altKey;

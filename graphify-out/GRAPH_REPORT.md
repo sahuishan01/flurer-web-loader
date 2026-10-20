@@ -1,16 +1,16 @@
 # Graph Report - flurer-web-loader-plugin  (2026-10-20)
 
 ## Corpus Check
-- 28 files · ~37,942 words
+- 28 files · ~38,305 words
 - Verdict: corpus is large enough that graph structure adds value.
 
 ## Summary
-- 252 nodes · 666 edges · 17 communities (14 shown, 3 thin omitted)
+- 252 nodes · 667 edges · 17 communities (14 shown, 3 thin omitted)
 - Extraction: 100% EXTRACTED · 0% INFERRED · 0% AMBIGUOUS
 - Token cost: 0 input · 0 output
 
 ## Graph Freshness
-- Built from commit: `f3059448`
+- Built from commit: `09efedba`
 - Run `git rev-parse HEAD` and compare to check if the graph is stale.
 - Run `graphify update .` after code changes (no API cost).
 
@@ -34,7 +34,7 @@
 - addHistoryItem
 
 ## God Nodes (most connected - your core abstractions)
-1. `WebBrowserPanel()` - 27 edges
+1. `WebBrowserPanel()` - 28 edges
 2. `getDomain()` - 22 edges
 3. `SettingsPanel()` - 16 edges
 4. `Tab` - 14 edges
@@ -95,7 +95,7 @@ Cohesion: 0.33
 Nodes (5): fs, path, pkg, plugin, pluginPath
 
 ### Community 11 - "index.tsx"
-Cohesion: 0.15
+Cohesion: 0.16
 Nodes (23): TabBar(), [activeTabId, setActiveTabId], [bookmarks, setBookmarks], createNewTab(), getMonotonicTimestamp(), initialTabsState, initRestoredTabs(), lastAssignedActiveTime (+15 more)
 
 ### Community 12 - "types.ts"

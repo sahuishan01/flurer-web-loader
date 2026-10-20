@@ -522,6 +522,23 @@ function WebBrowserPanel(props: MainPanelProps) {
     let unlistenTauriShortcut: (() => void) | undefined;
     let unlistenPageLoad: (() => void) | undefined;
     let unlistenNavigated: (() => void) | undefined;
+    let unlistenNewWindow: (() => void) | undefined;
+    let unlistenFlurerNewWindow: (() => void) | undefined;
+    let unlistenOpenTab: (() => void) | undefined;
+
+    const handleNewWindowRequested = (rawUrl: string, sourceWebview?: string) => {
+      if (!rawUrl || rawUrl === "about:blank" || rawUrl.startsWith("javascript:")) return;
+      const currentTabs = tabs();
+      const parentTab = sourceWebview
+        ? currentTabs.find((t) => {
+            const entry = getDockedWebviewEntry(t.id);
+            return entry?.label === sourceWebview;
+          }) || activeTab()
+        : activeTab();
+
+      const targetWs = parentTab?.projectId || currentWorkspace().id;
+      handleNewTab(rawUrl, parentTab?.id, targetWs);
+    };
 
     if (window.TauriEvent?.listen) {
       const handlePayloadShortcut = (event: any) => {
@@ -535,8 +552,29 @@ function WebBrowserPanel(props: MainPanelProps) {
         }
       };
 
+      const handlePayloadNewWindow = (event: any) => {
+        const p = event?.payload;
+        const rawUrl = typeof p === "string" ? p : p?.url;
+        const sourceWebview = p?.sourceWebview;
+        if (rawUrl) {
+          handleNewWindowRequested(rawUrl, sourceWebview);
+        }
+      };
+
       window.TauriEvent.listen("web-loader:shortcut", handlePayloadShortcut).then((unlisten: () => void) => {
         unlistenTauriShortcut = unlisten;
+      }).catch(() => {});
+
+      window.TauriEvent.listen("web-loader:new-window", handlePayloadNewWindow).then((unlisten: () => void) => {
+        unlistenNewWindow = unlisten;
+      }).catch(() => {});
+
+      window.TauriEvent.listen("flurer:webview-new-window", handlePayloadNewWindow).then((unlisten: () => void) => {
+        unlistenFlurerNewWindow = unlisten;
+      }).catch(() => {});
+
+      window.TauriEvent.listen("web-loader:open-tab", handlePayloadNewWindow).then((unlisten: () => void) => {
+        unlistenOpenTab = unlisten;
       }).catch(() => {});
 
       window.TauriEvent.listen("tauri://page-load", (event: any) => {
@@ -572,6 +610,17 @@ function WebBrowserPanel(props: MainPanelProps) {
         if (rawUrl) {
           handleWebviewNavigated(rawUrl, targetTabId);
         }
+      } else if (
+        e.data &&
+        (e.data.type === "web-loader:new-window" ||
+          e.data.type === "web-loader:new-tab" ||
+          e.data.type === "web-loader:open-tab")
+      ) {
+        const rawUrl = e.data.payload?.url || e.data.url;
+        const sourceWebview = e.data.payload?.sourceWebview || e.data.sourceWebview;
+        if (rawUrl) {
+          handleNewWindowRequested(rawUrl, sourceWebview);
+        }
       }
     };
     window.addEventListener("message", handleWindowMessage);
@@ -599,6 +648,15 @@ function WebBrowserPanel(props: MainPanelProps) {
       }
       if (unlistenNavigated) {
         unlistenNavigated();
+      }
+      if (unlistenNewWindow) {
+        unlistenNewWindow();
+      }
+      if (unlistenFlurerNewWindow) {
+        unlistenFlurerNewWindow();
+      }
+      if (unlistenOpenTab) {
+        unlistenOpenTab();
       }
     });
   });

@@ -421,6 +421,12 @@ export async function openInWebviewWindow(
     await window.TauriCore.invoke("plugin:webview|create_webview_window", {
       options: windowOptions,
     });
+    try {
+      await window.TauriCore.invoke("attach_child_webview_shortcuts", {
+        label,
+        pluginId: "web-loader",
+      });
+    } catch {}
     return { success: true };
   } catch (err: any) {
     console.error("Failed to spawn native WebviewWindow via TauriCore:", err);
@@ -449,6 +455,12 @@ export async function openInWebviewWindow(
             userAgent: options?.userAgent || DEFAULT_DESKTOP_USER_AGENT,
           },
         });
+        try {
+          await window.TauriCore.invoke("attach_child_webview_shortcuts", {
+            label: retryLabel,
+            pluginId: "web-loader",
+          });
+        } catch {}
         return { success: true };
       } catch {}
     }
