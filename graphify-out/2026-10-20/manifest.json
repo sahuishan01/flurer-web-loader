@@ -1,14 +1,14 @@
 {
   "package.json": {
-    "mtime": 1792494505.146007,
-    "seen": 1792494525.1263306,
-    "ast_hash": "f9032063d6aa989d6616b38d9fccfbd3",
+    "mtime": 1792495187.384959,
+    "seen": 1792495207.1828883,
+    "ast_hash": "2018897efe8986c70ca2cd273b54fceb",
     "semantic_hash": ""
   },
   "plugin.json": {
-    "mtime": 1792494529.8221135,
-    "seen": 1792494549.5855339,
-    "ast_hash": "7655bd6a1de38a5a2dcd1c26d17732b8",
+    "mtime": 1792495212.3570669,
+    "seen": 1792495234.1836748,
+    "ast_hash": "27517a17f6ddc0c4ca61c1c326d920cb",
     "semantic_hash": ""
   },
   "scripts/sync-version.cjs": {
@@ -36,9 +36,9 @@
     "semantic_hash": ""
   },
   "src/components/TabBar.tsx": {
-    "mtime": 1792483381.3778498,
-    "seen": 1792483437.9618697,
-    "ast_hash": "c4da20a4b0d8d4f8418d307ea544e16f",
+    "mtime": 1792495178.580921,
+    "seen": 1792495207.1829054,
+    "ast_hash": "4a420e4a4aef514dfbd7ef417ec547c2",
     "semantic_hash": ""
   },
   "src/components/WebViewport.tsx": {
@@ -54,9 +54,9 @@
     "semantic_hash": ""
   },
   "src/index.tsx": {
-    "mtime": 1792494447.84176,
-    "seen": 1792494525.1263568,
-    "ast_hash": "f75327e168fa831631f8254186d939d9",
+    "mtime": 1792495120.3486688,
+    "seen": 1792495207.182914,
+    "ast_hash": "e1c291472e7dfa8359fb82e4753f42be",
     "semantic_hash": ""
   },
   "src/styles.ts": {
@@ -72,9 +72,9 @@
     "semantic_hash": ""
   },
   "src/utils.ts": {
-    "mtime": 1792494411.8536046,
-    "seen": 1792494525.1263638,
-    "ast_hash": "9c7370ae1676c685fe2bb08fff4b43de",
+    "mtime": 1792495085.5285182,
+    "seen": 1792495207.1829214,
+    "ast_hash": "247ec88077879c484476d53010f4fedb",
     "semantic_hash": ""
   },
   "tsconfig.json": {
@@ -120,9 +120,9 @@
     "semantic_hash": ""
   },
   "src/components/ContextCapsuleBar.tsx": {
-    "mtime": 1792494472.7538674,
-    "seen": 1792494525.126338,
-    "ast_hash": "894a3f3cf001091cd0b015020bcb12dc",
+    "mtime": 1792495138.7807486,
+    "seen": 1792495207.1828957,
+    "ast_hash": "ab9ee6f3fd94648c111cdf806395a593",
     "semantic_hash": ""
   },
   "src/components/ContextOrbitDeck.tsx": {

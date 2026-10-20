@@ -27,6 +27,7 @@ interface TabBarProps {
   onSwitchWorkspace?: (id: string) => void;
   onReorderTabs?: (draggedTabId: string, targetTabId: string, insertBefore: boolean) => void;
   onReorderWorkspaces?: (draggedWsId: string, targetWsId: string, insertBefore: boolean) => void;
+  onAddWorkspace?: (name: string, color?: string, icon?: string, keywords?: string[]) => string;
   onToggleCompactTabs?: () => void;
 }
 
@@ -38,6 +39,28 @@ export function TabBar(props: TabBarProps) {
   const [wsDropTarget, setWsDropTarget] = createSignal<{ id: string; isBefore: boolean } | null>(null);
   const [wsTabHoverTarget, setWsTabHoverTarget] = createSignal<string | null>(null);
   let wsHoverTimer: any = null;
+
+  // Workspace creation state
+  const [isCreatingWs, setIsCreatingWs] = createSignal(false);
+  const [newWsName, setNewWsName] = createSignal("");
+  const [newWsColor, setNewWsColor] = createSignal("#38bdf8");
+  let wsInputRef: HTMLInputElement | undefined;
+
+  const handleCreateWsSubmit = () => {
+    const name = newWsName().trim();
+    if (!name) return;
+    const newId = props.onAddWorkspace?.(name, newWsColor());
+    if (newId) {
+      if (draggedTabId()) {
+        props.onUpdateTabWorkspace?.(draggedTabId()!, newId);
+        setDraggedTabId(null);
+      }
+      props.onSwitchWorkspace?.(newId);
+    }
+    setIsCreatingWs(false);
+    setNewWsName("");
+    setShowWsMenu(false);
+  };
 
   createEffect(() => {
     if (!tabMenu()) return;
@@ -235,6 +258,8 @@ export function TabBar(props: TabBarProps) {
                 padding: "8px",
                 "box-shadow": "0 16px 40px rgba(0, 0, 0, 0.7)",
                 "min-width": "220px",
+                "max-height": "420px",
+                "overflow-y": "auto",
                 display: "flex",
                 "flex-direction": "column",
                 gap: "4px",
@@ -368,6 +393,178 @@ export function TabBar(props: TabBarProps) {
                   );
                 }}
               </For>
+
+              {/* Divider */}
+              <div style={{ height: "1px", background: "rgba(255, 255, 255, 0.08)", margin: "4px 0" }} />
+
+              {/* New Group Option / Inline Creation Form */}
+              <Show
+                when={isCreatingWs()}
+                fallback={
+                  <button
+                    type="button"
+                    style={{
+                      display: "flex",
+                      "align-items": "center",
+                      gap: "8px",
+                      padding: "6px 8px",
+                      "border-radius": "6px",
+                      background: wsTabHoverTarget() === "new-group"
+                        ? "rgba(56, 189, 248, 0.22)"
+                        : "rgba(255, 255, 255, 0.04)",
+                      border: wsTabHoverTarget() === "new-group"
+                        ? "1px dashed var(--accent-default, #38bdf8)"
+                        : "1px dashed rgba(255, 255, 255, 0.15)",
+                      color: "var(--accent-default, #38bdf8)",
+                      "font-size": "12px",
+                      "font-weight": 500,
+                      cursor: "pointer",
+                      "text-align": "left",
+                      width: "100%",
+                      transition: "all 0.15s ease",
+                    }}
+                    onClick={() => {
+                      setIsCreatingWs(true);
+                      setTimeout(() => wsInputRef?.focus(), 25);
+                    }}
+                    onDragOver={(e) => {
+                      if (draggedTabId()) {
+                        e.preventDefault();
+                        e.dataTransfer!.dropEffect = "move";
+                        setWsTabHoverTarget("new-group");
+                      }
+                    }}
+                    onDragLeave={() => {
+                      if (wsTabHoverTarget() === "new-group") setWsTabHoverTarget(null);
+                    }}
+                    onDrop={(e) => {
+                      if (draggedTabId()) {
+                        e.preventDefault();
+                        e.stopPropagation();
+                        const tid = draggedTabId()!;
+                        const tab = props.tabs.find((t) => t.id === tid);
+                        const name = tab ? (tab.title && tab.title !== "New Tab" ? tab.title : getDomain(tab.url)) || "New Group" : "New Group";
+                        const newId = props.onAddWorkspace?.(name, "#38bdf8");
+                        if (newId) {
+                          props.onUpdateTabWorkspace?.(tid, newId);
+                          props.onSwitchWorkspace?.(newId);
+                        }
+                        setDraggedTabId(null);
+                        setWsTabHoverTarget(null);
+                        setShowWsMenu(false);
+                      }
+                    }}
+                    title="Create a new group / workspace"
+                  >
+                    <PlusIcon size={14} />
+                    <span>New Group</span>
+                  </button>
+                }
+              >
+                <form
+                  onSubmit={(e) => {
+                    e.preventDefault();
+                    handleCreateWsSubmit();
+                  }}
+                  style={{
+                    display: "flex",
+                    "flex-direction": "column",
+                    gap: "8px",
+                    padding: "8px",
+                    background: "rgba(0, 0, 0, 0.35)",
+                    border: "1px solid rgba(56, 189, 248, 0.35)",
+                    "border-radius": "6px",
+                    margin: "2px 0",
+                  }}
+                  onClick={(e) => e.stopPropagation()}
+                >
+                  <div style={{ display: "flex", "align-items": "center", gap: "6px" }}>
+                    <input
+                      ref={wsInputRef}
+                      type="text"
+                      placeholder="Group name..."
+                      value={newWsName()}
+                      onInput={(e) => setNewWsName(e.currentTarget.value)}
+                      onKeyDown={(e) => {
+                        if (e.key === "Escape") {
+                          setIsCreatingWs(false);
+                          setNewWsName("");
+                        }
+                      }}
+                      style={{
+                        flex: 1,
+                        background: "rgba(255, 255, 255, 0.08)",
+                        border: "1px solid rgba(255, 255, 255, 0.15)",
+                        "border-radius": "4px",
+                        padding: "4px 8px",
+                        color: "#f8fafc",
+                        "font-size": "12px",
+                        outline: "none",
+                      }}
+                    />
+                  </div>
+
+                  <div style={{ display: "flex", "align-items": "center", gap: "6px", "justify-content": "space-between" }}>
+                    <div style={{ display: "flex", "align-items": "center", gap: "5px" }}>
+                      <For each={["#38bdf8", "#05ffb0", "#a855f7", "#f59e0b", "#f43f5e", "#ec4899", "#94a3b8"]}>
+                        {(c) => (
+                          <button
+                            type="button"
+                            style={{
+                              width: "16px",
+                              height: "16px",
+                              "border-radius": "50%",
+                              background: c,
+                              border: newWsColor() === c ? "2px solid #ffffff" : "1px solid rgba(0, 0, 0, 0.3)",
+                              "box-shadow": newWsColor() === c ? `0 0 6px ${c}` : "none",
+                              cursor: "pointer",
+                              padding: 0,
+                            }}
+                            onClick={() => setNewWsColor(c)}
+                          />
+                        )}
+                      </For>
+                    </div>
+
+                    <div style={{ display: "flex", "align-items": "center", gap: "4px" }}>
+                      <button
+                        type="button"
+                        style={{
+                          background: "transparent",
+                          border: "none",
+                          color: "var(--text-muted, #94a3b8)",
+                          "font-size": "11px",
+                          cursor: "pointer",
+                          padding: "3px 6px",
+                        }}
+                        onClick={() => {
+                          setIsCreatingWs(false);
+                          setNewWsName("");
+                        }}
+                      >
+                        Cancel
+                      </button>
+                      <button
+                        type="submit"
+                        disabled={!newWsName().trim()}
+                        style={{
+                          background: "var(--accent-default, #38bdf8)",
+                          border: "none",
+                          "border-radius": "4px",
+                          color: "#0f172a",
+                          "font-size": "11px",
+                          "font-weight": 600,
+                          cursor: newWsName().trim() ? "pointer" : "not-allowed",
+                          opacity: newWsName().trim() ? 1 : 0.5,
+                          padding: "3px 8px",
+                        }}
+                      >
+                        Create
+                      </button>
+                    </div>
+                  </div>
+                </form>
+              </Show>
             </div>
           </Show>
         </div>
@@ -608,6 +805,40 @@ export function TabBar(props: TabBarProps) {
               );
             }}
           </For>
+
+          <button
+            type="button"
+            style={{
+              display: "flex",
+              "align-items": "center",
+              gap: "6px",
+              padding: "6px 8px",
+              "border-radius": "6px",
+              background: "transparent",
+              border: "none",
+              color: "var(--accent-default, #38bdf8)",
+              "font-size": "12px",
+              cursor: "pointer",
+              "text-align": "left",
+              transition: "background 0.15s ease",
+            }}
+            onClick={() => {
+              if (tabMenu()) {
+                const tid = tabMenu()!.tabId;
+                const tab = props.tabs.find((x) => x.id === tid);
+                const name = tab ? (tab.title && tab.title !== "New Tab" ? tab.title : getDomain(tab.url)) || "New Group" : "New Group";
+                const newId = props.onAddWorkspace?.(name, "#38bdf8");
+                if (newId) {
+                  props.onUpdateTabWorkspace?.(tid, newId);
+                  props.onSwitchWorkspace?.(newId);
+                }
+                setTabMenu(null);
+              }
+            }}
+          >
+            <PlusIcon size={12} />
+            <span>Create New Group...</span>
+          </button>
 
           <div style={{ height: "1px", background: "rgba(255, 255, 255, 0.08)", margin: "4px 0" }} />
 

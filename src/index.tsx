@@ -725,6 +725,28 @@ function WebBrowserPanel(props: MainPanelProps) {
     setWorkspaces(currentWs);
   };
 
+  const handleAddWorkspace = (
+    name: string,
+    color?: string,
+    icon?: string,
+    keywords?: string[]
+  ) => {
+    const trimmed = name.trim();
+    if (!trimmed) return "";
+    const newId = `ws-${Date.now()}`;
+    const newWs: ProjectWorkspace = {
+      id: newId,
+      name: trimmed,
+      color: color || "#38bdf8",
+      icon: icon || "✦",
+      keywords: keywords || [],
+    };
+    const updated = [...workspaces(), newWs];
+    setWorkspaces(updated);
+    handleSwitchWorkspace(newId);
+    return newId;
+  };
+
   const handleCloseTab = (id: string) => {
     closeTabWebview(id);
     const current = tabs();
@@ -1097,6 +1119,7 @@ function WebBrowserPanel(props: MainPanelProps) {
             onOpenQuickSwitcher={() => setQuickSwitcherOpen(true)}
             onReorderTabs={handleReorderTabs}
             onReorderWorkspaces={handleReorderWorkspaces}
+            onAddWorkspace={handleAddWorkspace}
             compactTabs={props.pluginSettings?.compactTabs ?? false}
             onToggleCompactTabs={() =>
               props.onPluginSettingsChange?.({
@@ -1120,6 +1143,7 @@ function WebBrowserPanel(props: MainPanelProps) {
             onSwitchWorkspace={handleSwitchWorkspace}
             onReorderTabs={handleReorderTabs}
             onReorderWorkspaces={handleReorderWorkspaces}
+            onAddWorkspace={handleAddWorkspace}
             onOpenQuickSwitcher={() => setQuickSwitcherOpen(true)}
             onToggleCompactTabs={() =>
               props.onPluginSettingsChange?.({
@@ -1167,15 +1191,7 @@ function WebBrowserPanel(props: MainPanelProps) {
         onReorderTabs={handleReorderTabs}
         onReorderWorkspaces={handleReorderWorkspaces}
         onAddWorkspace={(name, color, keywords) => {
-          const newWs = {
-            id: `ws-${Date.now()}`,
-            name,
-            color,
-            icon: "✦",
-            keywords,
-          };
-          const updated = [...workspaces(), newWs];
-          setWorkspaces(updated);
+          handleAddWorkspace(name, color, "✦", keywords);
         }}
         onUpdateTabProject={(tabId, projectId) => {
           const next = tabs().map((t) => (t.id === tabId ? { ...t, projectId } : t));
