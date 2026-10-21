@@ -70,6 +70,7 @@ export const SHORTCUT_METADATA: ShortcutMeta[] = [
     description: "Toggle icon-only compact tab bar layout",
     category: "Tabs",
     defaultShortcut: "Ctrl+Shift+C",
+    secondaryDefaults: ["Ctrl+Alt+C"],
   },
   {
     id: "focusOmnibox",

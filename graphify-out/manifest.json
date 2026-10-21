@@ -1,14 +1,14 @@
 {
   "package.json": {
-    "mtime": 1792553143.3435783,
-    "seen": 1792553159.3910496,
-    "ast_hash": "0e7501f4898c627072c68e1e500b519d",
+    "mtime": 1792554099.7717073,
+    "seen": 1792554116.7750273,
+    "ast_hash": "2cc01254f9012295c3c7ec28a171cfd3",
     "semantic_hash": ""
   },
   "plugin.json": {
-    "mtime": 1792553149.6116054,
-    "seen": 1792553159.3910537,
-    "ast_hash": "3163d01b7a562fdda9ba314ce1007fb8",
+    "mtime": 1792554106.6677372,
+    "seen": 1792554116.7750306,
+    "ast_hash": "df0d1e37ba1a28fd8e113bd6222b7667",
     "semantic_hash": ""
   },
   "scripts/sync-version.cjs": {
@@ -168,9 +168,9 @@
     "semantic_hash": ""
   },
   "src/shortcuts.ts": {
-    "mtime": 1792511692.3165348,
-    "seen": 1792511817.547048,
-    "ast_hash": "6f9196cfd6e1366b24c819123dd17ae7",
+    "mtime": 1792554085.2516446,
+    "seen": 1792554116.7750564,
+    "ast_hash": "8f35ab0fb3f4b562096e135387ede5e2",
     "semantic_hash": ""
   }
 }
