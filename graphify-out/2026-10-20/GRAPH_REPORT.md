@@ -1,7 +1,7 @@
 # Graph Report - flurer-web-loader-plugin  (2026-10-20)
 
 ## Corpus Check
-- 28 files · ~37,942 words
+- 28 files · ~38,821 words
 - Verdict: corpus is large enough that graph structure adds value.
 
 ## Summary
@@ -10,7 +10,7 @@
 - Token cost: 0 input · 0 output
 
 ## Graph Freshness
-- Built from commit: `f3059448`
+- Built from commit: `8e90fe05`
 - Run `git rev-parse HEAD` and compare to check if the graph is stale.
 - Run `graphify update .` after code changes (no API cost).
 
@@ -34,11 +34,11 @@
 - addHistoryItem
 
 ## God Nodes (most connected - your core abstractions)
-1. `WebBrowserPanel()` - 27 edges
+1. `WebBrowserPanel()` - 28 edges
 2. `getDomain()` - 22 edges
 3. `SettingsPanel()` - 16 edges
 4. `Tab` - 14 edges
-5. `invoke()` - 14 edges
+5. `invoke()` - 13 edges
 6. `ProjectWorkspace` - 12 edges
 7. `getModifierKey()` - 12 edges
 8. `WebViewport()` - 11 edges
@@ -96,7 +96,7 @@ Nodes (5): fs, path, pkg, plugin, pluginPath
 
 ### Community 11 - "index.tsx"
 Cohesion: 0.15
-Nodes (23): TabBar(), [activeTabId, setActiveTabId], [bookmarks, setBookmarks], createNewTab(), getMonotonicTimestamp(), initialTabsState, initRestoredTabs(), lastAssignedActiveTime (+15 more)
+Nodes (24): TabBar(), [activeTabId, setActiveTabId], [bookmarks, setBookmarks], createNewTab(), getMonotonicTimestamp(), initialTabsState, initRestoredTabs(), lastAssignedActiveTime (+16 more)
 
 ### Community 12 - "types.ts"
 Cohesion: 0.10
@@ -111,8 +111,8 @@ Cohesion: 0.33
 Nodes (5): 1. Automatic Version Bumping & Release Workflow, 2. Architecture & Runtime Invariants, 3. Secret & Instruction Handling, Project Guidelines & Invariants (GEMINI.md), Release Steps:
 
 ### Community 15 - "invoke"
-Cohesion: 0.25
-Nodes (9): clearAllBrowsingData(), closeAllDockedWebviews(), hideAllDockedWebviews(), hideTabWebview(), invoke(), queryDockedWebviewUrl(), restoreMainWebviewFocus(), setDockedWebviewZoom() (+1 more)
+Cohesion: 0.29
+Nodes (8): clearAllBrowsingData(), closeAllDockedWebviews(), hideAllDockedWebviews(), hideTabWebview(), invoke(), restoreMainWebviewFocus(), setDockedWebviewZoom(), showDockedWebview()
 
 ### Community 16 - "addHistoryItem"
 Cohesion: 0.50

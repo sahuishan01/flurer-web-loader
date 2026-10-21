@@ -889,18 +889,30 @@ export async function setDockedWebviewZoom(zoom: number, tabId?: string): Promis
   } catch {}
 }
 
+export interface DockedWebviewInfo {
+  url: string;
+  title?: string;
+}
+
 export async function queryDockedWebviewUrl(
   tabId?: string,
-  onNewWindow?: (url: string) => void
+  onNewWindow?: (url: string) => void,
+  onTitle?: (title: string) => void
 ): Promise<string | null> {
   if (!window.TauriCore) return null;
   const targetLabel = tabId ? tabWebviewRegistry.get(tabId)?.label : currentVisibleLabel;
   if (!targetLabel) return null;
   try {
-    const rawResult = await window.TauriCore.invoke<any>("get_docked_webview_url", { label: targetLabel });
+    let rawResult: any = null;
+    try {
+      rawResult = await window.TauriCore.invoke<any>("get_docked_webview_info", { label: targetLabel });
+    } catch {
+      rawResult = await window.TauriCore.invoke<any>("get_docked_webview_url", { label: targetLabel });
+    }
     if (!rawResult) return null;
 
     let targetUrl: string | null = null;
+    let targetTitle: string | null = null;
 
     if (typeof rawResult === "string" && rawResult.length > 0 && rawResult !== "about:blank") {
       const trimmed = rawResult.trim();
@@ -909,6 +921,9 @@ export async function queryDockedWebviewUrl(
           const parsed = JSON.parse(trimmed);
           if (parsed && typeof parsed.url === "string") {
             targetUrl = parsed.url;
+            if (typeof parsed.title === "string" && parsed.title.trim()) {
+              targetTitle = parsed.title.trim();
+            }
             if (Array.isArray(parsed.nw) && onNewWindow) {
               for (const nwUrl of parsed.nw) {
                 if (typeof nwUrl === "string" && nwUrl && nwUrl !== "about:blank") {
@@ -927,6 +942,9 @@ export async function queryDockedWebviewUrl(
       if (typeof rawResult.url === "string") {
         targetUrl = rawResult.url;
       }
+      if (typeof rawResult.title === "string" && rawResult.title.trim()) {
+        targetTitle = rawResult.title.trim();
+      }
       if (Array.isArray(rawResult.nw) && onNewWindow) {
         for (const nwUrl of rawResult.nw) {
           if (typeof nwUrl === "string" && nwUrl && nwUrl !== "about:blank") {
@@ -936,11 +954,30 @@ export async function queryDockedWebviewUrl(
       }
     }
 
+    if (targetTitle && onTitle) {
+      onTitle(targetTitle);
+    }
+
     if (targetUrl && targetUrl.length > 0 && targetUrl !== "about:blank" && !targetUrl.startsWith("{")) {
       return targetUrl;
     }
   } catch {}
   return null;
+}
+
+export async function queryDockedWebviewInfo(
+  tabId?: string,
+  onNewWindow?: (url: string) => void
+): Promise<DockedWebviewInfo | null> {
+  let reportedTitle: string | undefined = undefined;
+  const url = await queryDockedWebviewUrl(tabId, onNewWindow, (t) => {
+    reportedTitle = t;
+  });
+  if (!url) return null;
+  return {
+    url,
+    title: reportedTitle,
+  };
 }
 
 

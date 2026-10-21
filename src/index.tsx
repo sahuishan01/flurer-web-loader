@@ -545,8 +545,10 @@ function WebBrowserPanel(props: MainPanelProps) {
 
     // Tauri bridge listener for child webviews emitting "web-loader:shortcut"
     let unlistenTauriShortcut: (() => void) | undefined;
+    let unlistenFlurerShortcut: (() => void) | undefined;
     let unlistenPageLoad: (() => void) | undefined;
     let unlistenNavigated: (() => void) | undefined;
+    let unlistenFlurerNavigated: (() => void) | undefined;
     let unlistenNewWindow: (() => void) | undefined;
     let unlistenFlurerNewWindow: (() => void) | undefined;
     let unlistenOpenTab: (() => void) | undefined;
@@ -610,6 +612,10 @@ function WebBrowserPanel(props: MainPanelProps) {
         unlistenTauriShortcut = unlisten;
       }).catch(() => {});
 
+      window.TauriEvent.listen("flurer:webview-shortcut", handlePayloadShortcut).then((unlisten: () => void) => {
+        unlistenFlurerShortcut = unlisten;
+      }).catch(() => {});
+
       window.TauriEvent.listen("web-loader:new-window", handlePayloadNewWindow).then((unlisten: () => void) => {
         unlistenNewWindow = unlisten;
       }).catch(() => {});
@@ -624,8 +630,9 @@ function WebBrowserPanel(props: MainPanelProps) {
 
       window.TauriEvent.listen("tauri://page-load", (event: any) => {
         const rawUrl = typeof event?.payload === "string" ? event.payload : event?.payload?.url;
+        const pageTitle = event?.payload?.title;
         if (rawUrl && rawUrl !== "about:blank") {
-          handleWebviewNavigated(rawUrl);
+          handleWebviewNavigated(rawUrl, undefined, pageTitle);
         }
       }).then((unlisten: () => void) => {
         unlistenPageLoad = unlisten;
@@ -633,12 +640,28 @@ function WebBrowserPanel(props: MainPanelProps) {
 
       window.TauriEvent.listen("web-loader:navigated", (event: any) => {
         const rawUrl = typeof event?.payload === "string" ? event.payload : event?.payload?.url;
+        const pageTitle = event?.payload?.title;
         const targetTabId = event?.payload?.tabId;
+        const sourceWebview = event?.payload?.sourceWebview;
+        const targetId = targetTabId || (sourceWebview ? tabs().find((t) => getDockedWebviewEntry(t.id)?.label === sourceWebview)?.id : undefined);
         if (rawUrl && rawUrl !== "about:blank") {
-          handleWebviewNavigated(rawUrl, targetTabId);
+          handleWebviewNavigated(rawUrl, targetId, pageTitle);
         }
       }).then((unlisten: () => void) => {
         unlistenNavigated = unlisten;
+      }).catch(() => {});
+
+      window.TauriEvent.listen("flurer:webview-navigated", (event: any) => {
+        const rawUrl = typeof event?.payload === "string" ? event.payload : event?.payload?.url;
+        const pageTitle = event?.payload?.title;
+        const targetTabId = event?.payload?.tabId;
+        const sourceWebview = event?.payload?.sourceWebview;
+        const targetId = targetTabId || (sourceWebview ? tabs().find((t) => getDockedWebviewEntry(t.id)?.label === sourceWebview)?.id : undefined);
+        if (rawUrl && rawUrl !== "about:blank") {
+          handleWebviewNavigated(rawUrl, targetId, pageTitle);
+        }
+      }).then((unlisten: () => void) => {
+        unlistenFlurerNavigated = unlisten;
       }).catch(() => {});
     }
 
@@ -651,9 +674,10 @@ function WebBrowserPanel(props: MainPanelProps) {
         }
       } else if (e.data && e.data.type === "web-loader:navigated") {
         const rawUrl = e.data.payload?.url || e.data.url;
+        const pageTitle = e.data.payload?.title || e.data.title;
         const targetTabId = e.data.payload?.tabId || e.data.tabId;
         if (rawUrl) {
-          handleWebviewNavigated(rawUrl, targetTabId);
+          handleWebviewNavigated(rawUrl, targetTabId, pageTitle);
         }
       } else if (
         e.data &&
@@ -670,15 +694,24 @@ function WebBrowserPanel(props: MainPanelProps) {
     };
     window.addEventListener("message", handleWindowMessage);
 
-    // Periodically poll active docked webview's live URL (e.g. user clicked a link in search results)
+    // Periodically poll active docked webview's live URL & page title
     const pollInterval = setInterval(async () => {
       const curTab = activeTab();
       if (!curTab || curTab.url === "about:blank" || props.active === false) return;
-      const liveUrl = await queryDockedWebviewUrl(curTab.id, (nwUrl) => {
-        handleNewWindowRequested(nwUrl, getDockedWebviewEntry(curTab.id)?.label);
-      });
-      if (liveUrl && liveUrl !== curTab.url && liveUrl !== "about:blank" && !liveUrl.startsWith("javascript:")) {
-        handleWebviewNavigated(liveUrl, curTab.id);
+      let reportedTitle: string | undefined = undefined;
+      const liveUrl = await queryDockedWebviewUrl(
+        curTab.id,
+        (nwUrl) => {
+          handleNewWindowRequested(nwUrl, getDockedWebviewEntry(curTab.id)?.label);
+        },
+        (t) => {
+          reportedTitle = t;
+        }
+      );
+      if (liveUrl && liveUrl !== "about:blank" && !liveUrl.startsWith("javascript:")) {
+        handleWebviewNavigated(liveUrl, curTab.id, reportedTitle);
+      } else if (reportedTitle && reportedTitle !== curTab.title) {
+        handleWebviewNavigated(curTab.url, curTab.id, reportedTitle);
       }
     }, 350);
 
@@ -690,11 +723,17 @@ function WebBrowserPanel(props: MainPanelProps) {
       if (unlistenTauriShortcut) {
         unlistenTauriShortcut();
       }
+      if (unlistenFlurerShortcut) {
+        unlistenFlurerShortcut();
+      }
       if (unlistenPageLoad) {
         unlistenPageLoad();
       }
       if (unlistenNavigated) {
         unlistenNavigated();
+      }
+      if (unlistenFlurerNavigated) {
+        unlistenFlurerNavigated();
       }
       if (unlistenNewWindow) {
         unlistenNewWindow();
@@ -782,15 +821,17 @@ function WebBrowserPanel(props: MainPanelProps) {
   const handleNewTab = (
     url: string = "about:blank",
     parentId?: string,
-    projectId?: string
+    projectId?: string,
+    title?: string
   ) => {
     hideAllDockedWebviews();
     const parentTab = parentId ? tabs().find((t) => t.id === parentId) : undefined;
     const parentTitle = parentTab ? parentTab.title : undefined;
     const targetWs = projectId || parentTab?.projectId || currentWorkspace().id;
+    const initialTitle = title || (url === "about:blank" ? "New Tab" : getDomain(url));
     const newTab = createNewTab(
       url,
-      url === "about:blank" ? "New Tab" : getDomain(url),
+      initialTitle,
       parentId,
       parentTitle,
       targetWs
@@ -1004,14 +1045,15 @@ function WebBrowserPanel(props: MainPanelProps) {
     }
 
     const cur = tabs().find((t) => t.id === id);
-    const decision = classifyHeuristic(url, domain, workspaces(), cur?.projectId);
+    const initialTitle = cur?.url === url && cur?.title && cur.title !== "New Tab" && cur.title !== cur.url ? cur.title : domain;
+    const decision = classifyHeuristic(url, initialTitle, workspaces(), cur?.projectId);
 
     const nextTabs = tabs().map((t) =>
       t.id === id
         ? {
             ...t,
             url,
-            title: domain,
+            title: initialTitle,
             projectId: t.projectId || decision.projectId,
             intent: decision.intent,
             lastActiveAt: getMonotonicTimestamp(),
@@ -1050,7 +1092,7 @@ function WebBrowserPanel(props: MainPanelProps) {
     }
   };
 
-  const handleWebviewNavigated = (newUrl: string, targetTabId?: string) => {
+  const handleWebviewNavigated = (newUrl: string, targetTabId?: string, pageTitle?: string) => {
     if (!newUrl || newUrl === "about:blank" || newUrl.startsWith("javascript:")) return;
     let cleanUrl = newUrl.trim();
     if (cleanUrl.startsWith("{") && cleanUrl.endsWith("}")) {
@@ -1058,6 +1100,9 @@ function WebBrowserPanel(props: MainPanelProps) {
         const parsed = JSON.parse(cleanUrl);
         if (parsed && typeof parsed.url === "string") {
           cleanUrl = parsed.url;
+          if (typeof parsed.title === "string" && parsed.title.trim() && !pageTitle) {
+            pageTitle = parsed.title.trim();
+          }
           if (Array.isArray(parsed.nw)) {
             for (const nwUrl of parsed.nw) {
               if (typeof nwUrl === "string" && nwUrl && nwUrl !== "about:blank") {
@@ -1075,19 +1120,28 @@ function WebBrowserPanel(props: MainPanelProps) {
     const cur = tabs().find((t) => t.id === id);
     if (!cur) return;
 
-    // If URL is identical to current tab URL, skip duplicate navigation
-    if (cur.url === newUrl) return;
-
     const domain = getDomain(newUrl);
-    updateDockedWebviewUrl(id, newUrl);
+    const resolvedTitle = pageTitle && pageTitle.trim().length > 0 && pageTitle !== "about:blank"
+      ? pageTitle.trim()
+      : (cur.title && cur.title !== "New Tab" && cur.title !== cur.url ? cur.title : domain);
 
-    const decision = classifyHeuristic(newUrl, domain, workspaces(), cur.projectId);
+    const urlChanged = cur.url !== newUrl;
+    const titleChanged = resolvedTitle !== cur.title;
+
+    // If neither URL nor title changed, skip updating
+    if (!urlChanged && !titleChanged) return;
+
+    if (urlChanged) {
+      updateDockedWebviewUrl(id, newUrl);
+    }
+
+    const decision = classifyHeuristic(newUrl, resolvedTitle, workspaces(), cur.projectId);
     const nextTabs = tabs().map((t) =>
       t.id === id
         ? {
             ...t,
             url: newUrl,
-            title: domain,
+            title: resolvedTitle,
             projectId: t.projectId || decision.projectId,
             intent: decision.intent,
             lastActiveAt: getMonotonicTimestamp(),
@@ -1096,10 +1150,10 @@ function WebBrowserPanel(props: MainPanelProps) {
     );
     setTabs(nextTabs);
     persistCurrentTabs(nextTabs, id === activeTabId() ? newUrl : undefined);
-    setHistory(addHistoryItem(domain, newUrl));
+    setHistory(addHistoryItem(resolvedTitle, newUrl));
 
-    if (props.pluginSettings?.smartRouter?.enabled && props.pluginSettings.smartRouter.provider !== "heuristic") {
-      routeTab(newUrl, domain, props.pluginSettings.smartRouter, workspaces(), cur.projectId)
+    if (urlChanged && props.pluginSettings?.smartRouter?.enabled && props.pluginSettings.smartRouter.provider !== "heuristic") {
+      routeTab(newUrl, resolvedTitle, props.pluginSettings.smartRouter, workspaces(), cur.projectId)
         .then((asyncDecision) => {
           if (asyncDecision.projectId !== decision.projectId || asyncDecision.intent !== decision.intent) {
             setTabs((prev) => {
