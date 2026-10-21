@@ -12,8 +12,5 @@
   "10": "workflows/graphify.md",
   "11": "index.tsx",
   "12": "types.ts",
-  "13": "WebViewport.tsx",
-  "14": "Project Guidelines & Invariants (GEMINI.md)",
-  "15": "invoke",
-  "16": "addHistoryItem"
+  "14": "Project Guidelines & Invariants (GEMINI.md)"
 }

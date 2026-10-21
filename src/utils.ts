@@ -189,6 +189,104 @@ export function getDomain(url: string): string {
   }
 }
 
+export function deriveTabTitle(url: string, rawTitle?: string): string {
+  if (rawTitle && rawTitle.trim()) {
+    const t = rawTitle.trim();
+    if (
+      t !== "about:blank" &&
+      t !== "New Tab" &&
+      t !== url &&
+      !t.startsWith("http://") &&
+      !t.startsWith("https://")
+    ) {
+      return t;
+    }
+  }
+
+  if (!url || url === "about:blank") {
+    return "New Tab";
+  }
+
+  try {
+    const fullUrl = url.startsWith("http://") || url.startsWith("https://") ? url : `https://${url}`;
+    const parsed = new URL(fullUrl);
+    const host = parsed.hostname.replace(/^www\./i, "");
+
+    // Search query parsing for popular search engines
+    if (host.includes("google.") && parsed.pathname.includes("/search")) {
+      const q = parsed.searchParams.get("q");
+      if (q) return `Google: ${q}`;
+    }
+    if (host.includes("duckduckgo.com")) {
+      const q = parsed.searchParams.get("q");
+      if (q) return `DuckDuckGo: ${q}`;
+    }
+    if (host.includes("bing.com") && parsed.pathname.includes("/search")) {
+      const q = parsed.searchParams.get("q");
+      if (q) return `Bing: ${q}`;
+    }
+
+    // Well-known domain brand names
+    const brandMap: Record<string, string> = {
+      "github.com": "GitHub",
+      "gitlab.com": "GitLab",
+      "google.com": "Google",
+      "youtube.com": "YouTube",
+      "reddit.com": "Reddit",
+      "twitter.com": "X",
+      "x.com": "X",
+      "news.ycombinator.com": "Hacker News",
+      "wikipedia.org": "Wikipedia",
+      "stackoverflow.com": "Stack Overflow",
+      "docs.rs": "Docs.rs",
+      "crates.io": "Crates.io",
+      "npmjs.com": "npm",
+      "chatgpt.com": "ChatGPT",
+      "claude.ai": "Claude",
+      "anthropic.com": "Anthropic",
+      "openai.com": "OpenAI",
+      "gemini.google.com": "Gemini",
+    };
+
+    let brand = brandMap[host];
+    if (!brand) {
+      for (const [k, v] of Object.entries(brandMap)) {
+        if (host === k || host.endsWith(`.${k}`)) {
+          brand = v;
+          break;
+        }
+      }
+    }
+    if (!brand) {
+      const domainName = host.split(".")[0];
+      brand = domainName.charAt(0).toUpperCase() + domainName.slice(1);
+    }
+
+    const cleanPath = parsed.pathname.replace(/^\/+|\/+$/g, "");
+    if (cleanPath && cleanPath !== "search") {
+      const segments = cleanPath.split("/").filter(Boolean);
+      if (segments.length > 0) {
+        let pathTitle = "";
+        if (segments[0] === "wiki" && segments.length > 1) {
+          pathTitle = decodeURIComponent(segments.slice(1).join("/")).replace(/_/g, " ");
+        } else if (segments.length <= 2) {
+          pathTitle = decodeURIComponent(segments.join("/"));
+        } else {
+          pathTitle = decodeURIComponent(segments[segments.length - 1]).replace(/[-_]/g, " ");
+        }
+
+        if (pathTitle && pathTitle.length < 40) {
+          return `${pathTitle} • ${brand}`;
+        }
+      }
+    }
+
+    return brand;
+  } catch {
+    return url;
+  }
+}
+
 export function getIframeEmbedUrl(url: string): string {
   try {
     if (!url || url === "about:blank") return url;
@@ -679,6 +777,20 @@ export async function createOrShowDockedWebview(
       focus: true,
       transparent: false,
       userAgent: DEFAULT_DESKTOP_USER_AGENT,
+      initializationScript: `
+        (function() {
+          function pollTitle() {
+            try {
+              if (document && document.title) {
+                window.__flurer_title = document.title;
+              }
+            } catch(e) {}
+          }
+          setInterval(pollTitle, 300);
+          document.addEventListener("DOMContentLoaded", pollTitle);
+          window.addEventListener("load", pollTitle);
+        })();
+      `,
     };
 
     try {
@@ -904,52 +1016,68 @@ export async function queryDockedWebviewUrl(
   if (!targetLabel) return null;
   try {
     let rawResult: any = null;
+    let urlResult: any = null;
+
     try {
       rawResult = await window.TauriCore.invoke<any>("get_docked_webview_info", { label: targetLabel });
-    } catch {
-      rawResult = await window.TauriCore.invoke<any>("get_docked_webview_url", { label: targetLabel });
-    }
-    if (!rawResult) return null;
+    } catch {}
+
+    try {
+      urlResult = await window.TauriCore.invoke<any>("get_docked_webview_url", { label: targetLabel });
+    } catch {}
+
+    const parsePayload = (data: any): { url?: string; title?: string; nw?: string[] } | null => {
+      if (!data) return null;
+      if (typeof data === "string") {
+        const trimmed = data.trim();
+        if (trimmed.startsWith("{") && trimmed.endsWith("}")) {
+          try {
+            const parsed = JSON.parse(trimmed);
+            if (typeof parsed === "string") {
+              try {
+                return JSON.parse(parsed);
+              } catch {
+                return null;
+              }
+            }
+            return parsed;
+          } catch {
+            return null;
+          }
+        }
+      } else if (typeof data === "object") {
+        return data;
+      }
+      return null;
+    };
+
+    const parsedInfo = parsePayload(rawResult);
+    const parsedUrl = parsePayload(urlResult);
 
     let targetUrl: string | null = null;
     let targetTitle: string | null = null;
 
-    if (typeof rawResult === "string" && rawResult.length > 0 && rawResult !== "about:blank") {
-      const trimmed = rawResult.trim();
-      if (trimmed.startsWith("{") && trimmed.endsWith("}")) {
-        try {
-          const parsed = JSON.parse(trimmed);
-          if (parsed && typeof parsed.url === "string") {
-            targetUrl = parsed.url;
-            if (typeof parsed.title === "string" && parsed.title.trim()) {
-              targetTitle = parsed.title.trim();
-            }
-            if (Array.isArray(parsed.nw) && onNewWindow) {
-              for (const nwUrl of parsed.nw) {
-                if (typeof nwUrl === "string" && nwUrl && nwUrl !== "about:blank") {
-                  onNewWindow(nwUrl);
-                }
-              }
-            }
-          }
-        } catch {
-          targetUrl = trimmed;
-        }
-      } else {
-        targetUrl = trimmed;
-      }
-    } else if (typeof rawResult === "object" && rawResult !== null) {
-      if (typeof rawResult.url === "string") {
-        targetUrl = rawResult.url;
-      }
-      if (typeof rawResult.title === "string" && rawResult.title.trim()) {
-        targetTitle = rawResult.title.trim();
-      }
-      if (Array.isArray(rawResult.nw) && onNewWindow) {
-        for (const nwUrl of rawResult.nw) {
-          if (typeof nwUrl === "string" && nwUrl && nwUrl !== "about:blank") {
-            onNewWindow(nwUrl);
-          }
+    if (parsedInfo?.url && typeof parsedInfo.url === "string") {
+      targetUrl = parsedInfo.url;
+    } else if (parsedUrl?.url && typeof parsedUrl.url === "string") {
+      targetUrl = parsedUrl.url;
+    } else if (typeof urlResult === "string" && urlResult.length > 0 && urlResult !== "about:blank" && !urlResult.startsWith("{")) {
+      targetUrl = urlResult;
+    } else if (typeof rawResult === "string" && rawResult.length > 0 && rawResult !== "about:blank" && !rawResult.startsWith("{")) {
+      targetUrl = rawResult;
+    }
+
+    if (parsedInfo?.title && typeof parsedInfo.title === "string" && parsedInfo.title.trim()) {
+      targetTitle = parsedInfo.title.trim();
+    } else if (parsedUrl?.title && typeof parsedUrl.title === "string" && parsedUrl.title.trim()) {
+      targetTitle = parsedUrl.title.trim();
+    }
+
+    const newWindows = parsedInfo?.nw || parsedUrl?.nw;
+    if (Array.isArray(newWindows) && onNewWindow) {
+      for (const nwUrl of newWindows) {
+        if (typeof nwUrl === "string" && nwUrl && nwUrl !== "about:blank") {
+          onNewWindow(nwUrl);
         }
       }
     }

@@ -519,6 +519,28 @@ export function ContextOrbitDeck(props: ContextOrbitDeckProps) {
                   gap: "4px",
                   animation: "web-loader-card-enter 0.18s cubic-bezier(0.16, 1, 0.3, 1) both",
                 }}
+                onDragOver={(e) => {
+                  if (draggedWorkspaceId() || draggedTabId()) {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    e.dataTransfer!.dropEffect = "move";
+                  }
+                }}
+                onDrop={(e) => {
+                  if (draggedWorkspaceId()) {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    const wsList = props.workspaces;
+                    if (wsList.length > 0) {
+                      const lastWs = wsList[wsList.length - 1];
+                      if (draggedWorkspaceId() !== lastWs.id) {
+                        props.onReorderWorkspaces?.(draggedWorkspaceId()!, lastWs.id, false);
+                      }
+                    }
+                    setDraggedWorkspaceId(null);
+                    setOrbitWsDropTarget(null);
+                  }
+                }}
               >
                 <div
                   style={{
@@ -580,30 +602,37 @@ export function ContextOrbitDeck(props: ContextOrbitDeckProps) {
                               : "1px solid transparent",
                             color: ws.color,
                             "font-size": "12px",
-                            cursor: "pointer",
+                            cursor: "grab",
+                            "user-select": "none",
+                            "-webkit-user-select": "none",
                             "text-align": "left",
                             transition: "all 0.15s ease",
                           }}
                           onDragStart={(e) => {
                             e.dataTransfer!.setData(WORKSPACE_DRAG_MIME, ws.id);
+                            e.dataTransfer!.setData("text/plain", `flurer:ws:${ws.id}`);
                             e.dataTransfer!.effectAllowed = "move";
                             setDraggedWorkspaceId(ws.id);
                           }}
                           onDragEnd={() => {
                             setDraggedWorkspaceId(null);
                             setOrbitWsDropTarget(null);
+                            setOrbitWsTabHoverTarget(null);
                           }}
                           onDragOver={(e) => {
                             e.preventDefault();
                             e.stopPropagation();
+                            e.dataTransfer!.dropEffect = "move";
                             if (draggedTabId()) {
-                              e.dataTransfer!.dropEffect = "move";
                               setOrbitWsTabHoverTarget(ws.id);
-                            } else if (draggedWorkspaceId() && draggedWorkspaceId() !== ws.id) {
-                              e.dataTransfer!.dropEffect = "move";
-                              const rect = e.currentTarget.getBoundingClientRect();
-                              const isBefore = e.clientY < rect.top + rect.height / 2;
-                              setOrbitWsDropTarget({ id: ws.id, isBefore });
+                            } else if (draggedWorkspaceId()) {
+                              if (draggedWorkspaceId() !== ws.id) {
+                                const rect = e.currentTarget.getBoundingClientRect();
+                                const isBefore = e.clientY < rect.top + rect.height / 2;
+                                setOrbitWsDropTarget({ id: ws.id, isBefore });
+                              } else {
+                                setOrbitWsDropTarget(null);
+                              }
                             }
                           }}
                           onDragLeave={() => {
@@ -616,6 +645,7 @@ export function ContextOrbitDeck(props: ContextOrbitDeckProps) {
                             if (draggedTabId()) {
                               props.onUpdateTabProject(draggedTabId()!, ws.id);
                               setOrbitWsTabHoverTarget(null);
+                              setDraggedTabId(null);
                               setShowOrbitWsMenu(false);
                             } else if (draggedWorkspaceId() && draggedWorkspaceId() !== ws.id) {
                               const isBefore = orbitWsDropTarget()?.isBefore ?? true;
@@ -1010,13 +1040,16 @@ export function ContextOrbitDeck(props: ContextOrbitDeckProps) {
                     }}
                     onDragOver={(e) => {
                       e.preventDefault();
-                      if (draggedWorkspaceId() && draggedWorkspaceId() !== ws.id) {
-                        e.dataTransfer!.dropEffect = "move";
-                        const rect = e.currentTarget.getBoundingClientRect();
-                        const isBefore = e.clientX < rect.left + rect.width / 2;
-                        setMatrixWsDropTarget({ id: ws.id, isBefore });
-                      } else if (draggedTabId()) {
-                        e.dataTransfer!.dropEffect = "move";
+                      e.stopPropagation();
+                      e.dataTransfer!.dropEffect = "move";
+                      if (draggedWorkspaceId()) {
+                        if (draggedWorkspaceId() !== ws.id) {
+                          const rect = e.currentTarget.getBoundingClientRect();
+                          const isBefore = e.clientX < rect.left + rect.width / 2;
+                          setMatrixWsDropTarget({ id: ws.id, isBefore });
+                        } else {
+                          setMatrixWsDropTarget(null);
+                        }
                       }
                     }}
                     onDragLeave={(e) => {
@@ -1048,9 +1081,12 @@ export function ContextOrbitDeck(props: ContextOrbitDeckProps) {
                         background: "rgba(255, 255, 255, 0.03)",
                         "border-bottom": "1px solid rgba(255, 255, 255, 0.06)",
                         cursor: "grab",
+                        "user-select": "none",
+                        "-webkit-user-select": "none",
                       }}
                       onDragStart={(e) => {
                         e.dataTransfer!.setData(WORKSPACE_DRAG_MIME, ws.id);
+                        e.dataTransfer!.setData("text/plain", `flurer:ws:${ws.id}`);
                         e.dataTransfer!.effectAllowed = "move";
                         setDraggedWorkspaceId(ws.id);
                       }}
@@ -1172,13 +1208,15 @@ export function ContextOrbitDeck(props: ContextOrbitDeckProps) {
                                   "box-shadow": isActive()
                                     ? "0 0 16px rgba(56, 189, 248, 0.25)"
                                     : "none",
-                                  cursor: "pointer",
+                                  cursor: "grab",
+                                  "user-select": "none",
+                                  "-webkit-user-select": "none",
                                   transition: "all 0.18s cubic-bezier(0.16, 1, 0.3, 1)",
                                   opacity: draggedTabId() === tab.id ? 0.45 : 1,
                                 }}
                                 onDragStart={(e) => {
                                   e.dataTransfer!.setData(TAB_DRAG_MIME, tab.id);
-                                  e.dataTransfer!.setData("text/plain", tab.id);
+                                  e.dataTransfer!.setData("text/plain", `flurer:tab:${tab.id}`);
                                   e.dataTransfer!.effectAllowed = "move";
                                   setDraggedTabId(tab.id);
                                 }}
@@ -1187,13 +1225,17 @@ export function ContextOrbitDeck(props: ContextOrbitDeckProps) {
                                   setMatrixCardDropTarget(null);
                                 }}
                                 onDragOver={(e) => {
-                                  if (draggedTabId() && draggedTabId() !== tab.id) {
+                                  if (draggedTabId()) {
                                     e.preventDefault();
                                     e.stopPropagation();
                                     e.dataTransfer!.dropEffect = "move";
-                                    const rect = e.currentTarget.getBoundingClientRect();
-                                    const isBefore = e.clientY < rect.top + rect.height / 2;
-                                    setMatrixCardDropTarget({ id: tab.id, isBefore });
+                                    if (draggedTabId() !== tab.id) {
+                                      const rect = e.currentTarget.getBoundingClientRect();
+                                      const isBefore = e.clientY < rect.top + rect.height / 2;
+                                      setMatrixCardDropTarget({ id: tab.id, isBefore });
+                                    } else {
+                                      setMatrixCardDropTarget(null);
+                                    }
                                   }
                                 }}
                                 onDragLeave={(e) => {

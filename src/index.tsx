@@ -23,6 +23,7 @@ import {
   openInWebviewWindow,
   openInExternalBrowser,
   getDomain,
+  deriveTabTitle,
   getSavedTabs,
   saveTabs,
   getSavedActiveTab,
@@ -242,7 +243,7 @@ export function getMonotonicTimestamp(): number {
 
 function createNewTab(
   url: string = "about:blank",
-  title: string = "New Tab",
+  title?: string,
   parentId?: string,
   parentTitle?: string,
   projectId?: string
@@ -258,12 +259,12 @@ function createNewTab(
   }
   url = cleanUrl;
 
-  const domain = url === "about:blank" ? "" : getDomain(url);
-  const decision = classifyHeuristic(url, title || domain, getSavedWorkspaces(), projectId);
+  const initialTitle = deriveTabTitle(url, title);
+  const decision = classifyHeuristic(url, initialTitle, getSavedWorkspaces(), projectId);
   const now = getMonotonicTimestamp();
   return {
     id: `tab-${++tabCounter}`,
-    title: title || (url === "about:blank" ? "New Tab" : domain),
+    title: initialTitle,
     url,
     isLoading: false,
     canGoBack: false,
@@ -289,7 +290,8 @@ function initRestoredTabs(): { tabs: Tab[]; activeId: string } {
   if (saved.length > 0) {
     const baseTime = Date.now() - saved.length * 1000;
     const restored = saved.map((s, idx) => {
-      const tab = createNewTab(s.url, s.title, s.parentId, s.parentTitle, s.projectId);
+      const derived = deriveTabTitle(s.url, s.title);
+      const tab = createNewTab(s.url, derived, s.parentId, s.parentTitle, s.projectId);
       if (s.intent) tab.intent = s.intent;
       if (s.pinned !== undefined) tab.pinned = s.pinned;
       if (s.position) tab.position = s.position;
@@ -828,7 +830,7 @@ function WebBrowserPanel(props: MainPanelProps) {
     const parentTab = parentId ? tabs().find((t) => t.id === parentId) : undefined;
     const parentTitle = parentTab ? parentTab.title : undefined;
     const targetWs = projectId || parentTab?.projectId || currentWorkspace().id;
-    const initialTitle = title || (url === "about:blank" ? "New Tab" : getDomain(url));
+    const initialTitle = deriveTabTitle(url, title);
     const newTab = createNewTab(
       url,
       initialTitle,
@@ -1035,17 +1037,18 @@ function WebBrowserPanel(props: MainPanelProps) {
   const handleNavigate = (url: string) => {
     const id = activeTabId();
     const domain = getDomain(url);
+    const derivedTitle = deriveTabTitle(url);
 
     if (props.pluginSettings?.defaultMode === "webviewwindow") {
-      openInWebviewWindow(url, domain, getLaunchOptions());
+      openInWebviewWindow(url, derivedTitle || domain, getLaunchOptions());
       if (url && url !== "about:blank") {
-        setHistory(addHistoryItem(domain, url));
+        setHistory(addHistoryItem(derivedTitle || domain, url));
       }
       return;
     }
 
     const cur = tabs().find((t) => t.id === id);
-    const initialTitle = cur?.url === url && cur?.title && cur.title !== "New Tab" && cur.title !== cur.url ? cur.title : domain;
+    const initialTitle = cur?.url === url && cur?.title && cur.title !== "New Tab" && cur.title !== cur.url ? cur.title : derivedTitle;
     const decision = classifyHeuristic(url, initialTitle, workspaces(), cur?.projectId);
 
     const nextTabs = tabs().map((t) =>
@@ -1064,7 +1067,7 @@ function WebBrowserPanel(props: MainPanelProps) {
     persistCurrentTabs(nextTabs, url);
 
     if (props.pluginSettings?.smartRouter?.enabled && props.pluginSettings.smartRouter.provider !== "heuristic") {
-      routeTab(url, domain, props.pluginSettings.smartRouter, workspaces(), cur?.projectId)
+      routeTab(url, initialTitle, props.pluginSettings.smartRouter, workspaces(), cur?.projectId)
         .then((asyncDecision) => {
           if (asyncDecision.projectId !== decision.projectId || asyncDecision.intent !== decision.intent) {
             setTabs((prev) => {
@@ -1088,7 +1091,7 @@ function WebBrowserPanel(props: MainPanelProps) {
     }
 
     if (url && url !== "about:blank") {
-      setHistory(addHistoryItem(domain, url));
+      setHistory(addHistoryItem(initialTitle, url));
     }
   };
 
@@ -1121,9 +1124,10 @@ function WebBrowserPanel(props: MainPanelProps) {
     if (!cur) return;
 
     const domain = getDomain(newUrl);
+    const derived = deriveTabTitle(newUrl);
     const resolvedTitle = pageTitle && pageTitle.trim().length > 0 && pageTitle !== "about:blank"
       ? pageTitle.trim()
-      : (cur.title && cur.title !== "New Tab" && cur.title !== cur.url ? cur.title : domain);
+      : (cur.title && cur.title !== "New Tab" && cur.title !== cur.url && cur.title !== domain ? cur.title : derived);
 
     const urlChanged = cur.url !== newUrl;
     const titleChanged = resolvedTitle !== cur.title;

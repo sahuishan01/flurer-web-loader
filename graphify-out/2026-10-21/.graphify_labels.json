@@ -15,5 +15,6 @@
   "13": "WebViewport.tsx",
   "14": "Project Guidelines & Invariants (GEMINI.md)",
   "15": "invoke",
-  "16": "addHistoryItem"
+  "16": "addHistoryItem",
+  "17": "openInWebviewWindow"
 }

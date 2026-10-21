@@ -390,6 +390,28 @@ export function ContextCapsuleBar(props: ContextCapsuleBarProps) {
                 gap: "4px",
                 animation: "web-loader-card-enter 0.18s cubic-bezier(0.16, 1, 0.3, 1) both",
               }}
+              onDragOver={(e) => {
+                if (draggedWorkspaceId() || draggedTabId()) {
+                  e.preventDefault();
+                  e.stopPropagation();
+                  e.dataTransfer!.dropEffect = "move";
+                }
+              }}
+              onDrop={(e) => {
+                if (draggedWorkspaceId()) {
+                  e.preventDefault();
+                  e.stopPropagation();
+                  const wsList = props.workspaces;
+                  if (wsList.length > 0) {
+                    const lastWs = wsList[wsList.length - 1];
+                    if (draggedWorkspaceId() !== lastWs.id) {
+                      props.onReorderWorkspaces?.(draggedWorkspaceId()!, lastWs.id, false);
+                    }
+                  }
+                  setDraggedWorkspaceId(null);
+                  setWsDropTarget(null);
+                }
+              }}
             >
               <div
                 style={{
@@ -517,30 +539,37 @@ export function ContextCapsuleBar(props: ContextCapsuleBarProps) {
                             : "1px solid transparent",
                           color: ws.color,
                           "font-size": "12px",
-                          cursor: "pointer",
+                          cursor: "grab",
+                          "user-select": "none",
+                          "-webkit-user-select": "none",
                           "text-align": "left",
                           transition: "all 0.15s ease",
                         }}
                         onDragStart={(e) => {
                           e.dataTransfer!.setData(WORKSPACE_DRAG_MIME, ws.id);
+                          e.dataTransfer!.setData("text/plain", `flurer:ws:${ws.id}`);
                           e.dataTransfer!.effectAllowed = "move";
                           setDraggedWorkspaceId(ws.id);
                         }}
                         onDragEnd={() => {
                           setDraggedWorkspaceId(null);
                           setWsDropTarget(null);
+                          setWsTabHoverTarget(null);
                         }}
                         onDragOver={(e) => {
                           e.preventDefault();
                           e.stopPropagation();
+                          e.dataTransfer!.dropEffect = "move";
                           if (draggedTabId()) {
-                            e.dataTransfer!.dropEffect = "move";
                             setWsTabHoverTarget(ws.id);
-                          } else if (draggedWorkspaceId() && draggedWorkspaceId() !== ws.id) {
-                            e.dataTransfer!.dropEffect = "move";
-                            const rect = e.currentTarget.getBoundingClientRect();
-                            const isBefore = e.clientY < rect.top + rect.height / 2;
-                            setWsDropTarget({ id: ws.id, isBefore });
+                          } else if (draggedWorkspaceId()) {
+                            if (draggedWorkspaceId() !== ws.id) {
+                              const rect = e.currentTarget.getBoundingClientRect();
+                              const isBefore = e.clientY < rect.top + rect.height / 2;
+                              setWsDropTarget({ id: ws.id, isBefore });
+                            } else {
+                              setWsDropTarget(null);
+                            }
                           }
                         }}
                         onDragLeave={() => {
@@ -553,6 +582,7 @@ export function ContextCapsuleBar(props: ContextCapsuleBarProps) {
                           if (draggedTabId()) {
                             props.onUpdateTabWorkspace?.(draggedTabId()!, ws.id);
                             setWsTabHoverTarget(null);
+                            setDraggedTabId(null);
                             setShowWsMenu(false);
                           } else if (draggedWorkspaceId() && draggedWorkspaceId() !== ws.id) {
                             const isBefore = wsDropTarget()?.isBefore ?? true;
@@ -772,6 +802,28 @@ export function ContextCapsuleBar(props: ContextCapsuleBarProps) {
             overflow: "auto",
             "scrollbar-width": "none",
           }}
+          onDragOver={(e) => {
+            if (draggedTabId()) {
+              e.preventDefault();
+              e.stopPropagation();
+              e.dataTransfer!.dropEffect = "move";
+            }
+          }}
+          onDrop={(e) => {
+            if (draggedTabId()) {
+              e.preventDefault();
+              e.stopPropagation();
+              const vis = visibleTabs();
+              if (vis.length > 0) {
+                const lastTab = vis[vis.length - 1];
+                if (draggedTabId() !== lastTab.id) {
+                  props.onReorderTabs?.(draggedTabId()!, lastTab.id, false);
+                }
+              }
+              setDraggedTabId(null);
+              setTabDropTarget(null);
+            }
+          }}
         >
           <For each={visibleTabs()}>
             {(tab) => {
@@ -824,17 +876,18 @@ export function ContextCapsuleBar(props: ContextCapsuleBarProps) {
                         ? "1px solid rgba(56, 189, 248, 0.45)"
                         : "1px solid rgba(255, 255, 255, 0.08)",
                       "box-shadow": isActive() ? "0 2px 8px rgba(0, 0, 0, 0.3)" : "none",
-                      cursor: "pointer",
+                      cursor: "grab",
                       "flex-shrink": 0,
                       "max-width": isCompact() ? "56px" : "200px",
                       "min-width": isCompact() ? "34px" : "110px",
                       "user-select": "none",
+                      "-webkit-user-select": "none",
                       opacity: draggedTabId() === tab.id ? 0.45 : 1,
                       transition: "opacity 0.15s ease",
                     }}
                     onDragStart={(e) => {
                       e.dataTransfer!.setData(TAB_DRAG_MIME, tab.id);
-                      e.dataTransfer!.setData("text/plain", tab.id);
+                      e.dataTransfer!.setData("text/plain", `flurer:tab:${tab.id}`);
                       e.dataTransfer!.effectAllowed = "move";
                       setDraggedTabId(tab.id);
                     }}
@@ -843,13 +896,17 @@ export function ContextCapsuleBar(props: ContextCapsuleBarProps) {
                       setTabDropTarget(null);
                     }}
                     onDragOver={(e) => {
-                      if (draggedTabId() && draggedTabId() !== tab.id) {
+                      if (draggedTabId()) {
                         e.preventDefault();
                         e.stopPropagation();
                         e.dataTransfer!.dropEffect = "move";
-                        const rect = e.currentTarget.getBoundingClientRect();
-                        const isBefore = e.clientX < rect.left + rect.width / 2;
-                        setTabDropTarget({ id: tab.id, isBefore });
+                        if (draggedTabId() !== tab.id) {
+                          const rect = e.currentTarget.getBoundingClientRect();
+                          const isBefore = e.clientX < rect.left + rect.width / 2;
+                          setTabDropTarget({ id: tab.id, isBefore });
+                        } else {
+                          setTabDropTarget(null);
+                        }
                       }
                     }}
                     onDragLeave={(e) => {
