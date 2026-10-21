@@ -1,14 +1,14 @@
 {
   "package.json": {
-    "mtime": 1792554099.7717073,
-    "seen": 1792554116.7750273,
-    "ast_hash": "2cc01254f9012295c3c7ec28a171cfd3",
+    "mtime": 1792562516.7080317,
+    "seen": 1792562536.272554,
+    "ast_hash": "d79dae7d4c6449a9ee002dd5efd59c71",
     "semantic_hash": ""
   },
   "plugin.json": {
-    "mtime": 1792554106.6677372,
-    "seen": 1792554116.7750306,
-    "ast_hash": "df0d1e37ba1a28fd8e113bd6222b7667",
+    "mtime": 1792562521.1040506,
+    "seen": 1792562536.2725568,
+    "ast_hash": "5f305cb0329e5fc2b5bf9ca0904822bd",
     "semantic_hash": ""
   },
   "scripts/sync-version.cjs": {
@@ -30,9 +30,9 @@
     "semantic_hash": ""
   },
   "src/components/SettingsPanel.tsx": {
-    "mtime": 1792500084.5381837,
-    "seen": 1792500182.706983,
-    "ast_hash": "fe8caa52ba9e36769be24dab053581d5",
+    "mtime": 1792562469.9038293,
+    "seen": 1792562536.2725701,
+    "ast_hash": "1704a275852436e98297dd0d908af50c",
     "semantic_hash": ""
   },
   "src/components/TabBar.tsx": {
@@ -42,9 +42,9 @@
     "semantic_hash": ""
   },
   "src/components/WebViewport.tsx": {
-    "mtime": 1792501438.0040977,
-    "seen": 1792501514.956932,
-    "ast_hash": "3d82735aef88b3c1f03c24802d18ebf0",
+    "mtime": 1792562460.3317878,
+    "seen": 1792562536.2725735,
+    "ast_hash": "433eec0c247edfeaab8c68d9f497e1c0",
     "semantic_hash": ""
   },
   "src/icons.tsx": {
@@ -54,9 +54,9 @@
     "semantic_hash": ""
   },
   "src/index.tsx": {
-    "mtime": 1792553117.3754666,
-    "seen": 1792553159.3910763,
-    "ast_hash": "b7fc4a216c4d38758571a8e5199f1b6c",
+    "mtime": 1792562446.91973,
+    "seen": 1792562536.2725804,
+    "ast_hash": "df8b2d5fbf5e30882157aac87f74fcb9",
     "semantic_hash": ""
   },
   "src/styles.ts": {
@@ -168,9 +168,9 @@
     "semantic_hash": ""
   },
   "src/shortcuts.ts": {
-    "mtime": 1792554085.2516446,
-    "seen": 1792554116.7750564,
-    "ast_hash": "8f35ab0fb3f4b562096e135387ede5e2",
+    "mtime": 1792562426.1836402,
+    "seen": 1792562536.2725816,
+    "ast_hash": "723f6369ecf364b3f32a665c30a9e263",
     "semantic_hash": ""
   }
 }

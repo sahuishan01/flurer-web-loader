@@ -1561,6 +1561,11 @@ export function SettingsPanel(props: SettingsPanelProps) {
                     <span style={{ "font-size": "12px", color: "var(--text-secondary, #94a3b8)" }}>
                       {meta.description}
                     </span>
+                    <Show when={meta.secondaryDefaults && meta.secondaryDefaults.length > 0}>
+                      <span style={{ "font-size": "11px", color: "var(--text-muted, #64748b)" }}>
+                        Also works with: {meta.secondaryDefaults!.join(", ")}
+                      </span>
+                    </Show>
                   </div>
 
                   {/* Shortcut Controls */}

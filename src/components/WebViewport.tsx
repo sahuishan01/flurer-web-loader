@@ -509,8 +509,14 @@ export function WebViewport(props: WebViewportProps) {
                           frameWindow.addEventListener("keydown", (evt: KeyboardEvent) => {
                             const isMod = evt.ctrlKey || evt.metaKey;
                             const isAlt = evt.altKey;
+                            const isShift = evt.shiftKey;
                             const k = evt.key?.toLowerCase();
                             const isFunc = /^f\d+$/i.test(k);
+
+                            // Preserve native text-editing commands in page inputs (copy, paste, cut, select all, undo, redo)
+                            if (isMod && !isShift && !isAlt && ["c", "v", "x", "a", "z", "y"].includes(k)) {
+                              return;
+                            }
 
                             // Forward shortcuts: any modifier combo (Ctrl/Cmd, Alt) or Function keys (F1-F12)
                             if (isMod || isAlt || isFunc) {

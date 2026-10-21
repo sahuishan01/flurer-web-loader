@@ -511,12 +511,12 @@ function WebBrowserPanel(props: MainPanelProps) {
       }
 
       // 15. Numbered Tab Switch: Ctrl+1..Ctrl+8 (direct), Ctrl+9 (last tab) within current workspace
-      if (isMod && !isShift && (/^[1-9]$/.test(key) || /^Digit[1-9]$/.test(c))) {
+      if (isMod && !isShift && (/^[1-9]$/.test(key) || /^(Digit|Numpad)[1-9]$/.test(c))) {
         preventDefault?.();
         const currentWsId = currentWorkspace().id;
         const currentList = tabs().filter((t) => tabMatchesWorkspace(t, currentWsId));
         if (currentList.length === 0) return true;
-        const digitChar = /^[1-9]$/.test(key) ? key : c.replace("Digit", "");
+        const digitChar = /^[1-9]$/.test(key) ? key : c.replace(/^(Digit|Numpad)/, "");
         const num = parseInt(digitChar, 10);
         if (num === 9) {
           handleSelectTab(currentList[currentList.length - 1].id);

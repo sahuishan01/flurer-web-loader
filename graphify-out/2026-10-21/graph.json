@@ -186,19 +186,6 @@
       "source_location": "L38"
     },
     {
-      "id": "src_types_customshortcuts",
-      "label": "CustomShortcuts",
-      "_callable": true,
-      "_callable_class": true,
-      "_origin": "ast",
-      "community": 12,
-      "community_name": "types.ts",
-      "file_type": "code",
-      "norm_label": "customshortcuts",
-      "source_file": "src/types.ts",
-      "source_location": "L104"
-    },
-    {
       "id": "src_types_historyitem",
       "label": "HistoryItem",
       "_callable": true,
@@ -444,6 +431,19 @@
       "norm_label": "thememode",
       "source_file": "src/theme.ts",
       "source_location": "L3"
+    },
+    {
+      "id": "src_types_customshortcuts",
+      "label": "CustomShortcuts",
+      "_callable": true,
+      "_callable_class": true,
+      "_origin": "ast",
+      "community": 5,
+      "community_name": "SettingsPanel.tsx",
+      "file_type": "code",
+      "norm_label": "customshortcuts",
+      "source_file": "src/types.ts",
+      "source_location": "L104"
     },
     {
       "id": "src_types_shortcutactionid",
@@ -1608,7 +1608,7 @@
       "file_type": "code",
       "norm_label": "eventtoshortcutstring()",
       "source_file": "src/shortcuts.ts",
-      "source_location": "L281"
+      "source_location": "L282"
     },
     {
       "id": "src_shortcuts_findshortcutconflict",
@@ -1620,7 +1620,7 @@
       "file_type": "code",
       "norm_label": "findshortcutconflict()",
       "source_file": "src/shortcuts.ts",
-      "source_location": "L330"
+      "source_location": "L331"
     },
     {
       "id": "src_shortcuts_formatshortcutparts",
@@ -1632,7 +1632,7 @@
       "file_type": "code",
       "norm_label": "formatshortcutparts()",
       "source_file": "src/shortcuts.ts",
-      "source_location": "L344"
+      "source_location": "L345"
     },
     {
       "id": "src_shortcuts_geteffectiveshortcuts",
@@ -1644,7 +1644,7 @@
       "file_type": "code",
       "norm_label": "geteffectiveshortcuts()",
       "source_file": "src/shortcuts.ts",
-      "source_location": "L154"
+      "source_location": "L155"
     },
     {
       "id": "src_shortcuts_getsavedshortcuts",
@@ -1656,7 +1656,7 @@
       "file_type": "code",
       "norm_label": "getsavedshortcuts()",
       "source_file": "src/shortcuts.ts",
-      "source_location": "L137"
+      "source_location": "L138"
     },
     {
       "id": "src_shortcuts_matchesaction",
@@ -1668,7 +1668,7 @@
       "file_type": "code",
       "norm_label": "matchesaction()",
       "source_file": "src/shortcuts.ts",
-      "source_location": "L251"
+      "source_location": "L252"
     },
     {
       "id": "src_shortcuts_matchesshortcut",
@@ -1680,7 +1680,7 @@
       "file_type": "code",
       "norm_label": "matchesshortcut()",
       "source_file": "src/shortcuts.ts",
-      "source_location": "L206"
+      "source_location": "L207"
     },
     {
       "id": "src_shortcuts_normalizeshortcutstring",
@@ -1692,7 +1692,7 @@
       "file_type": "code",
       "norm_label": "normalizeshortcutstring()",
       "source_file": "src/shortcuts.ts",
-      "source_location": "L188"
+      "source_location": "L189"
     },
     {
       "id": "src_shortcuts_parseshortcut",
@@ -1704,7 +1704,7 @@
       "file_type": "code",
       "norm_label": "parseshortcut()",
       "source_file": "src/shortcuts.ts",
-      "source_location": "L163"
+      "source_location": "L164"
     },
     {
       "id": "src_shortcuts_saveshortcuts",
@@ -1716,7 +1716,7 @@
       "file_type": "code",
       "norm_label": "saveshortcuts()",
       "source_file": "src/shortcuts.ts",
-      "source_location": "L148"
+      "source_location": "L149"
     },
     {
       "id": "src_smartrouter_clearlayaofflinestorage",
@@ -3950,7 +3950,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "src/shortcuts.ts",
-      "source_location": "L335",
+      "source_location": "L336",
       "weight": 1.0
     },
     {
@@ -3962,7 +3962,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "src/shortcuts.ts",
-      "source_location": "L155",
+      "source_location": "L156",
       "weight": 1.0
     },
     {
@@ -3974,7 +3974,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "src/shortcuts.ts",
-      "source_location": "L261",
+      "source_location": "L262",
       "weight": 1.0
     },
     {
@@ -3986,7 +3986,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "src/shortcuts.ts",
-      "source_location": "L270",
+      "source_location": "L271",
       "weight": 1.0
     },
     {
@@ -3998,7 +3998,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "src/shortcuts.ts",
-      "source_location": "L215",
+      "source_location": "L216",
       "weight": 1.0
     },
     {
@@ -4010,7 +4010,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "src/shortcuts.ts",
-      "source_location": "L189",
+      "source_location": "L190",
       "weight": 1.0
     },
     {
@@ -4779,18 +4779,6 @@
       "context": "field",
       "source_file": "src/components/WebViewport.tsx",
       "source_location": "L23",
-      "weight": 1.0
-    },
-    {
-      "source": "src_shortcuts_shortcutmeta",
-      "target": "src_types_shortcutactionid",
-      "relation": "references",
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "context": "field",
-      "source_file": "src/shortcuts.ts",
-      "source_location": "L4",
       "weight": 1.0
     },
     {
@@ -9400,7 +9388,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "src/shortcuts.ts",
-      "source_location": "L137",
+      "source_location": "L138",
       "weight": 1.0
     },
     {
@@ -9422,7 +9410,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "src/shortcuts.ts",
-      "source_location": "L148",
+      "source_location": "L149",
       "weight": 1.0
     },
     {
@@ -9433,7 +9421,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "src/shortcuts.ts",
-      "source_location": "L154",
+      "source_location": "L155",
       "weight": 1.0
     },
     {
@@ -9444,7 +9432,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "src/shortcuts.ts",
-      "source_location": "L163",
+      "source_location": "L164",
       "weight": 1.0
     },
     {
@@ -9455,7 +9443,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "src/shortcuts.ts",
-      "source_location": "L188",
+      "source_location": "L189",
       "weight": 1.0
     },
     {
@@ -9466,7 +9454,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "src/shortcuts.ts",
-      "source_location": "L206",
+      "source_location": "L207",
       "weight": 1.0
     },
     {
@@ -9477,7 +9465,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "src/shortcuts.ts",
-      "source_location": "L251",
+      "source_location": "L252",
       "weight": 1.0
     },
     {
@@ -9488,7 +9476,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "src/shortcuts.ts",
-      "source_location": "L281",
+      "source_location": "L282",
       "weight": 1.0
     },
     {
@@ -9521,7 +9509,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "src/shortcuts.ts",
-      "source_location": "L330",
+      "source_location": "L331",
       "weight": 1.0
     },
     {
@@ -9532,7 +9520,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "src/shortcuts.ts",
-      "source_location": "L344",
+      "source_location": "L345",
       "weight": 1.0
     },
     {
@@ -10813,5 +10801,5 @@
     }
   ],
   "hyperedges": [],
-  "built_at_commit": "a42d7ff974537798b41cc6abb3f80f3528fa6772"
+  "built_at_commit": "c63e8f69b22c3f214e5ad8eef0cb2c0217f79425"
 }

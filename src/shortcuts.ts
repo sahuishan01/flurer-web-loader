@@ -35,6 +35,7 @@ export const SHORTCUT_METADATA: ShortcutMeta[] = [
     description: "Open a new blank tab and auto-focus omnibox",
     category: "Tabs",
     defaultShortcut: "Ctrl+T",
+    secondaryDefaults: ["Ctrl+Alt+T", "Ctrl+N"],
   },
   {
     id: "closeTab",
@@ -42,6 +43,7 @@ export const SHORTCUT_METADATA: ShortcutMeta[] = [
     description: "Close the currently active tab",
     category: "Tabs",
     defaultShortcut: "Ctrl+W",
+    secondaryDefaults: ["Ctrl+Alt+W", "Ctrl+F4"],
   },
   {
     id: "nextTab",
@@ -49,6 +51,7 @@ export const SHORTCUT_METADATA: ShortcutMeta[] = [
     description: "Switch to next tab in the current group",
     category: "Tabs",
     defaultShortcut: "Ctrl+Tab",
+    secondaryDefaults: ["Ctrl+PageDown", "Ctrl+Alt+Right"],
   },
   {
     id: "prevTab",
@@ -56,6 +59,7 @@ export const SHORTCUT_METADATA: ShortcutMeta[] = [
     description: "Switch to previous tab in the current group",
     category: "Tabs",
     defaultShortcut: "Ctrl+Shift+Tab",
+    secondaryDefaults: ["Ctrl+Alt+Tab", "Ctrl+PageUp", "Ctrl+Alt+Left"],
   },
   {
     id: "newWorkspace",
@@ -63,6 +67,7 @@ export const SHORTCUT_METADATA: ShortcutMeta[] = [
     description: "Create and switch to a new tab group",
     category: "Tabs",
     defaultShortcut: "Ctrl+Shift+G",
+    secondaryDefaults: ["Ctrl+Alt+G"],
   },
   {
     id: "toggleCompact",
@@ -78,7 +83,7 @@ export const SHORTCUT_METADATA: ShortcutMeta[] = [
     description: "Focus search bar to enter URL or query",
     category: "Navigation",
     defaultShortcut: "Ctrl+L",
-    secondaryDefaults: ["Alt+D", "Ctrl+K", "F6"],
+    secondaryDefaults: ["Alt+D", "Ctrl+K", "Ctrl+Alt+L", "F6"],
   },
   {
     id: "reload",
@@ -86,7 +91,7 @@ export const SHORTCUT_METADATA: ShortcutMeta[] = [
     description: "Refresh the currently active web page",
     category: "Navigation",
     defaultShortcut: "Ctrl+R",
-    secondaryDefaults: ["F5"],
+    secondaryDefaults: ["F5", "Ctrl+Alt+R", "Ctrl+Shift+R", "Ctrl+F5"],
   },
   {
     id: "quickSwitcher",
@@ -94,7 +99,7 @@ export const SHORTCUT_METADATA: ShortcutMeta[] = [
     description: "Open floating tab search and jump palette",
     category: "Navigation",
     defaultShortcut: "Ctrl+P",
-    secondaryDefaults: ["Ctrl+O", "Ctrl+Shift+A"],
+    secondaryDefaults: ["Ctrl+O", "Ctrl+Shift+A", "Ctrl+Alt+P"],
   },
   {
     id: "orbitDeck",
@@ -102,7 +107,7 @@ export const SHORTCUT_METADATA: ShortcutMeta[] = [
     description: "Toggle spatial workspace orbit overview",
     category: "Navigation",
     defaultShortcut: "Ctrl+E",
-    secondaryDefaults: ["Ctrl+K"],
+    secondaryDefaults: ["Ctrl+K", "Ctrl+Alt+E"],
   },
   {
     id: "zoomIn",
@@ -110,7 +115,7 @@ export const SHORTCUT_METADATA: ShortcutMeta[] = [
     description: "Increase webpage viewport scale (+10%)",
     category: "View & Bookmarks",
     defaultShortcut: "Ctrl+=",
-    secondaryDefaults: ["Ctrl++"],
+    secondaryDefaults: ["Ctrl++", "Ctrl+Alt+=", "Ctrl+Alt++", "Ctrl+NumpadAdd"],
   },
   {
     id: "zoomOut",
@@ -118,6 +123,7 @@ export const SHORTCUT_METADATA: ShortcutMeta[] = [
     description: "Decrease webpage viewport scale (-10%)",
     category: "View & Bookmarks",
     defaultShortcut: "Ctrl+-",
+    secondaryDefaults: ["Ctrl+Alt+-", "Ctrl+NumpadSubtract", "Ctrl+_"],
   },
   {
     id: "resetZoom",
@@ -125,6 +131,7 @@ export const SHORTCUT_METADATA: ShortcutMeta[] = [
     description: "Reset webpage viewport scale to 100%",
     category: "View & Bookmarks",
     defaultShortcut: "Ctrl+0",
+    secondaryDefaults: ["Ctrl+Alt+0", "Ctrl+Numpad0"],
   },
   {
     id: "toggleBookmark",
@@ -132,6 +139,7 @@ export const SHORTCUT_METADATA: ShortcutMeta[] = [
     description: "Add or remove current page from bookmarks",
     category: "View & Bookmarks",
     defaultShortcut: "Ctrl+D",
+    secondaryDefaults: ["Ctrl+Alt+D"],
   },
 ];
 
@@ -167,22 +175,34 @@ export function parseShortcut(str: string): {
   altRequired: boolean;
   key: string;
 } {
-  const parts = str.split("+").map((s) => s.trim().toLowerCase()).filter(Boolean);
+  const trimmed = (str || "").trim();
+  let modPart = trimmed;
+  let keyPart = "";
+
+  if (trimmed.endsWith("++") || trimmed === "+") {
+    keyPart = "+";
+    modPart = trimmed.slice(0, -1);
+  } else if (trimmed.includes("+")) {
+    const lastPlus = trimmed.lastIndexOf("+");
+    modPart = trimmed.slice(0, lastPlus);
+    keyPart = trimmed.slice(lastPlus + 1).trim();
+  } else {
+    keyPart = trimmed;
+    modPart = "";
+  }
+
+  const parts = modPart.split("+").map((s) => s.trim().toLowerCase()).filter(Boolean);
   const hasCtrl = parts.includes("ctrl") || parts.includes("control");
   const hasCmd = parts.includes("cmd") || parts.includes("meta") || parts.includes("command");
   const modRequired = hasCtrl || hasCmd;
   const shiftRequired = parts.includes("shift");
   const altRequired = parts.includes("alt") || parts.includes("option");
 
-  const nonMod = parts.filter(
-    (p) => !["ctrl", "control", "cmd", "meta", "command", "shift", "alt", "option"].includes(p)
-  );
-
   return {
     modRequired,
     shiftRequired,
     altRequired,
-    key: nonMod.join("+"),
+    key: keyPart.toLowerCase(),
   };
 }
 
@@ -195,6 +215,8 @@ export function normalizeShortcutString(str: string): string {
   if (key) {
     if (/^f\d+$/i.test(key)) {
       parts.push(key.toUpperCase());
+    } else if (key === "+" || key === "=" || key === "-") {
+      parts.push(key);
     } else if (key.length === 1) {
       parts.push(key.toUpperCase());
     } else {
@@ -241,10 +263,16 @@ export function matchesShortcut(
   if (eventCode === targetKey) return true;
 
   // Specific symbol key/code variants
-  if ((targetKey === "=" || targetKey === "+") && (eventCode === "equal" || eventCode === "numpadadd")) return true;
-  if (targetKey === "-" && (eventCode === "minus" || eventCode === "numpadsubtract")) return true;
+  if ((targetKey === "=" || targetKey === "+") && (eventCode === "equal" || eventCode === "numpadadd" || eventKey === "=" || eventKey === "+")) return true;
+  if ((targetKey === "-" || targetKey === "_") && (eventCode === "minus" || eventCode === "numpadsubtract" || eventKey === "-" || eventKey === "_")) return true;
   if (targetKey === "0" && (eventCode === "digit0" || eventCode === "numpad0")) return true;
   if (targetKey === "tab" && eventCode === "tab") return true;
+  if (targetKey === "pagedown" && (eventCode === "pagedown" || eventKey === "pagedown")) return true;
+  if (targetKey === "pageup" && (eventCode === "pageup" || eventKey === "pageup")) return true;
+  if (targetKey === "arrowleft" && (eventCode === "arrowleft" || eventKey === "arrowleft")) return true;
+  if (targetKey === "arrowright" && (eventCode === "arrowright" || eventKey === "arrowright")) return true;
+  if (targetKey === "arrowup" && (eventCode === "arrowup" || eventKey === "arrowup")) return true;
+  if (targetKey === "arrowdown" && (eventCode === "arrowdown" || eventKey === "arrowdown")) return true;
 
   return false;
 }
@@ -315,9 +343,13 @@ export function eventToShortcutString(e: KeyboardEvent): string | null {
     parts.push(e.code.replace("Key", "").toUpperCase());
   } else if (e.code.startsWith("Digit")) {
     parts.push(e.code.replace("Digit", ""));
-  } else if (e.code === "Equal" || e.code === "NumpadAdd") {
-    parts.push("=");
-  } else if (e.code === "Minus" || e.code === "NumpadSubtract") {
+  } else if (e.code === "Equal") {
+    parts.push(e.shiftKey ? "+" : "=");
+  } else if (e.code === "NumpadAdd") {
+    parts.push("+");
+  } else if (e.code === "Minus") {
+    parts.push("-");
+  } else if (e.code === "NumpadSubtract") {
     parts.push("-");
   } else if (key.length === 1) {
     parts.push(key.toUpperCase());
@@ -343,5 +375,10 @@ export function findShortcutConflict(
 }
 
 export function formatShortcutParts(shortcutStr: string): string[] {
-  return shortcutStr.split("+").map((s) => s.trim()).filter(Boolean);
+  const trimmed = (shortcutStr || "").trim();
+  if (trimmed.endsWith("++")) {
+    const mods = trimmed.slice(0, -1).split("+").map((s) => s.trim()).filter(Boolean);
+    return [...mods, "+"];
+  }
+  return trimmed.split("+").map((s) => s.trim()).filter(Boolean);
 }

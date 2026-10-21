@@ -1608,7 +1608,7 @@
       "file_type": "code",
       "norm_label": "eventtoshortcutstring()",
       "source_file": "src/shortcuts.ts",
-      "source_location": "L282"
+      "source_location": "L310"
     },
     {
       "id": "src_shortcuts_findshortcutconflict",
@@ -1620,7 +1620,7 @@
       "file_type": "code",
       "norm_label": "findshortcutconflict()",
       "source_file": "src/shortcuts.ts",
-      "source_location": "L331"
+      "source_location": "L363"
     },
     {
       "id": "src_shortcuts_formatshortcutparts",
@@ -1632,7 +1632,7 @@
       "file_type": "code",
       "norm_label": "formatshortcutparts()",
       "source_file": "src/shortcuts.ts",
-      "source_location": "L345"
+      "source_location": "L377"
     },
     {
       "id": "src_shortcuts_geteffectiveshortcuts",
@@ -1644,7 +1644,7 @@
       "file_type": "code",
       "norm_label": "geteffectiveshortcuts()",
       "source_file": "src/shortcuts.ts",
-      "source_location": "L155"
+      "source_location": "L163"
     },
     {
       "id": "src_shortcuts_getsavedshortcuts",
@@ -1656,7 +1656,7 @@
       "file_type": "code",
       "norm_label": "getsavedshortcuts()",
       "source_file": "src/shortcuts.ts",
-      "source_location": "L138"
+      "source_location": "L146"
     },
     {
       "id": "src_shortcuts_matchesaction",
@@ -1668,7 +1668,7 @@
       "file_type": "code",
       "norm_label": "matchesaction()",
       "source_file": "src/shortcuts.ts",
-      "source_location": "L252"
+      "source_location": "L280"
     },
     {
       "id": "src_shortcuts_matchesshortcut",
@@ -1680,7 +1680,7 @@
       "file_type": "code",
       "norm_label": "matchesshortcut()",
       "source_file": "src/shortcuts.ts",
-      "source_location": "L207"
+      "source_location": "L229"
     },
     {
       "id": "src_shortcuts_normalizeshortcutstring",
@@ -1692,7 +1692,7 @@
       "file_type": "code",
       "norm_label": "normalizeshortcutstring()",
       "source_file": "src/shortcuts.ts",
-      "source_location": "L189"
+      "source_location": "L209"
     },
     {
       "id": "src_shortcuts_parseshortcut",
@@ -1704,7 +1704,7 @@
       "file_type": "code",
       "norm_label": "parseshortcut()",
       "source_file": "src/shortcuts.ts",
-      "source_location": "L164"
+      "source_location": "L172"
     },
     {
       "id": "src_shortcuts_saveshortcuts",
@@ -1716,7 +1716,7 @@
       "file_type": "code",
       "norm_label": "saveshortcuts()",
       "source_file": "src/shortcuts.ts",
-      "source_location": "L149"
+      "source_location": "L157"
     },
     {
       "id": "src_smartrouter_clearlayaofflinestorage",
@@ -3266,7 +3266,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "src/components/SettingsPanel.tsx",
-      "source_location": "L2032",
+      "source_location": "L2037",
       "weight": 1.0
     },
     {
@@ -3278,7 +3278,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "src/components/SettingsPanel.tsx",
-      "source_location": "L2062",
+      "source_location": "L2067",
       "weight": 1.0
     },
     {
@@ -3950,7 +3950,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "src/shortcuts.ts",
-      "source_location": "L336",
+      "source_location": "L368",
       "weight": 1.0
     },
     {
@@ -3962,7 +3962,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "src/shortcuts.ts",
-      "source_location": "L156",
+      "source_location": "L164",
       "weight": 1.0
     },
     {
@@ -3974,7 +3974,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "src/shortcuts.ts",
-      "source_location": "L262",
+      "source_location": "L290",
       "weight": 1.0
     },
     {
@@ -3986,7 +3986,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "src/shortcuts.ts",
-      "source_location": "L271",
+      "source_location": "L299",
       "weight": 1.0
     },
     {
@@ -3998,7 +3998,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "src/shortcuts.ts",
-      "source_location": "L216",
+      "source_location": "L238",
       "weight": 1.0
     },
     {
@@ -4010,7 +4010,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "src/shortcuts.ts",
-      "source_location": "L190",
+      "source_location": "L210",
       "weight": 1.0
     },
     {
@@ -9394,17 +9394,6 @@
     },
     {
       "source": "src_shortcuts",
-      "target": "src_shortcuts_getsavedshortcuts",
-      "relation": "contains",
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "source_file": "src/shortcuts.ts",
-      "source_location": "L138",
-      "weight": 1.0
-    },
-    {
-      "source": "src_shortcuts",
       "target": "src_shortcuts_default_shortcuts",
       "relation": "contains",
       "_origin": "ast",
@@ -9416,13 +9405,24 @@
     },
     {
       "source": "src_shortcuts",
+      "target": "src_shortcuts_getsavedshortcuts",
+      "relation": "contains",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "src/shortcuts.ts",
+      "source_location": "L146",
+      "weight": 1.0
+    },
+    {
+      "source": "src_shortcuts",
       "target": "src_shortcuts_saveshortcuts",
       "relation": "contains",
       "_origin": "ast",
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "src/shortcuts.ts",
-      "source_location": "L149",
+      "source_location": "L157",
       "weight": 1.0
     },
     {
@@ -9433,7 +9433,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "src/shortcuts.ts",
-      "source_location": "L155",
+      "source_location": "L163",
       "weight": 1.0
     },
     {
@@ -9444,7 +9444,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "src/shortcuts.ts",
-      "source_location": "L164",
+      "source_location": "L172",
       "weight": 1.0
     },
     {
@@ -9455,7 +9455,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "src/shortcuts.ts",
-      "source_location": "L189",
+      "source_location": "L209",
       "weight": 1.0
     },
     {
@@ -9466,7 +9466,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "src/shortcuts.ts",
-      "source_location": "L207",
+      "source_location": "L229",
       "weight": 1.0
     },
     {
@@ -9477,18 +9477,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "src/shortcuts.ts",
-      "source_location": "L252",
-      "weight": 1.0
-    },
-    {
-      "source": "src_shortcuts",
-      "target": "src_shortcuts_eventtoshortcutstring",
-      "relation": "contains",
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "source_file": "src/shortcuts.ts",
-      "source_location": "L282",
+      "source_location": "L280",
       "weight": 1.0
     },
     {
@@ -9515,13 +9504,24 @@
     },
     {
       "source": "src_shortcuts",
+      "target": "src_shortcuts_eventtoshortcutstring",
+      "relation": "contains",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "src/shortcuts.ts",
+      "source_location": "L310",
+      "weight": 1.0
+    },
+    {
+      "source": "src_shortcuts",
       "target": "src_shortcuts_findshortcutconflict",
       "relation": "contains",
       "_origin": "ast",
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "src/shortcuts.ts",
-      "source_location": "L331",
+      "source_location": "L363",
       "weight": 1.0
     },
     {
@@ -9532,7 +9532,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "src/shortcuts.ts",
-      "source_location": "L345",
+      "source_location": "L377",
       "weight": 1.0
     },
     {
@@ -10813,5 +10813,5 @@
     }
   ],
   "hyperedges": [],
-  "built_at_commit": "e94c85fcfc8314e0fbe988fae6aed75cc802cd5a"
+  "built_at_commit": "c63e8f69b22c3f214e5ad8eef0cb2c0217f79425"
 }
