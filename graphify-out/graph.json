@@ -313,7 +313,7 @@
       "file_type": "code",
       "norm_label": "dockedwebviewinfo",
       "source_file": "src/utils.ts",
-      "source_location": "L1004"
+      "source_location": "L990"
     },
     {
       "id": "src_utils_platform",
@@ -936,7 +936,7 @@
       "file_type": "code",
       "norm_label": "addhistoryitem()",
       "source_file": "src/utils.ts",
-      "source_location": "L1246"
+      "source_location": "L1232"
     },
     {
       "id": "src_utils_derivetabtitle",
@@ -972,7 +972,7 @@
       "file_type": "code",
       "norm_label": "getsavedactivetab()",
       "source_file": "src/utils.ts",
-      "source_location": "L1196"
+      "source_location": "L1182"
     },
     {
       "id": "src_utils_getsavedbookmarks",
@@ -984,7 +984,7 @@
       "file_type": "code",
       "norm_label": "getsavedbookmarks()",
       "source_file": "src/utils.ts",
-      "source_location": "L1214"
+      "source_location": "L1200"
     },
     {
       "id": "src_utils_getsavedhistory",
@@ -996,7 +996,7 @@
       "file_type": "code",
       "norm_label": "getsavedhistory()",
       "source_file": "src/utils.ts",
-      "source_location": "L1230"
+      "source_location": "L1216"
     },
     {
       "id": "src_utils_getsavedtabs",
@@ -1008,7 +1008,7 @@
       "file_type": "code",
       "norm_label": "getsavedtabs()",
       "source_file": "src/utils.ts",
-      "source_location": "L1120"
+      "source_location": "L1106"
     },
     {
       "id": "src_utils_getsavedworkspaces",
@@ -1020,7 +1020,7 @@
       "file_type": "code",
       "norm_label": "getsavedworkspaces()",
       "source_file": "src/utils.ts",
-      "source_location": "L1149"
+      "source_location": "L1135"
     },
     {
       "id": "src_utils_querydockedwebviewinfo",
@@ -1032,7 +1032,7 @@
       "file_type": "code",
       "norm_label": "querydockedwebviewinfo()",
       "source_file": "src/utils.ts",
-      "source_location": "L1096"
+      "source_location": "L1082"
     },
     {
       "id": "src_utils_querydockedwebviewurl",
@@ -1044,7 +1044,7 @@
       "file_type": "code",
       "norm_label": "querydockedwebviewurl()",
       "source_file": "src/utils.ts",
-      "source_location": "L1009"
+      "source_location": "L995"
     },
     {
       "id": "src_utils_removehistoryitem",
@@ -1056,7 +1056,7 @@
       "file_type": "code",
       "norm_label": "removehistoryitem()",
       "source_file": "src/utils.ts",
-      "source_location": "L1261"
+      "source_location": "L1247"
     },
     {
       "id": "src_utils_saveactivetab",
@@ -1068,7 +1068,7 @@
       "file_type": "code",
       "norm_label": "saveactivetab()",
       "source_file": "src/utils.ts",
-      "source_location": "L1204"
+      "source_location": "L1190"
     },
     {
       "id": "src_utils_savebookmarks",
@@ -1080,7 +1080,7 @@
       "file_type": "code",
       "norm_label": "savebookmarks()",
       "source_file": "src/utils.ts",
-      "source_location": "L1224"
+      "source_location": "L1210"
     },
     {
       "id": "src_utils_savehistory",
@@ -1092,7 +1092,7 @@
       "file_type": "code",
       "norm_label": "savehistory()",
       "source_file": "src/utils.ts",
-      "source_location": "L1240"
+      "source_location": "L1226"
     },
     {
       "id": "src_utils_savetabs",
@@ -1104,7 +1104,7 @@
       "file_type": "code",
       "norm_label": "savetabs()",
       "source_file": "src/utils.ts",
-      "source_location": "L1143"
+      "source_location": "L1129"
     },
     {
       "id": "src_utils_saveworkspaces",
@@ -1116,7 +1116,7 @@
       "file_type": "code",
       "norm_label": "saveworkspaces()",
       "source_file": "src/utils.ts",
-      "source_location": "L1160"
+      "source_location": "L1146"
     },
     {
       "id": "src_utils_updatedockedwebviewurl",
@@ -1248,7 +1248,7 @@
       "file_type": "code",
       "norm_label": "closealldockedwebviews()",
       "source_file": "src/utils.ts",
-      "source_location": "L960"
+      "source_location": "L946"
     },
     {
       "id": "src_utils_closetabwebview",
@@ -1260,7 +1260,7 @@
       "file_type": "code",
       "norm_label": "closetabwebview()",
       "source_file": "src/utils.ts",
-      "source_location": "L937"
+      "source_location": "L923"
     },
     {
       "id": "src_utils_createdockedwebview",
@@ -1272,7 +1272,7 @@
       "file_type": "code",
       "norm_label": "createdockedwebview()",
       "source_file": "src/utils.ts",
-      "source_location": "L974"
+      "source_location": "L960"
     },
     {
       "id": "src_utils_createorshowdockedwebview",
@@ -1404,7 +1404,7 @@
       "file_type": "code",
       "norm_label": "getsavedrouterconfig()",
       "source_file": "src/utils.ts",
-      "source_location": "L1166"
+      "source_location": "L1152"
     },
     {
       "id": "src_utils_getuserrestricteddomains",
@@ -1428,7 +1428,7 @@
       "file_type": "code",
       "norm_label": "hidealldockedwebviews()",
       "source_file": "src/utils.ts",
-      "source_location": "L917"
+      "source_location": "L903"
     },
     {
       "id": "src_utils_hidetabwebview",
@@ -1440,7 +1440,7 @@
       "file_type": "code",
       "norm_label": "hidetabwebview()",
       "source_file": "src/utils.ts",
-      "source_location": "L876"
+      "source_location": "L862"
     },
     {
       "id": "src_utils_invoke",
@@ -1548,7 +1548,7 @@
       "file_type": "code",
       "norm_label": "restoremainwebviewfocus()",
       "source_file": "src/utils.ts",
-      "source_location": "L904"
+      "source_location": "L890"
     },
     {
       "id": "src_utils_sanitizeurl",
@@ -1572,7 +1572,7 @@
       "file_type": "code",
       "norm_label": "saverouterconfig()",
       "source_file": "src/utils.ts",
-      "source_location": "L1190"
+      "source_location": "L1176"
     },
     {
       "id": "src_utils_setdockedwebviewzoom",
@@ -1584,7 +1584,7 @@
       "file_type": "code",
       "norm_label": "setdockedwebviewzoom()",
       "source_file": "src/utils.ts",
-      "source_location": "L992"
+      "source_location": "L978"
     },
     {
       "id": "src_utils_showdockedwebview",
@@ -1596,7 +1596,7 @@
       "file_type": "code",
       "norm_label": "showdockedwebview()",
       "source_file": "src/utils.ts",
-      "source_location": "L983"
+      "source_location": "L969"
     },
     {
       "id": "src_utils_tabmatchesworkspace",
@@ -1608,7 +1608,7 @@
       "file_type": "code",
       "norm_label": "tabmatchesworkspace()",
       "source_file": "src/utils.ts",
-      "source_location": "L897"
+      "source_location": "L883"
     },
     {
       "id": "src_utils_updatedockedwebviewbounds",
@@ -1620,7 +1620,7 @@
       "file_type": "code",
       "norm_label": "updatedockedwebviewbounds()",
       "source_file": "src/utils.ts",
-      "source_location": "L852"
+      "source_location": "L838"
     },
     {
       "id": "src_components_settingspanel_settingspanel",
@@ -1836,7 +1836,7 @@
       "file_type": "code",
       "norm_label": "clearhistory()",
       "source_file": "src/utils.ts",
-      "source_location": "L1268"
+      "source_location": "L1254"
     },
     {
       "id": "src_components_contextcapsulebar",
@@ -2150,7 +2150,7 @@
       "file_type": "code",
       "norm_label": "closedockedwebview",
       "source_file": "src/utils.ts",
-      "source_location": "L980"
+      "source_location": "L966"
     },
     {
       "id": "src_components_quickdial",
@@ -2695,7 +2695,7 @@
       "file_type": "code",
       "norm_label": "hidedockedwebview",
       "source_file": "src/utils.ts",
-      "source_location": "L981"
+      "source_location": "L967"
     },
     {
       "id": "src_utils_known_frame_restricted_domains",
@@ -4190,7 +4190,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "src/utils.ts",
-      "source_location": "L1247",
+      "source_location": "L1233",
       "weight": 1.0
     },
     {
@@ -4202,7 +4202,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "src/utils.ts",
-      "source_location": "L1252",
+      "source_location": "L1238",
       "weight": 1.0
     },
     {
@@ -4214,7 +4214,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "src/utils.ts",
-      "source_location": "L1257",
+      "source_location": "L1243",
       "weight": 1.0
     },
     {
@@ -4250,7 +4250,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "src/utils.ts",
-      "source_location": "L968",
+      "source_location": "L954",
       "weight": 1.0
     },
     {
@@ -4262,7 +4262,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "src/utils.ts",
-      "source_location": "L947",
+      "source_location": "L933",
       "weight": 1.0
     },
     {
@@ -4274,7 +4274,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "src/utils.ts",
-      "source_location": "L978",
+      "source_location": "L964",
       "weight": 1.0
     },
     {
@@ -4370,7 +4370,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "src/utils.ts",
-      "source_location": "L921",
+      "source_location": "L907",
       "weight": 1.0
     },
     {
@@ -4382,7 +4382,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "src/utils.ts",
-      "source_location": "L934",
+      "source_location": "L920",
       "weight": 1.0
     },
     {
@@ -4394,7 +4394,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "src/utils.ts",
-      "source_location": "L881",
+      "source_location": "L867",
       "weight": 1.0
     },
     {
@@ -4526,7 +4526,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "src/utils.ts",
-      "source_location": "L1101",
+      "source_location": "L1087",
       "weight": 1.0
     },
     {
@@ -4538,7 +4538,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "src/utils.ts",
-      "source_location": "L1262",
+      "source_location": "L1248",
       "weight": 1.0
     },
     {
@@ -4550,7 +4550,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "src/utils.ts",
-      "source_location": "L1264",
+      "source_location": "L1250",
       "weight": 1.0
     },
     {
@@ -4574,7 +4574,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "src/utils.ts",
-      "source_location": "L910",
+      "source_location": "L896",
       "weight": 1.0
     },
     {
@@ -4586,7 +4586,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "src/utils.ts",
-      "source_location": "L997",
+      "source_location": "L983",
       "weight": 1.0
     },
     {
@@ -4598,7 +4598,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "src/utils.ts",
-      "source_location": "L988",
+      "source_location": "L974",
       "weight": 1.0
     },
     {
@@ -4610,7 +4610,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "src/utils.ts",
-      "source_location": "L865",
+      "source_location": "L851",
       "weight": 1.0
     },
     {
@@ -10025,28 +10025,6 @@
     },
     {
       "source": "src_utils",
-      "target": "src_utils_dockedwebviewinfo",
-      "relation": "contains",
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "source_file": "src/utils.ts",
-      "source_location": "L1004",
-      "weight": 1.0
-    },
-    {
-      "source": "src_utils",
-      "target": "src_utils_querydockedwebviewurl",
-      "relation": "contains",
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "source_file": "src/utils.ts",
-      "source_location": "L1009",
-      "weight": 1.0
-    },
-    {
-      "source": "src_utils",
       "target": "src_utils_normalizeurl",
       "relation": "contains",
       "_origin": "ast",
@@ -10064,7 +10042,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "src/utils.ts",
-      "source_location": "L1096",
+      "source_location": "L1082",
       "weight": 1.0
     },
     {
@@ -10075,7 +10053,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "src/utils.ts",
-      "source_location": "L1120",
+      "source_location": "L1106",
       "weight": 1.0
     },
     {
@@ -10086,7 +10064,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "src/utils.ts",
-      "source_location": "L1143",
+      "source_location": "L1129",
       "weight": 1.0
     },
     {
@@ -10097,7 +10075,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "src/utils.ts",
-      "source_location": "L1149",
+      "source_location": "L1135",
       "weight": 1.0
     },
     {
@@ -10108,7 +10086,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "src/utils.ts",
-      "source_location": "L1160",
+      "source_location": "L1146",
       "weight": 1.0
     },
     {
@@ -10119,7 +10097,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "src/utils.ts",
-      "source_location": "L1166",
+      "source_location": "L1152",
       "weight": 1.0
     },
     {
@@ -10130,7 +10108,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "src/utils.ts",
-      "source_location": "L1190",
+      "source_location": "L1176",
       "weight": 1.0
     },
     {
@@ -10141,7 +10119,18 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "src/utils.ts",
-      "source_location": "L1196",
+      "source_location": "L1182",
+      "weight": 1.0
+    },
+    {
+      "source": "src_utils",
+      "target": "src_utils_saveactivetab",
+      "relation": "contains",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "src/utils.ts",
+      "source_location": "L1190",
       "weight": 1.0
     },
     {
@@ -10157,24 +10146,13 @@
     },
     {
       "source": "src_utils",
-      "target": "src_utils_saveactivetab",
-      "relation": "contains",
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "source_file": "src/utils.ts",
-      "source_location": "L1204",
-      "weight": 1.0
-    },
-    {
-      "source": "src_utils",
       "target": "src_utils_getsavedbookmarks",
       "relation": "contains",
       "_origin": "ast",
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "src/utils.ts",
-      "source_location": "L1214",
+      "source_location": "L1200",
       "weight": 1.0
     },
     {
@@ -10185,7 +10163,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "src/utils.ts",
-      "source_location": "L1224",
+      "source_location": "L1210",
       "weight": 1.0
     },
     {
@@ -10196,7 +10174,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "src/utils.ts",
-      "source_location": "L1230",
+      "source_location": "L1216",
       "weight": 1.0
     },
     {
@@ -10207,7 +10185,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "src/utils.ts",
-      "source_location": "L1240",
+      "source_location": "L1226",
       "weight": 1.0
     },
     {
@@ -10218,7 +10196,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "src/utils.ts",
-      "source_location": "L1246",
+      "source_location": "L1232",
       "weight": 1.0
     },
     {
@@ -10229,7 +10207,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "src/utils.ts",
-      "source_location": "L1261",
+      "source_location": "L1247",
       "weight": 1.0
     },
     {
@@ -10240,7 +10218,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "src/utils.ts",
-      "source_location": "L1268",
+      "source_location": "L1254",
       "weight": 1.0
     },
     {
@@ -10603,7 +10581,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "src/utils.ts",
-      "source_location": "L852",
+      "source_location": "L838",
       "weight": 1.0
     },
     {
@@ -10614,7 +10592,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "src/utils.ts",
-      "source_location": "L876",
+      "source_location": "L862",
       "weight": 1.0
     },
     {
@@ -10625,7 +10603,18 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "src/utils.ts",
-      "source_location": "L897",
+      "source_location": "L883",
+      "weight": 1.0
+    },
+    {
+      "source": "src_utils",
+      "target": "src_utils_restoremainwebviewfocus",
+      "relation": "contains",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "src/utils.ts",
+      "source_location": "L890",
       "weight": 1.0
     },
     {
@@ -10641,24 +10630,13 @@
     },
     {
       "source": "src_utils",
-      "target": "src_utils_restoremainwebviewfocus",
-      "relation": "contains",
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "source_file": "src/utils.ts",
-      "source_location": "L904",
-      "weight": 1.0
-    },
-    {
-      "source": "src_utils",
       "target": "src_utils_hidealldockedwebviews",
       "relation": "contains",
       "_origin": "ast",
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "src/utils.ts",
-      "source_location": "L917",
+      "source_location": "L903",
       "weight": 1.0
     },
     {
@@ -10669,7 +10647,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "src/utils.ts",
-      "source_location": "L937",
+      "source_location": "L923",
       "weight": 1.0
     },
     {
@@ -10680,7 +10658,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "src/utils.ts",
-      "source_location": "L960",
+      "source_location": "L946",
       "weight": 1.0
     },
     {
@@ -10691,7 +10669,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "src/utils.ts",
-      "source_location": "L974",
+      "source_location": "L960",
       "weight": 1.0
     },
     {
@@ -10702,7 +10680,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "src/utils.ts",
-      "source_location": "L980",
+      "source_location": "L966",
       "weight": 1.0
     },
     {
@@ -10713,7 +10691,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "src/utils.ts",
-      "source_location": "L981",
+      "source_location": "L967",
       "weight": 1.0
     },
     {
@@ -10724,7 +10702,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "src/utils.ts",
-      "source_location": "L983",
+      "source_location": "L969",
       "weight": 1.0
     },
     {
@@ -10735,7 +10713,29 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "src/utils.ts",
-      "source_location": "L992",
+      "source_location": "L978",
+      "weight": 1.0
+    },
+    {
+      "source": "src_utils",
+      "target": "src_utils_dockedwebviewinfo",
+      "relation": "contains",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "src/utils.ts",
+      "source_location": "L990",
+      "weight": 1.0
+    },
+    {
+      "source": "src_utils",
+      "target": "src_utils_querydockedwebviewurl",
+      "relation": "contains",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "src/utils.ts",
+      "source_location": "L995",
       "weight": 1.0
     },
     {
@@ -10872,5 +10872,5 @@
     }
   ],
   "hyperedges": [],
-  "built_at_commit": "28f6b3f17affb3d8a64829ba63ed6aa32e8537e0"
+  "built_at_commit": "0f8b17c7aa10b1dfc87829d2eeadaf131b551b21"
 }

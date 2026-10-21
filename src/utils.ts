@@ -777,20 +777,6 @@ export async function createOrShowDockedWebview(
       focus: true,
       transparent: false,
       userAgent: DEFAULT_DESKTOP_USER_AGENT,
-      initializationScript: `
-        (function() {
-          function pollTitle() {
-            try {
-              if (document && document.title) {
-                window.__flurer_title = document.title;
-              }
-            } catch(e) {}
-          }
-          setInterval(pollTitle, 300);
-          document.addEventListener("DOMContentLoaded", pollTitle);
-          window.addEventListener("load", pollTitle);
-        })();
-      `,
     };
 
     try {
