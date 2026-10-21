@@ -1,6 +1,6 @@
 {
   "0": "ContextCapsuleBar.tsx",
-  "1": "smartRouter.ts",
+  "1": "getDomain",
   "2": "compilerOptions",
   "3": "package.json",
   "4": "utils.ts",
@@ -11,6 +11,11 @@
   "9": "rules/graphify.md",
   "10": "workflows/graphify.md",
   "11": "index.tsx",
-  "12": "types.ts",
-  "14": "Project Guidelines & Invariants (GEMINI.md)"
+  "12": "WebViewport.tsx",
+  "13": "types.ts",
+  "14": "Project Guidelines & Invariants (GEMINI.md)",
+  "15": "invoke",
+  "16": "createNewTab",
+  "17": "addHistoryItem",
+  "18": "openInWebviewWindow"
 }

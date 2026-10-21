@@ -1,7 +1,7 @@
 import { For, Show, createSignal, createEffect, onCleanup } from "solid-js";
 import { Tab, ProjectWorkspace } from "../types";
 import { S } from "../styles";
-import { PlusIcon, CloseIcon, GlobeIcon, SearchIcon, CompactIcon } from "../icons";
+import { PlusIcon, CloseIcon, GlobeIcon, SearchIcon, CompactIcon, HistoryIcon } from "../icons";
 import { WebsiteIcon } from "./WebsiteIcon";
 import { getModifierKey, tabMatchesWorkspace } from "../utils";
 import {
@@ -29,6 +29,8 @@ interface TabBarProps {
   onReorderWorkspaces?: (draggedWsId: string, targetWsId: string, insertBefore: boolean) => void;
   onAddWorkspace?: (name: string, color?: string, icon?: string, keywords?: string[]) => string;
   onToggleCompactTabs?: () => void;
+  onOpenHistory?: () => void;
+  onReopenClosedTab?: () => void;
   shortcuts?: Record<string, string>;
 }
 
@@ -787,6 +789,23 @@ export function TabBar(props: TabBarProps) {
         >
           <PlusIcon size={18} />
         </button>
+
+        <button
+          type="button"
+          class="icon-btn web-loader-icon-btn"
+          style={{
+            ...S.iconBtn,
+            width: "32px",
+            height: "32px",
+            "min-width": "32px",
+            "min-height": "32px",
+            "flex-shrink": 0,
+          }}
+          onClick={props.onOpenHistory}
+          title={`Browsing History & Closed Tabs (${props.shortcuts?.toggleHistory || `${mod}+H`})`}
+        >
+          <HistoryIcon size={16} />
+        </button>
       </div>
 
       {/* Floating Tab Context Menu for Group / Ungroup */}
@@ -929,6 +948,72 @@ export function TabBar(props: TabBarProps) {
             <span>❖</span>
             <span>Ungroup Tab (General)</span>
           </button>
+
+          <div style={{ height: "1px", background: "rgba(255, 255, 255, 0.08)", margin: "4px 0" }} />
+
+          {/* Reopen Closed Tab */}
+          <button
+            type="button"
+            style={{
+              display: "flex",
+              "align-items": "center",
+              gap: "6px",
+              padding: "6px 8px",
+              "border-radius": "6px",
+              background: "transparent",
+              border: "none",
+              color: "var(--text-primary, #f8fafc)",
+              "font-size": "12px",
+              cursor: "pointer",
+              "text-align": "left",
+              transition: "background 0.15s ease",
+            }}
+            onClick={() => {
+              props.onReopenClosedTab?.();
+              setTabMenu(null);
+            }}
+          >
+            <HistoryIcon size={14} />
+            <div style={{ display: "flex", "align-items": "center", "justify-content": "space-between", flex: 1, gap: "8px" }}>
+              <span>Reopen Closed Tab</span>
+              <span style={{ "font-size": "10px", "font-family": "Space Mono, monospace", color: "var(--text-muted, #94a3b8)" }}>
+                {props.shortcuts?.reopenClosedTab || `${mod}+Shift+T`}
+              </span>
+            </div>
+          </button>
+
+          {/* Browsing History */}
+          <button
+            type="button"
+            style={{
+              display: "flex",
+              "align-items": "center",
+              gap: "6px",
+              padding: "6px 8px",
+              "border-radius": "6px",
+              background: "transparent",
+              border: "none",
+              color: "var(--text-primary, #f8fafc)",
+              "font-size": "12px",
+              cursor: "pointer",
+              "text-align": "left",
+              transition: "background 0.15s ease",
+            }}
+            onClick={() => {
+              props.onOpenHistory?.();
+              setTabMenu(null);
+            }}
+          >
+            <HistoryIcon size={14} />
+            <div style={{ display: "flex", "align-items": "center", "justify-content": "space-between", flex: 1, gap: "8px" }}>
+              <span>History & Closed Tabs</span>
+              <span style={{ "font-size": "10px", "font-family": "Space Mono, monospace", color: "var(--text-muted, #94a3b8)" }}>
+                {props.shortcuts?.toggleHistory || `${mod}+H`}
+              </span>
+            </div>
+          </button>
+
+          <div style={{ height: "1px", background: "rgba(255, 255, 255, 0.08)", margin: "4px 0" }} />
 
           <button
             type="button"

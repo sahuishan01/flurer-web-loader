@@ -10,6 +10,7 @@ import {
   StarIcon,
   LockIcon,
   CloseIcon,
+  HistoryIcon,
 } from "../icons";
 import { Tab, SearchEngine } from "../types";
 import { normalizeUrl, getModifierKey, getPlatformEngineName } from "../utils";
@@ -29,6 +30,7 @@ interface NavigationBarProps {
   onZoomIn: () => void;
   onZoomOut: () => void;
   onResetZoom: () => void;
+  onOpenHistory?: () => void;
 }
 
 export function NavigationBar(props: NavigationBarProps) {
@@ -94,6 +96,17 @@ export function NavigationBar(props: NavigationBarProps) {
         title="Go to Home"
       >
         <HomeIcon size={20} />
+      </button>
+
+      {/* History & Closed Tabs */}
+      <button
+        type="button"
+        class="icon-btn web-loader-icon-btn"
+        style={S.iconBtn}
+        onClick={props.onOpenHistory}
+        title={`Browsing History & Closed Tabs (${props.shortcuts?.toggleHistory || `${mod}+H`})`}
+      >
+        <HistoryIcon size={18} />
       </button>
 
       {/* Smart Omnibox */}

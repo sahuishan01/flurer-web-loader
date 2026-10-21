@@ -48,6 +48,19 @@ export interface HistoryItem {
   title: string;
   url: string;
   timestamp: number;
+  projectId?: string;
+  favicon?: string;
+}
+
+export interface ClosedTabRecord {
+  id: string;
+  url: string;
+  title: string;
+  projectId?: string;
+  favicon?: string;
+  zoom?: number;
+  intent?: TabIntent;
+  closedAt: number;
 }
 
 export type NavDesignMode = "context-orbit" | "standard-tabs";
@@ -88,6 +101,8 @@ export interface SavedTabRecord {
 export type ShortcutActionId =
   | "newTab"
   | "closeTab"
+  | "reopenClosedTab"
+  | "toggleHistory"
   | "nextTab"
   | "prevTab"
   | "newWorkspace"

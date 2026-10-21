@@ -4,6 +4,7 @@ import {
   Tab,
   Bookmark,
   HistoryItem,
+  ClosedTabRecord,
   ProjectWorkspace,
   OrbitLayoutMode,
 } from "./types";
@@ -14,6 +15,7 @@ import { NavigationBar } from "./components/NavigationBar";
 import { ContextCapsuleBar } from "./components/ContextCapsuleBar";
 import { ContextOrbitDeck } from "./components/ContextOrbitDeck";
 import { QuickTabSwitcher } from "./components/QuickTabSwitcher";
+import { HistoryModal } from "./components/HistoryModal";
 import { WebViewport } from "./components/WebViewport";
 import { SettingsPanel } from "./components/SettingsPanel";
 import { themeConfig, getEffectiveThemeStyles } from "./theme";
@@ -34,6 +36,12 @@ import {
   addHistoryItem,
   removeHistoryItem,
   clearHistory,
+  getSavedClosedTabs,
+  saveClosedTabs,
+  pushClosedTab,
+  popClosedTab,
+  removeClosedTab,
+  clearClosedTabs,
   closeDockedWebview,
   closeTabWebview,
   closeAllDockedWebviews,
@@ -321,6 +329,7 @@ const [tabs, setTabs] = createRoot(() => createSignal<Tab[]>(initialTabsState.ta
 const [activeTabId, setActiveTabId] = createRoot(() => createSignal<string>(initialTabsState.activeId));
 const [bookmarks, setBookmarks] = createRoot(() => createSignal<Bookmark[]>(getSavedBookmarks()));
 const [history, setHistory] = createRoot(() => createSignal<HistoryItem[]>(getSavedHistory()));
+const [closedTabs, setClosedTabs] = createRoot(() => createSignal<ClosedTabRecord[]>(getSavedClosedTabs()));
 
 function WebBrowserPanel(props: MainPanelProps) {
   const activeTab = () => tabs().find((t) => t.id === activeTabId()) || tabs()[0];
@@ -344,6 +353,7 @@ function WebBrowserPanel(props: MainPanelProps) {
   const [orbitDeckOpen, setOrbitDeckOpen] = createSignal(false);
   const [workspaceMenuOpen, setWorkspaceMenuOpen] = createSignal(false);
   const [quickSwitcherOpen, setQuickSwitcherOpen] = createSignal(false);
+  const [historyModalOpen, setHistoryModalOpen] = createSignal(false);
   const orbitLayoutMode = () => props.pluginSettings?.orbitDeckLayout ?? "matrix";
 
   // Reactive compact tabs state with instant local response
@@ -525,6 +535,20 @@ function WebBrowserPanel(props: MainPanelProps) {
         } else if (num - 1 < currentList.length) {
           handleSelectTab(currentList[num - 1].id);
         }
+        return true;
+      }
+
+      // 16. Reopen Last Closed Tab (workspace-scoped)
+      if (matchesAction("reopenClosedTab", sc, key, c, isMod, isShift, isAlt)) {
+        preventDefault?.();
+        handleReopenClosedTab();
+        return true;
+      }
+
+      // 17. Toggle Browsing History & Closed Tabs Modal
+      if (matchesAction("toggleHistory", sc, key, c, isMod, isShift, isAlt)) {
+        preventDefault?.();
+        setHistoryModalOpen((prev) => !prev);
         return true;
       }
 
@@ -935,6 +959,18 @@ function WebBrowserPanel(props: MainPanelProps) {
     closeTabWebview(id);
     const current = tabs();
     if (current.length <= 1) {
+      const single = current[0];
+      if (single && single.url && single.url !== "about:blank" && !single.url.startsWith("javascript:")) {
+        const rec = {
+          url: single.url,
+          title: single.title || getDomain(single.url),
+          projectId: single.projectId || currentWorkspace().id,
+          favicon: single.favicon,
+          zoom: single.zoom,
+          intent: single.intent,
+        };
+        setClosedTabs(pushClosedTab(rec));
+      }
       // If closing last tab, reset it to about:blank
       const fresh = [createNewTab("about:blank", "New Tab", undefined, undefined, currentWorkspace().id)];
       batch(() => {
@@ -948,6 +984,19 @@ function WebBrowserPanel(props: MainPanelProps) {
 
     const closingTab = current.find((t) => t.id === id);
     if (!closingTab) return;
+
+    if (closingTab.url && closingTab.url !== "about:blank" && !closingTab.url.startsWith("javascript:")) {
+      const rec = {
+        url: closingTab.url,
+        title: closingTab.title || getDomain(closingTab.url),
+        projectId: closingTab.projectId || currentWorkspace().id,
+        favicon: closingTab.favicon,
+        zoom: closingTab.zoom,
+        intent: closingTab.intent,
+      };
+      setClosedTabs(pushClosedTab(rec));
+    }
+
     const updated = current.filter((t) => t.id !== id);
 
     if (activeTabId() === id) {
@@ -993,6 +1042,91 @@ function WebBrowserPanel(props: MainPanelProps) {
       setTabs(updated);
       persistCurrentTabs(updated, activeTab()?.url);
     }
+  };
+
+  const handleReopenClosedTab = (record?: ClosedTabRecord) => {
+    let target = record;
+    if (!target) {
+      const curWsId = currentWorkspace().id;
+      const res = popClosedTab(curWsId);
+      if (!res.reopened) {
+        return;
+      }
+      target = res.reopened;
+      setClosedTabs(res.remaining);
+    } else {
+      setClosedTabs(removeClosedTab(target.id));
+    }
+
+    // Determine target workspace: use target.projectId if that workspace exists, else current workspace
+    const wsId = target.projectId && workspaces().some((w) => w.id === target.projectId)
+      ? target.projectId
+      : currentWorkspace().id;
+
+    const restored = createNewTab(
+      target.url,
+      target.title || getDomain(target.url),
+      undefined,
+      undefined,
+      wsId
+    );
+    if (target.favicon) restored.favicon = target.favicon;
+    if (target.zoom) restored.zoom = target.zoom;
+    if (target.intent) restored.intent = target.intent;
+
+    const currentTabs = tabs();
+    // If the only tab in this workspace is an unused about:blank, replace it
+    const wsTabs = currentTabs.filter((t) => tabMatchesWorkspace(t, wsId));
+    let nextTabs: Tab[];
+    if (wsTabs.length === 1 && wsTabs[0].url === "about:blank") {
+      nextTabs = currentTabs.map((t) => (t.id === wsTabs[0].id ? restored : t));
+    } else {
+      nextTabs = [...currentTabs, restored];
+    }
+
+    batch(() => {
+      setCurrentWorkspaceId(wsId);
+      setActiveTabId(restored.id);
+      setTabs(nextTabs);
+    });
+    persistCurrentTabs(nextTabs, restored.url);
+    saveActiveTab(restored.url);
+  };
+
+  const handleReopenAllClosedTabs = (projectId?: string) => {
+    const list = getSavedClosedTabs().filter((t) => {
+      if (!projectId) return true;
+      if (t.projectId === projectId) return true;
+      if (!t.projectId && (projectId === "general" || projectId === "default")) return true;
+      return false;
+    });
+    if (list.length === 0) return;
+
+    clearClosedTabs(projectId);
+    setClosedTabs(getSavedClosedTabs());
+
+    const curTabs = tabs();
+    const newTabsToAdd: Tab[] = [];
+    for (const item of list) {
+      const wsId = item.projectId && workspaces().some((w) => w.id === item.projectId)
+        ? item.projectId
+        : currentWorkspace().id;
+      const t = createNewTab(item.url, item.title, undefined, undefined, wsId);
+      if (item.favicon) t.favicon = item.favicon;
+      if (item.zoom) t.zoom = item.zoom;
+      newTabsToAdd.push(t);
+    }
+    if (newTabsToAdd.length === 0) return;
+
+    const lastTab = newTabsToAdd[newTabsToAdd.length - 1];
+    const finalTabs = [...curTabs, ...newTabsToAdd];
+    batch(() => {
+      setCurrentWorkspaceId(lastTab.projectId || currentWorkspace().id);
+      setActiveTabId(lastTab.id);
+      setTabs(finalTabs);
+    });
+    persistCurrentTabs(finalTabs, lastTab.url);
+    saveActiveTab(lastTab.url);
   };
 
   const handleSwitchWorkspace = (wsId: string) => {
@@ -1042,7 +1176,7 @@ function WebBrowserPanel(props: MainPanelProps) {
     if (props.pluginSettings?.defaultMode === "webviewwindow") {
       openInWebviewWindow(url, derivedTitle || domain, getLaunchOptions());
       if (url && url !== "about:blank") {
-        setHistory(addHistoryItem(derivedTitle || domain, url));
+        setHistory(addHistoryItem(derivedTitle || domain, url, cur?.projectId || currentWorkspace().id, cur?.favicon));
       }
       return;
     }
@@ -1091,7 +1225,7 @@ function WebBrowserPanel(props: MainPanelProps) {
     }
 
     if (url && url !== "about:blank") {
-      setHistory(addHistoryItem(initialTitle, url));
+      setHistory(addHistoryItem(initialTitle, url, cur?.projectId || decision.projectId || currentWorkspace().id, cur?.favicon));
     }
   };
 
@@ -1154,7 +1288,7 @@ function WebBrowserPanel(props: MainPanelProps) {
     );
     setTabs(nextTabs);
     persistCurrentTabs(nextTabs, id === activeTabId() ? newUrl : undefined);
-    setHistory(addHistoryItem(resolvedTitle, newUrl));
+    setHistory(addHistoryItem(resolvedTitle, newUrl, cur.projectId || currentWorkspace().id, cur.favicon));
 
     if (urlChanged && props.pluginSettings?.smartRouter?.enabled && props.pluginSettings.smartRouter.provider !== "heuristic") {
       routeTab(newUrl, resolvedTitle, props.pluginSettings.smartRouter, workspaces(), cur.projectId)
@@ -1206,7 +1340,7 @@ function WebBrowserPanel(props: MainPanelProps) {
     if (current && current.url !== "about:blank") {
       closeDockedWebview();
       openInWebviewWindow(current.url, current.title, getLaunchOptions());
-      setHistory(addHistoryItem(current.title || getDomain(current.url), current.url));
+      setHistory(addHistoryItem(current.title || getDomain(current.url), current.url, current.projectId || currentWorkspace().id, current.favicon));
     }
   };
 
@@ -1341,6 +1475,11 @@ function WebBrowserPanel(props: MainPanelProps) {
             compactTabs={compactTabs()}
             shortcuts={effectiveShortcuts()}
             onToggleCompactTabs={handleToggleCompactTabs}
+            onOpenHistory={() => {
+              hideAllDockedWebviews();
+              setHistoryModalOpen(true);
+            }}
+            onReopenClosedTab={() => handleReopenClosedTab()}
           />
         }
       >
@@ -1362,6 +1501,11 @@ function WebBrowserPanel(props: MainPanelProps) {
             onAddWorkspace={handleAddWorkspace}
             onOpenQuickSwitcher={() => setQuickSwitcherOpen(true)}
             onToggleCompactTabs={handleToggleCompactTabs}
+            onOpenHistory={() => {
+              hideAllDockedWebviews();
+              setHistoryModalOpen(true);
+            }}
+            onReopenClosedTab={() => handleReopenClosedTab()}
           />
 
           <NavigationBar
@@ -1379,6 +1523,10 @@ function WebBrowserPanel(props: MainPanelProps) {
             onZoomIn={() => handleZoom(0.1)}
             onZoomOut={() => handleZoom(-0.1)}
             onResetZoom={handleResetZoom}
+            onOpenHistory={() => {
+              hideAllDockedWebviews();
+              setHistoryModalOpen(true);
+            }}
           />
         </div>
       </Show>
@@ -1442,13 +1590,48 @@ function WebBrowserPanel(props: MainPanelProps) {
         onNewTab={(url) => handleNewTab(url, activeTab()?.id, currentWorkspace().id)}
       />
 
+      <HistoryModal
+        isOpen={historyModalOpen()}
+        onClose={() => setHistoryModalOpen(false)}
+        history={history()}
+        closedTabs={closedTabs()}
+        workspaces={workspaces()}
+        currentWorkspace={currentWorkspace()}
+        onSelectUrl={(url, title, projectId) => {
+          if (projectId && projectId !== currentWorkspaceId()) {
+            setCurrentWorkspaceId(projectId);
+          }
+          handleNavigate(url);
+          setHistoryModalOpen(false);
+        }}
+        onOpenInNewTab={(url, title, projectId) => {
+          handleNewTab(url, activeTab()?.id, projectId || currentWorkspace().id);
+          setHistoryModalOpen(false);
+        }}
+        onReopenClosedTab={(rec) => {
+          handleReopenClosedTab(rec);
+          setHistoryModalOpen(false);
+        }}
+        onReopenAllClosedTabs={(projectId) => {
+          handleReopenAllClosedTabs(projectId);
+          setHistoryModalOpen(false);
+        }}
+        onRemoveHistoryItem={(id) => setHistory(removeHistoryItem(id))}
+        onClearHistory={() => {
+          clearHistory();
+          setHistory([]);
+        }}
+        onRemoveClosedTab={(id) => setClosedTabs(removeClosedTab(id))}
+        onClearClosedTabs={(projectId) => setClosedTabs(clearClosedTabs(projectId))}
+      />
+
       <WebViewport
         activeTab={activeTab()}
         tabs={tabs()}
         bookmarks={bookmarks()}
         history={history()}
         active={props.active}
-        isOverlayOpen={orbitDeckOpen() || workspaceMenuOpen() || quickSwitcherOpen()}
+        isOverlayOpen={orbitDeckOpen() || workspaceMenuOpen() || quickSwitcherOpen() || historyModalOpen()}
         dockedChildWebview={props.pluginSettings?.dockedChildWebview !== false}
         autoLaunchRestricted={props.pluginSettings?.autoLaunchRestricted ?? false}
         onOpenUrl={handleNavigate}
@@ -1456,7 +1639,7 @@ function WebBrowserPanel(props: MainPanelProps) {
         onOpenInWebviewWindow={(url) => {
           const domain = getDomain(url);
           openInWebviewWindow(url, domain, getLaunchOptions());
-          setHistory(addHistoryItem(domain, url));
+          setHistory(addHistoryItem(domain, url, activeTab()?.projectId || currentWorkspace().id, activeTab()?.favicon));
         }}
         onOpenExternal={handleOpenExternal}
         onAddBookmark={handleAddBookmark}

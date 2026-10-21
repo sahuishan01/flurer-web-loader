@@ -1,4 +1,4 @@
-import { SearchEngine, Bookmark, HistoryItem, SavedTabRecord, ProjectWorkspace, SmartRouterConfig } from "./types";
+import { SearchEngine, Bookmark, HistoryItem, ClosedTabRecord, SavedTabRecord, ProjectWorkspace, SmartRouterConfig } from "./types";
 import { DEFAULT_WORKSPACES } from "./smartRouter";
 
 export type Platform = "windows" | "macos" | "linux";
@@ -1225,11 +1225,16 @@ export function getSavedHistory(): HistoryItem[] {
 
 export function saveHistory(history: HistoryItem[]): void {
   try {
-    localStorage.setItem(HISTORY_KEY, JSON.stringify(history.slice(0, 100)));
+    localStorage.setItem(HISTORY_KEY, JSON.stringify(history.slice(0, 200)));
   } catch {}
 }
 
-export function addHistoryItem(title: string, url: string): HistoryItem[] {
+export function addHistoryItem(
+  title: string,
+  url: string,
+  projectId?: string,
+  favicon?: string
+): HistoryItem[] {
   if (!url || url === "about:blank") return getSavedHistory();
   const current = getSavedHistory();
   const filtered = current.filter((h) => h.url !== url);
@@ -1238,8 +1243,10 @@ export function addHistoryItem(title: string, url: string): HistoryItem[] {
     title: title || getDomain(url),
     url,
     timestamp: Date.now(),
+    projectId,
+    favicon,
   };
-  const updated = [newItem, ...filtered].slice(0, 100);
+  const updated = [newItem, ...filtered].slice(0, 200);
   saveHistory(updated);
   return updated;
 }
@@ -1255,5 +1262,96 @@ export function clearHistory(): void {
   try {
     localStorage.removeItem(HISTORY_KEY);
   } catch {}
+}
+
+const CLOSED_TABS_KEY = "flurer_web_loader_closed_tabs";
+
+export function getSavedClosedTabs(): ClosedTabRecord[] {
+  try {
+    const raw = localStorage.getItem(CLOSED_TABS_KEY);
+    if (!raw) return [];
+    return JSON.parse(raw);
+  } catch {
+    return [];
+  }
+}
+
+export function saveClosedTabs(tabs: ClosedTabRecord[]): void {
+  try {
+    localStorage.setItem(CLOSED_TABS_KEY, JSON.stringify(tabs.slice(0, 50)));
+  } catch {}
+}
+
+export function pushClosedTab(tab: {
+  url: string;
+  title: string;
+  projectId?: string;
+  favicon?: string;
+  zoom?: number;
+}): ClosedTabRecord[] {
+  if (!tab.url || tab.url === "about:blank") return getSavedClosedTabs();
+  const current = getSavedClosedTabs();
+  const record: ClosedTabRecord = {
+    id: `closed-${Date.now()}-${Math.random().toString(36).slice(2, 6)}`,
+    url: tab.url,
+    title: tab.title || getDomain(tab.url),
+    projectId: tab.projectId,
+    favicon: tab.favicon,
+    zoom: tab.zoom,
+    closedAt: Date.now(),
+  };
+  const updated = [record, ...current].slice(0, 50);
+  saveClosedTabs(updated);
+  return updated;
+}
+
+export function popClosedTab(currentWorkspaceId?: string): {
+  reopened: ClosedTabRecord | null;
+  remaining: ClosedTabRecord[];
+} {
+  const current = getSavedClosedTabs();
+  if (current.length === 0) {
+    return { reopened: null, remaining: [] };
+  }
+
+  // Find the most recently closed tab matching the current workspace
+  let targetIdx = -1;
+  if (currentWorkspaceId) {
+    targetIdx = current.findIndex((ct) => {
+      if (ct.projectId === currentWorkspaceId) return true;
+      if (!ct.projectId && (currentWorkspaceId === "general" || currentWorkspaceId === "default")) return true;
+      return false;
+    });
+  }
+
+  if (targetIdx === -1) {
+    return { reopened: null, remaining: current };
+  }
+
+  const [reopened] = current.splice(targetIdx, 1);
+  saveClosedTabs(current);
+  return { reopened, remaining: current };
+}
+
+export function removeClosedTab(id: string): ClosedTabRecord[] {
+  const current = getSavedClosedTabs();
+  const updated = current.filter((t) => t.id !== id);
+  saveClosedTabs(updated);
+  return updated;
+}
+
+export function clearClosedTabs(currentWorkspaceId?: string): ClosedTabRecord[] {
+  const current = getSavedClosedTabs();
+  if (!currentWorkspaceId) {
+    saveClosedTabs([]);
+    return [];
+  }
+  const filtered = current.filter((ct) => {
+    if (ct.projectId === currentWorkspaceId) return false;
+    if (!ct.projectId && (currentWorkspaceId === "general" || currentWorkspaceId === "default")) return false;
+    return true;
+  });
+  saveClosedTabs(filtered);
+  return filtered;
 }
 

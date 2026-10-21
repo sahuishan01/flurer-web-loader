@@ -14,6 +14,8 @@ export const SHORTCUT_STORAGE_KEY = "flurer_web_loader_shortcuts";
 export const DEFAULT_SHORTCUTS: Record<ShortcutActionId, string> = {
   newTab: "Ctrl+T",
   closeTab: "Ctrl+W",
+  reopenClosedTab: "Ctrl+Shift+T",
+  toggleHistory: "Ctrl+H",
   nextTab: "Ctrl+Tab",
   prevTab: "Ctrl+Shift+Tab",
   newWorkspace: "Ctrl+Shift+G",
@@ -35,7 +37,7 @@ export const SHORTCUT_METADATA: ShortcutMeta[] = [
     description: "Open a new blank tab and auto-focus omnibox",
     category: "Tabs",
     defaultShortcut: "Ctrl+T",
-    secondaryDefaults: ["Ctrl+Alt+T", "Ctrl+N"],
+    secondaryDefaults: ["Ctrl+N"],
   },
   {
     id: "closeTab",
@@ -44,6 +46,22 @@ export const SHORTCUT_METADATA: ShortcutMeta[] = [
     category: "Tabs",
     defaultShortcut: "Ctrl+W",
     secondaryDefaults: ["Ctrl+Alt+W", "Ctrl+F4"],
+  },
+  {
+    id: "reopenClosedTab",
+    label: "Reopen Closed Tab",
+    description: "Reopen the last closed tab in the current workspace",
+    category: "Tabs",
+    defaultShortcut: "Ctrl+Shift+T",
+    secondaryDefaults: ["Ctrl+Alt+T"],
+  },
+  {
+    id: "toggleHistory",
+    label: "Browsing History",
+    description: "Open browsing history and recently closed tabs",
+    category: "Navigation",
+    defaultShortcut: "Ctrl+H",
+    secondaryDefaults: ["Ctrl+Alt+H", "Ctrl+Shift+H"],
   },
   {
     id: "nextTab",

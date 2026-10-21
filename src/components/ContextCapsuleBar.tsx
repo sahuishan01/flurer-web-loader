@@ -17,6 +17,7 @@ import {
   LayersIcon,
   SearchIcon,
   CompactIcon,
+  HistoryIcon,
 } from "../icons";
 import { WebsiteIcon } from "./WebsiteIcon";
 import { normalizeUrl, getModifierKey, getPlatformEngineName, getDomain, tabMatchesWorkspace } from "../utils";
@@ -62,6 +63,8 @@ interface ContextCapsuleBarProps {
   onAddWorkspace?: (name: string, color?: string, icon?: string, keywords?: string[]) => string;
   compactTabs?: boolean;
   onToggleCompactTabs?: () => void;
+  onOpenHistory?: () => void;
+  onReopenClosedTab?: () => void;
   shortcuts?: Record<string, string>;
 }
 
@@ -1212,6 +1215,17 @@ export function ContextCapsuleBar(props: ContextCapsuleBarProps) {
           <StarIcon size={20} filled={props.isBookmarked} />
         </button>
 
+        {/* History & Closed Tabs */}
+        <button
+          type="button"
+          class="icon-btn web-loader-icon-btn"
+          style={S.iconBtn}
+          onClick={props.onOpenHistory}
+          title={`Browsing History & Closed Tabs (${props.shortcuts?.toggleHistory || `${mod}+H`})`}
+        >
+          <HistoryIcon size={18} />
+        </button>
+
         {/* Zoom Controls */}
         <div style={{ display: "flex", "align-items": "center", gap: "2px" }}>
           <button
@@ -1433,6 +1447,72 @@ export function ContextCapsuleBar(props: ContextCapsuleBarProps) {
             <span>❖</span>
             <span>Ungroup Tab (General)</span>
           </button>
+
+          <div style={{ height: "1px", background: "rgba(255, 255, 255, 0.08)", margin: "4px 0" }} />
+
+          {/* Reopen Closed Tab */}
+          <button
+            type="button"
+            style={{
+              display: "flex",
+              "align-items": "center",
+              gap: "6px",
+              padding: "6px 8px",
+              "border-radius": "6px",
+              background: "transparent",
+              border: "none",
+              color: "var(--text-primary, #f8fafc)",
+              "font-size": "12px",
+              cursor: "pointer",
+              "text-align": "left",
+              transition: "background 0.15s ease",
+            }}
+            onClick={() => {
+              props.onReopenClosedTab?.();
+              setTabMenu(null);
+            }}
+          >
+            <HistoryIcon size={14} />
+            <div style={{ display: "flex", "align-items": "center", "justify-content": "space-between", flex: 1, gap: "8px" }}>
+              <span>Reopen Closed Tab</span>
+              <span style={{ "font-size": "10px", "font-family": "Space Mono, monospace", color: "var(--text-muted, #94a3b8)" }}>
+                {props.shortcuts?.reopenClosedTab || `${mod}+Shift+T`}
+              </span>
+            </div>
+          </button>
+
+          {/* Browsing History */}
+          <button
+            type="button"
+            style={{
+              display: "flex",
+              "align-items": "center",
+              gap: "6px",
+              padding: "6px 8px",
+              "border-radius": "6px",
+              background: "transparent",
+              border: "none",
+              color: "var(--text-primary, #f8fafc)",
+              "font-size": "12px",
+              cursor: "pointer",
+              "text-align": "left",
+              transition: "background 0.15s ease",
+            }}
+            onClick={() => {
+              props.onOpenHistory?.();
+              setTabMenu(null);
+            }}
+          >
+            <HistoryIcon size={14} />
+            <div style={{ display: "flex", "align-items": "center", "justify-content": "space-between", flex: 1, gap: "8px" }}>
+              <span>History & Closed Tabs</span>
+              <span style={{ "font-size": "10px", "font-family": "Space Mono, monospace", color: "var(--text-muted, #94a3b8)" }}>
+                {props.shortcuts?.toggleHistory || `${mod}+H`}
+              </span>
+            </div>
+          </button>
+
+          <div style={{ height: "1px", background: "rgba(255, 255, 255, 0.08)", margin: "4px 0" }} />
 
           <button
             type="button"
