@@ -60,8 +60,8 @@ export const S = {
     overflow: "hidden",
     "text-overflow": "ellipsis",
     flex: 1,
-    "user-select": "none",
-    "-webkit-user-select": "none",
+    "user-select": "none" as const,
+    "-webkit-user-select": "none" as const,
   },
   tabCloseBtn: {
     display: "inline-flex",

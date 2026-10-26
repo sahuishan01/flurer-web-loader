@@ -22,7 +22,7 @@ import {
   LayersIcon,
 } from "../icons";
 import { WebsiteIcon } from "./WebsiteIcon";
-import { getDomain, getModifierKey } from "../utils";
+import { getDomain, getModifierKey, tabMatchesWorkspace } from "../utils";
 import {
   INTENT_COLORS,
   INTENT_LABELS,
@@ -90,6 +90,138 @@ export function ContextOrbitDeck(props: ContextOrbitDeckProps) {
   // Matrix view drag-and-drop state
   const [matrixWsDropTarget, setMatrixWsDropTarget] = createSignal<{ id: string; isBefore: boolean } | null>(null);
   const [matrixCardDropTarget, setMatrixCardDropTarget] = createSignal<{ id: string; isBefore: boolean } | null>(null);
+
+  let matrixCardDrag: { tabId: string; wsId: string; startX: number; startY: number; moved: boolean } | null = null;
+  let suppressMatrixCardClick = false;
+
+  function endMatrixCardDrag() {
+    if (matrixCardDrag?.moved) {
+      suppressMatrixCardClick = true;
+    }
+    document.body.style.cursor = "";
+    document.body.style.userSelect = "";
+    matrixCardDrag = null;
+    setDraggedTabId(null);
+    setMatrixCardDropTarget(null);
+    window.removeEventListener("pointermove", onMatrixCardPointerMove);
+    window.removeEventListener("pointerup", onMatrixCardPointerUp);
+    window.removeEventListener("pointercancel", onMatrixCardPointerUp);
+  }
+
+  function onMatrixCardPointerMove(e: PointerEvent) {
+    if (!matrixCardDrag) return;
+    if (!matrixCardDrag.moved) {
+      if (Math.hypot(e.clientX - matrixCardDrag.startX, e.clientY - matrixCardDrag.startY) < 5) return;
+      matrixCardDrag.moved = true;
+      setDraggedTabId(matrixCardDrag.tabId);
+      document.body.style.cursor = "grabbing";
+      document.body.style.userSelect = "none";
+    }
+
+    const hit = document.elementFromPoint(e.clientX, e.clientY);
+    const colEl = hit?.closest("[data-matrix-ws-col]") as HTMLElement | null;
+    if (colEl) {
+      const colWsId = colEl.getAttribute("data-matrix-ws-col");
+      if (colWsId && colWsId !== matrixCardDrag.wsId) {
+        // Moved card to a different workspace column!
+        props.onUpdateTabProject(matrixCardDrag.tabId, colWsId);
+        matrixCardDrag.wsId = colWsId;
+      }
+
+      // Live reorder cards vertically within this column
+      const cardEls = Array.from(colEl.querySelectorAll<HTMLElement>(".web-loader-card[data-tab-id]") ?? []);
+      if (cardEls.length >= 2) {
+        let passed = 0;
+        for (const el of cardEls) {
+          const r = el.getBoundingClientRect();
+          if (e.clientY > r.top + r.height / 2) passed++;
+        }
+        const wsTabsList = props.tabs.filter((t) => tabMatchesWorkspace(t, matrixCardDrag!.wsId));
+        const fromIndex = wsTabsList.findIndex((t) => t.id === matrixCardDrag!.tabId);
+        if (fromIndex !== -1) {
+          const target = passed > fromIndex ? passed - 1 : passed;
+          if (target !== fromIndex && target >= 0 && target < wsTabsList.length) {
+            const targetTab = wsTabsList[target];
+            props.onReorderTabs?.(matrixCardDrag.tabId, targetTab.id, target < fromIndex, matrixCardDrag.wsId);
+          }
+        }
+      }
+    }
+  }
+
+  function onMatrixCardPointerUp() {
+    endMatrixCardDrag();
+  }
+
+  function startMatrixCardDrag(e: PointerEvent, tabId: string, wsId: string) {
+    if (e.button !== 0) return;
+    const target = e.target as HTMLElement;
+    if (target.closest(".web-loader-tab-close") || target.closest("button") || target.closest("a")) return;
+    matrixCardDrag = { tabId, wsId, startX: e.clientX, startY: e.clientY, moved: false };
+    window.addEventListener("pointermove", onMatrixCardPointerMove);
+    window.addEventListener("pointerup", onMatrixCardPointerUp);
+    window.addEventListener("pointercancel", onMatrixCardPointerUp);
+  }
+
+  onCleanup(endMatrixCardDrag);
+
+  let matrixColDrag: { wsId: string; startX: number; moved: boolean } | null = null;
+
+  function endMatrixColDrag() {
+    document.body.style.cursor = "";
+    document.body.style.userSelect = "";
+    matrixColDrag = null;
+    setDraggedWorkspaceId(null);
+    setMatrixWsDropTarget(null);
+    window.removeEventListener("pointermove", onMatrixColPointerMove);
+    window.removeEventListener("pointerup", onMatrixColPointerUp);
+    window.removeEventListener("pointercancel", onMatrixColPointerUp);
+  }
+
+  function onMatrixColPointerMove(e: PointerEvent) {
+    if (!matrixColDrag) return;
+    if (!matrixColDrag.moved) {
+      if (Math.abs(e.clientX - matrixColDrag.startX) < 5) return;
+      matrixColDrag.moved = true;
+      setDraggedWorkspaceId(matrixColDrag.wsId);
+      document.body.style.cursor = "grabbing";
+      document.body.style.userSelect = "none";
+    }
+
+    const colEls = Array.from(document.querySelectorAll<HTMLElement>(".matrix-column[data-matrix-ws-col]") ?? []);
+    if (colEls.length >= 2) {
+      let passed = 0;
+      for (const el of colEls) {
+        const r = el.getBoundingClientRect();
+        if (e.clientX > r.left + r.width / 2) passed++;
+      }
+      const wsList = props.workspaces;
+      const fromIndex = wsList.findIndex((w) => w.id === matrixColDrag!.wsId);
+      if (fromIndex !== -1) {
+        const target = passed > fromIndex ? passed - 1 : passed;
+        if (target !== fromIndex && target >= 0 && target < wsList.length) {
+          const targetWs = wsList[target];
+          props.onReorderWorkspaces?.(matrixColDrag.wsId, targetWs.id, target < fromIndex);
+        }
+      }
+    }
+  }
+
+  function onMatrixColPointerUp() {
+    endMatrixColDrag();
+  }
+
+  function startMatrixColDrag(e: PointerEvent, wsId: string) {
+    if (e.button !== 0) return;
+    const target = e.target as HTMLElement;
+    if (target.closest("button")) return;
+    matrixColDrag = { wsId, startX: e.clientX, moved: false };
+    window.addEventListener("pointermove", onMatrixColPointerMove);
+    window.addEventListener("pointerup", onMatrixColPointerUp);
+    window.addEventListener("pointercancel", onMatrixColPointerUp);
+  }
+
+  onCleanup(endMatrixColDrag);
 
   // Dragging state for Spatial Canvas
   const [draggingTabId, setDraggingTabId] = createSignal<string | null>(null);
@@ -1024,6 +1156,8 @@ export function ContextOrbitDeck(props: ContextOrbitDeckProps) {
                   </Show>
 
                   <div
+                    class="matrix-column"
+                    data-matrix-ws-col={ws.id}
                     style={{
                       display: "flex",
                       "flex-direction": "column",
@@ -1037,42 +1171,12 @@ export function ContextOrbitDeck(props: ContextOrbitDeckProps) {
                       overflow: "hidden",
                       "box-shadow": "0 8px 24px rgba(0, 0, 0, 0.3)",
                       "flex-shrink": 0,
-                    }}
-                    onDragOver={(e) => {
-                      e.preventDefault();
-                      e.stopPropagation();
-                      e.dataTransfer!.dropEffect = "move";
-                      if (draggedWorkspaceId()) {
-                        if (draggedWorkspaceId() !== ws.id) {
-                          const rect = e.currentTarget.getBoundingClientRect();
-                          const isBefore = e.clientX < rect.left + rect.width / 2;
-                          setMatrixWsDropTarget({ id: ws.id, isBefore });
-                        } else {
-                          setMatrixWsDropTarget(null);
-                        }
-                      }
-                    }}
-                    onDragLeave={(e) => {
-                      const related = e.relatedTarget as Node;
-                      if (related && (e.currentTarget as HTMLElement).contains(related)) return;
-                      if (matrixWsDropTarget()?.id === ws.id) setMatrixWsDropTarget(null);
-                    }}
-                    onDrop={(e) => {
-                      e.preventDefault();
-                      if (draggedWorkspaceId() && draggedWorkspaceId() !== ws.id) {
-                        const isBefore = matrixWsDropTarget()?.isBefore ?? true;
-                        props.onReorderWorkspaces?.(draggedWorkspaceId()!, ws.id, isBefore);
-                        setDraggedWorkspaceId(null);
-                        setMatrixWsDropTarget(null);
-                      } else if (draggedTabId()) {
-                        props.onUpdateTabProject(draggedTabId()!, ws.id);
-                        setDraggedTabId(null);
-                      }
+                      opacity: draggedWorkspaceId() === ws.id ? 0.45 : 1,
+                      transition: "opacity 0.15s ease",
                     }}
                   >
                     {/* Column Header: Draggable to reorder columns */}
                     <div
-                      draggable={true}
                       style={{
                         display: "flex",
                         "align-items": "center",
@@ -1083,17 +1187,9 @@ export function ContextOrbitDeck(props: ContextOrbitDeckProps) {
                         cursor: "grab",
                         "user-select": "none",
                         "-webkit-user-select": "none",
+                        "touch-action": "none",
                       }}
-                      onDragStart={(e) => {
-                        e.dataTransfer!.setData(WORKSPACE_DRAG_MIME, ws.id);
-                        e.dataTransfer!.setData("text/plain", `flurer:ws:${ws.id}`);
-                        e.dataTransfer!.effectAllowed = "move";
-                        setDraggedWorkspaceId(ws.id);
-                      }}
-                      onDragEnd={() => {
-                        setDraggedWorkspaceId(null);
-                        setMatrixWsDropTarget(null);
-                      }}
+                      onPointerDown={(e) => startMatrixColDrag(e, ws.id)}
                       title="Drag column to reorder workspace"
                     >
                     <div style={{ display: "flex", "align-items": "center", gap: "8px" }}>
@@ -1191,8 +1287,8 @@ export function ContextOrbitDeck(props: ContextOrbitDeckProps) {
                               </Show>
 
                               <div
-                                draggable={true}
                                 class="web-loader-card"
+                                data-tab-id={tab.id}
                                 style={{
                                   display: "flex",
                                   "flex-direction": "column",
@@ -1208,53 +1304,19 @@ export function ContextOrbitDeck(props: ContextOrbitDeckProps) {
                                   "box-shadow": isActive()
                                     ? "0 0 16px rgba(56, 189, 248, 0.25)"
                                     : "none",
-                                  cursor: "grab",
+                                  cursor: draggedTabId() === tab.id ? "grabbing" : "grab",
                                   "user-select": "none",
                                   "-webkit-user-select": "none",
+                                  "touch-action": "none",
                                   transition: "all 0.18s cubic-bezier(0.16, 1, 0.3, 1)",
                                   opacity: draggedTabId() === tab.id ? 0.45 : 1,
                                 }}
-                                onDragStart={(e) => {
-                                  e.dataTransfer!.setData(TAB_DRAG_MIME, tab.id);
-                                  e.dataTransfer!.setData("text/plain", `flurer:tab:${tab.id}`);
-                                  e.dataTransfer!.effectAllowed = "move";
-                                  setDraggedTabId(tab.id);
-                                }}
-                                onDragEnd={() => {
-                                  setDraggedTabId(null);
-                                  setMatrixCardDropTarget(null);
-                                }}
-                                onDragOver={(e) => {
-                                  if (draggedTabId()) {
-                                    e.preventDefault();
-                                    e.stopPropagation();
-                                    e.dataTransfer!.dropEffect = "move";
-                                    if (draggedTabId() !== tab.id) {
-                                      const rect = e.currentTarget.getBoundingClientRect();
-                                      const isBefore = e.clientY < rect.top + rect.height / 2;
-                                      setMatrixCardDropTarget({ id: tab.id, isBefore });
-                                    } else {
-                                      setMatrixCardDropTarget(null);
-                                    }
-                                  }
-                                }}
-                                onDragLeave={(e) => {
-                                  const related = e.relatedTarget as Node;
-                                  if (related && (e.currentTarget as HTMLElement).contains(related)) return;
-                                  if (matrixCardDropTarget()?.id === tab.id) setMatrixCardDropTarget(null);
-                                }}
-                                onDrop={(e) => {
-                                  if (draggedTabId() && draggedTabId() !== tab.id) {
-                                    e.preventDefault();
-                                    e.stopPropagation();
-                                    const isBefore = matrixCardDropTarget()?.isBefore ?? true;
-                                    props.onReorderTabs?.(draggedTabId()!, tab.id, isBefore, ws.id);
-                                    props.onUpdateTabProject(draggedTabId()!, ws.id);
-                                    setDraggedTabId(null);
-                                    setMatrixCardDropTarget(null);
-                                  }
-                                }}
+                                onPointerDown={(e) => startMatrixCardDrag(e, tab.id, ws.id)}
                                 onClick={(e) => {
+                                  if (suppressMatrixCardClick) {
+                                    suppressMatrixCardClick = false;
+                                    return;
+                                  }
                                   e.preventDefault();
                                   e.stopPropagation();
                                   props.onSelectTab(tab.id);
@@ -1661,14 +1723,6 @@ export function ContextOrbitDeck(props: ContextOrbitDeckProps) {
                       cursor: "pointer",
                       "z-index": isActive() ? 5 : 2,
                     }}
-                    draggable={true}
-                    onDragStart={(e) => {
-                      e.dataTransfer!.setData(TAB_DRAG_MIME, tab.id);
-                      e.dataTransfer!.setData("text/plain", tab.id);
-                      e.dataTransfer!.effectAllowed = "move";
-                      setDraggedTabId(tab.id);
-                    }}
-                    onDragEnd={() => setDraggedTabId(null)}
                     onClick={(e) => {
                       e.preventDefault();
                       e.stopPropagation();

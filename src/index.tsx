@@ -136,6 +136,13 @@ if (typeof document !== "undefined" && !document.getElementById(STYLE_ID)) {
     .web-loader-tab:active {
       transform: scale(0.98) translateY(0px) !important;
     }
+    .web-loader-tab.dragging {
+      opacity: 0.5 !important;
+      cursor: grabbing !important;
+      transform: scale(0.96) !important;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4) !important;
+      pointer-events: none;
+    }
 
     .web-loader-tab-close {
       transition: opacity 0.15s ease,
@@ -388,6 +395,8 @@ function WebBrowserPanel(props: MainPanelProps) {
     }
   });
 
+  let handleNewWindowRequested: (rawUrl: string, sourceWebview?: string) => void = () => {};
+
   // Global Keyboard shortcuts & Child Webview Bridge
   onMount(() => {
     let lastShortcutSig = "";
@@ -581,7 +590,7 @@ function WebBrowserPanel(props: MainPanelProps) {
     let lastNewWindowUrl = "";
     let lastNewWindowTime = 0;
 
-    const handleNewWindowRequested = (rawUrl: string, sourceWebview?: string) => {
+    handleNewWindowRequested = (rawUrl: string, sourceWebview?: string) => {
       if (!rawUrl || rawUrl === "about:blank" || rawUrl.startsWith("javascript:")) return;
       let cleanUrl = rawUrl.trim();
       if (cleanUrl.startsWith("{") && cleanUrl.endsWith("}")) {
@@ -1172,6 +1181,7 @@ function WebBrowserPanel(props: MainPanelProps) {
     const id = activeTabId();
     const domain = getDomain(url);
     const derivedTitle = deriveTabTitle(url);
+    const cur = tabs().find((t) => t.id === id);
 
     if (props.pluginSettings?.defaultMode === "webviewwindow") {
       openInWebviewWindow(url, derivedTitle || domain, getLaunchOptions());
@@ -1181,7 +1191,6 @@ function WebBrowserPanel(props: MainPanelProps) {
       return;
     }
 
-    const cur = tabs().find((t) => t.id === id);
     const initialTitle = cur?.url === url && cur?.title && cur.title !== "New Tab" && cur.title !== cur.url ? cur.title : derivedTitle;
     const decision = classifyHeuristic(url, initialTitle, workspaces(), cur?.projectId);
 

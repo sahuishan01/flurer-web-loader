@@ -11,11 +11,11 @@
   "9": "rules/graphify.md",
   "10": "workflows/graphify.md",
   "11": "index.tsx",
-  "12": "WebViewport.tsx",
+  "12": "TabBar",
   "13": "types.ts",
   "14": "Project Guidelines & Invariants (GEMINI.md)",
-  "15": "invoke",
-  "16": "createNewTab",
-  "17": "addHistoryItem",
+  "15": "WebViewport.tsx",
+  "16": "ContextCapsuleBar",
+  "17": "getSavedClosedTabs",
   "18": "openInWebviewWindow"
 }

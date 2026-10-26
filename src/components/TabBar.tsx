@@ -3,7 +3,7 @@ import { Tab, ProjectWorkspace } from "../types";
 import { S } from "../styles";
 import { PlusIcon, CloseIcon, GlobeIcon, SearchIcon, CompactIcon, HistoryIcon } from "../icons";
 import { WebsiteIcon } from "./WebsiteIcon";
-import { getModifierKey, tabMatchesWorkspace } from "../utils";
+import { getModifierKey, tabMatchesWorkspace, getDomain } from "../utils";
 import {
   draggedTabId,
   setDraggedTabId,
@@ -42,6 +42,188 @@ export function TabBar(props: TabBarProps) {
   const [wsDropTarget, setWsDropTarget] = createSignal<{ id: string; isBefore: boolean } | null>(null);
   const [wsTabHoverTarget, setWsTabHoverTarget] = createSignal<string | null>(null);
   let wsHoverTimer: any = null;
+
+  let tabStripRef: HTMLDivElement | undefined;
+  let tabDrag: { tabId: string; startX: number; startY: number; moved: boolean } | null = null;
+  let suppressTabClick = false;
+
+  function endTabDrag() {
+    if (tabDrag?.moved) {
+      suppressTabClick = true;
+      const targetWs = wsTabHoverTarget();
+      if (targetWs) {
+        if (targetWs === "all") {
+          props.onUpdateTabWorkspace?.(tabDrag.tabId, undefined);
+        } else {
+          props.onUpdateTabWorkspace?.(tabDrag.tabId, targetWs);
+        }
+        setShowWsMenu(false);
+      }
+    }
+    if (wsHoverTimer) {
+      clearTimeout(wsHoverTimer);
+      wsHoverTimer = null;
+    }
+    document.body.style.cursor = "";
+    document.body.style.userSelect = "";
+    tabDrag = null;
+    setDraggedTabId(null);
+    setTabDropTarget(null);
+    setWsTabHoverTarget(null);
+    window.removeEventListener("pointermove", onTabPointerMove);
+    window.removeEventListener("pointerup", onTabPointerUp);
+    window.removeEventListener("pointercancel", onTabPointerUp);
+  }
+
+  function onTabPointerMove(e: PointerEvent) {
+    if (!tabDrag) return;
+    if (!tabDrag.moved) {
+      if (Math.hypot(e.clientX - tabDrag.startX, e.clientY - tabDrag.startY) < 5) {
+        return;
+      }
+      tabDrag.moved = true;
+      setDraggedTabId(tabDrag.tabId);
+      document.body.style.cursor = "grabbing";
+      document.body.style.userSelect = "none";
+    }
+
+    // Check if hovering over a workspace drop target
+    const hit = document.elementFromPoint(e.clientX, e.clientY);
+    const wsDropEl = hit?.closest("[data-workspace-drop-id]") as HTMLElement | null;
+    const wsPillEl = hit?.closest("[data-workspace-pill]") as HTMLElement | null;
+
+    if (wsDropEl) {
+      const wsId = wsDropEl.getAttribute("data-workspace-drop-id");
+      setWsTabHoverTarget(wsId);
+      setTabDropTarget(null);
+      return;
+    } else if (wsPillEl && props.currentWorkspace) {
+      setWsTabHoverTarget(props.currentWorkspace.id);
+      setTabDropTarget(null);
+      if (!showWsMenu() && !wsHoverTimer) {
+        wsHoverTimer = setTimeout(() => {
+          setShowWsMenu(true);
+          wsHoverTimer = null;
+        }, 220);
+      }
+      return;
+    } else {
+      if (wsTabHoverTarget()) setWsTabHoverTarget(null);
+      if (wsHoverTimer) {
+        clearTimeout(wsHoverTimer);
+        wsHoverTimer = null;
+      }
+    }
+
+    // Tab strip horizontal auto-scrolling
+    if (tabStripRef) {
+      const rect = tabStripRef.getBoundingClientRect();
+      if (e.clientX < rect.left + 35) {
+        tabStripRef.scrollLeft -= 8;
+      } else if (e.clientX > rect.right - 35) {
+        tabStripRef.scrollLeft += 8;
+      }
+    }
+
+    // Live reordering within the tab strip
+    const tabEls = Array.from(tabStripRef?.querySelectorAll<HTMLElement>(".web-loader-tab") ?? []);
+    if (tabEls.length >= 2) {
+      let passed = 0;
+      for (const el of tabEls) {
+        const r = el.getBoundingClientRect();
+        if (e.clientX > r.left + r.width / 2) passed++;
+      }
+      const vis = visibleTabs();
+      const fromIndex = vis.findIndex((t) => t.id === tabDrag!.tabId);
+      if (fromIndex !== -1) {
+        const target = passed > fromIndex ? passed - 1 : passed;
+        if (target !== fromIndex && target >= 0 && target < vis.length) {
+          const targetTab = vis[target];
+          props.onReorderTabs?.(tabDrag.tabId, targetTab.id, target < fromIndex);
+        }
+      }
+    }
+  }
+
+  function onTabPointerUp() {
+    endTabDrag();
+  }
+
+  function startTabDrag(e: PointerEvent, tabId: string) {
+    if (e.button !== 0) return;
+    const target = e.target as HTMLElement;
+    if (target.closest(".web-loader-tab-close")) {
+      return;
+    }
+    tabDrag = { tabId, startX: e.clientX, startY: e.clientY, moved: false };
+    window.addEventListener("pointermove", onTabPointerMove);
+    window.addEventListener("pointerup", onTabPointerUp);
+    window.addEventListener("pointercancel", onTabPointerUp);
+  }
+
+  onCleanup(endTabDrag);
+
+  // Workspace reordering in menu
+  let wsListRef: HTMLDivElement | undefined;
+  let wsDrag: { wsId: string; startY: number; moved: boolean } | null = null;
+  let suppressWsClick = false;
+
+  function endWsDrag() {
+    if (wsDrag?.moved) {
+      suppressWsClick = true;
+    }
+    document.body.style.cursor = "";
+    document.body.style.userSelect = "";
+    wsDrag = null;
+    setDraggedWorkspaceId(null);
+    setWsDropTarget(null);
+    window.removeEventListener("pointermove", onWsPointerMove);
+    window.removeEventListener("pointerup", onWsPointerUp);
+    window.removeEventListener("pointercancel", onWsPointerUp);
+  }
+
+  function onWsPointerMove(e: PointerEvent) {
+    if (!wsDrag) return;
+    if (!wsDrag.moved) {
+      if (Math.abs(e.clientY - wsDrag.startY) < 5) return;
+      wsDrag.moved = true;
+      setDraggedWorkspaceId(wsDrag.wsId);
+      document.body.style.cursor = "grabbing";
+      document.body.style.userSelect = "none";
+    }
+
+    const wsEls = Array.from(wsListRef?.querySelectorAll<HTMLElement>(".web-loader-ws-item") ?? []);
+    if (wsEls.length >= 2) {
+      let passed = 0;
+      for (const el of wsEls) {
+        const r = el.getBoundingClientRect();
+        if (e.clientY > r.top + r.height / 2) passed++;
+      }
+      const wsList = props.workspaces || [];
+      const fromIndex = wsList.findIndex((w) => w.id === wsDrag!.wsId);
+      if (fromIndex !== -1) {
+        const target = passed > fromIndex ? passed - 1 : passed;
+        if (target !== fromIndex && target >= 0 && target < wsList.length) {
+          const targetWs = wsList[target];
+          props.onReorderWorkspaces?.(wsDrag.wsId, targetWs.id, target < fromIndex);
+        }
+      }
+    }
+  }
+
+  function onWsPointerUp() {
+    endWsDrag();
+  }
+
+  function startWsDrag(e: PointerEvent, wsId: string) {
+    if (e.button !== 0) return;
+    wsDrag = { wsId, startY: e.clientY, moved: false };
+    window.addEventListener("pointermove", onWsPointerMove);
+    window.addEventListener("pointerup", onWsPointerUp);
+    window.addEventListener("pointercancel", onWsPointerUp);
+  }
+
+  onCleanup(endWsDrag);
 
   // Workspace creation state
   const [isCreatingWs, setIsCreatingWs] = createSignal(false);
@@ -155,39 +337,14 @@ export function TabBar(props: TabBarProps) {
       {/* Workspace Pill Dropdown Button (if workspaces available) */}
       <Show when={props.workspaces && props.workspaces.length > 0 && props.currentWorkspace}>
         <div
+          data-workspace-pill="true"
+          data-workspace-drop-id={props.currentWorkspace!.id}
           style={{ position: "relative", "flex-shrink": 0 }}
-          onDragEnter={(e) => {
-            if (draggedTabId()) {
-              if (wsHoverTimer) clearTimeout(wsHoverTimer);
-              wsHoverTimer = setTimeout(() => {
-                setShowWsMenu(true);
-                wsHoverTimer = null;
-              }, 110);
-            }
-          }}
-          onDragOver={(e) => {
-            if (draggedTabId()) {
-              e.preventDefault();
-              e.dataTransfer!.dropEffect = "move";
-              if (!showWsMenu() && !wsHoverTimer) {
-                wsHoverTimer = setTimeout(() => {
-                  setShowWsMenu(true);
-                  wsHoverTimer = null;
-                }, 110);
-              }
-            }
-          }}
-          onDragLeave={(e) => {
-            const related = e.relatedTarget as Node;
-            if (related && (e.currentTarget as HTMLElement).contains(related)) return;
-            if (wsHoverTimer) {
-              clearTimeout(wsHoverTimer);
-              wsHoverTimer = null;
-            }
-          }}
         >
           <button
             type="button"
+            data-workspace-pill="true"
+            data-workspace-drop-id={props.currentWorkspace!.id}
             class="web-loader-action-btn"
             style={{
               display: "inline-flex",
@@ -195,8 +352,12 @@ export function TabBar(props: TabBarProps) {
               gap: "6px",
               padding: "5px 10px",
               "border-radius": "8px",
-              background: `rgba(56, 189, 248, 0.14)`,
-              border: `1px solid ${props.currentWorkspace!.color || "#38bdf8"}`,
+              background: wsTabHoverTarget() === props.currentWorkspace!.id
+                ? "rgba(56, 189, 248, 0.28)"
+                : `rgba(56, 189, 248, 0.14)`,
+              border: wsTabHoverTarget() === props.currentWorkspace!.id
+                ? "1px dashed var(--accent-default, #38bdf8)"
+                : `1px solid ${props.currentWorkspace!.color || "#38bdf8"}`,
               color: props.currentWorkspace!.color || "#38bdf8",
               "font-family": "Space Mono, monospace",
               "font-size": "12px",
@@ -204,23 +365,6 @@ export function TabBar(props: TabBarProps) {
               cursor: "pointer",
             }}
             onClick={() => setShowWsMenu(!showWsMenu())}
-            onDragOver={(e) => {
-              if (draggedTabId()) {
-                e.preventDefault();
-                e.dataTransfer!.dropEffect = "move";
-              }
-            }}
-            onDrop={(e) => {
-              if (draggedTabId()) {
-                e.preventDefault();
-                e.stopPropagation();
-                props.onUpdateTabWorkspace?.(draggedTabId()!, props.currentWorkspace!.id);
-                if (wsHoverTimer) {
-                  clearTimeout(wsHoverTimer);
-                  wsHoverTimer = null;
-                }
-              }
-            }}
             title="Switch Workspace / Group (drag tab here)"
           >
             <span>{props.currentWorkspace!.icon || "✦"}</span>
@@ -247,6 +391,7 @@ export function TabBar(props: TabBarProps) {
           {/* Workspace Switcher Popover */}
           <Show when={showWsMenu()}>
             <div
+              ref={wsListRef}
               style={{
                 position: "absolute",
                 top: "100%",
@@ -268,28 +413,6 @@ export function TabBar(props: TabBarProps) {
                 gap: "4px",
                 animation: "web-loader-card-enter 0.18s cubic-bezier(0.16, 1, 0.3, 1) both",
               }}
-              onDragOver={(e) => {
-                if (draggedWorkspaceId() || draggedTabId()) {
-                  e.preventDefault();
-                  e.stopPropagation();
-                  e.dataTransfer!.dropEffect = "move";
-                }
-              }}
-              onDrop={(e) => {
-                if (draggedWorkspaceId()) {
-                  e.preventDefault();
-                  e.stopPropagation();
-                  const wsList = props.workspaces;
-                  if (wsList.length > 0) {
-                    const lastWs = wsList[wsList.length - 1];
-                    if (draggedWorkspaceId() !== lastWs.id) {
-                      props.onReorderWorkspaces?.(draggedWorkspaceId()!, lastWs.id, false);
-                    }
-                  }
-                  setDraggedWorkspaceId(null);
-                  setWsDropTarget(null);
-                }
-              }}
             >
               <div
                 style={{
@@ -307,32 +430,13 @@ export function TabBar(props: TabBarProps) {
               <For each={props.workspaces}>
                 {(ws) => {
                   const isHoveredForTab = () => wsTabHoverTarget() === ws.id;
-                  const isWsDrop = () => wsDropTarget()?.id === ws.id;
-                  const isDropBefore = () => wsDropTarget()?.isBefore;
 
                   return (
                     <div style={{ position: "relative" }}>
-                      <Show when={isWsDrop() && draggedWorkspaceId() && draggedWorkspaceId() !== ws.id}>
-                        <div
-                          style={{
-                            position: "absolute",
-                            left: "4px",
-                            right: "4px",
-                            top: isDropBefore() ? "-2px" : "auto",
-                            bottom: !isDropBefore() ? "-2px" : "auto",
-                            height: "2px",
-                            "border-radius": "1px",
-                            background: "var(--accent-default, #38bdf8)",
-                            "box-shadow": "0 0 6px rgba(56, 189, 248, 0.8)",
-                            "z-index": 10,
-                            "pointer-events": "none",
-                          }}
-                        />
-                      </Show>
-
                       <button
                         type="button"
-                        draggable={true}
+                        class="web-loader-ws-item"
+                        data-workspace-drop-id={ws.id}
                         style={{
                           display: "flex",
                           "align-items": "center",
@@ -354,58 +458,17 @@ export function TabBar(props: TabBarProps) {
                           cursor: "grab",
                           "user-select": "none",
                           "-webkit-user-select": "none",
+                          "touch-action": "none",
                           "text-align": "left",
                           transition: "all 0.15s ease",
+                          opacity: draggedWorkspaceId() === ws.id ? 0.45 : 1,
                         }}
-                        onDragStart={(e) => {
-                          e.dataTransfer!.setData(WORKSPACE_DRAG_MIME, ws.id);
-                          e.dataTransfer!.setData("text/plain", `flurer:ws:${ws.id}`);
-                          e.dataTransfer!.effectAllowed = "move";
-                          setDraggedWorkspaceId(ws.id);
-                        }}
-                        onDragEnd={() => {
-                          setDraggedWorkspaceId(null);
-                          setWsDropTarget(null);
-                          setWsTabHoverTarget(null);
-                        }}
-                        onDragOver={(e) => {
-                          e.preventDefault();
-                          e.stopPropagation();
-                          e.dataTransfer!.dropEffect = "move";
-                          if (draggedTabId()) {
-                            setWsTabHoverTarget(ws.id);
-                          } else if (draggedWorkspaceId()) {
-                            if (draggedWorkspaceId() !== ws.id) {
-                              const rect = e.currentTarget.getBoundingClientRect();
-                              const isBefore = e.clientY < rect.top + rect.height / 2;
-                              setWsDropTarget({ id: ws.id, isBefore });
-                            } else {
-                              setWsDropTarget(null);
-                            }
-                          }
-                        }}
-                        onDragLeave={(e) => {
-                          const related = e.relatedTarget as Node;
-                          if (related && (e.currentTarget as HTMLElement).contains(related)) return;
-                          if (wsTabHoverTarget() === ws.id) setWsTabHoverTarget(null);
-                          if (wsDropTarget()?.id === ws.id) setWsDropTarget(null);
-                        }}
-                        onDrop={(e) => {
-                          e.preventDefault();
-                          e.stopPropagation();
-                          if (draggedTabId()) {
-                            props.onUpdateTabWorkspace?.(draggedTabId()!, ws.id);
-                            setWsTabHoverTarget(null);
-                            setDraggedTabId(null);
-                            setShowWsMenu(false);
-                          } else if (draggedWorkspaceId() && draggedWorkspaceId() !== ws.id) {
-                            const isBefore = wsDropTarget()?.isBefore ?? true;
-                            props.onReorderWorkspaces?.(draggedWorkspaceId()!, ws.id, isBefore);
-                            setDraggedWorkspaceId(null);
-                            setWsDropTarget(null);
-                          }
-                        }}
+                        onPointerDown={(e) => startWsDrag(e, ws.id)}
                         onClick={() => {
+                          if (suppressWsClick) {
+                            suppressWsClick = false;
+                            return;
+                          }
                           props.onSwitchWorkspace?.(ws.id);
                           setShowWsMenu(false);
                         }}
@@ -607,65 +670,22 @@ export function TabBar(props: TabBarProps) {
 
       {/* Scrollable Tab Strip */}
       <div
+        ref={tabStripRef}
         style={{
           ...S.tabRow,
           flex: "1 1 auto",
           "min-width": 0,
-        }}
-        onDragOver={(e) => {
-          if (draggedTabId()) {
-            e.preventDefault();
-            e.stopPropagation();
-            e.dataTransfer!.dropEffect = "move";
-          }
-        }}
-        onDrop={(e) => {
-          if (draggedTabId()) {
-            e.preventDefault();
-            e.stopPropagation();
-            const vis = visibleTabs();
-            if (vis.length > 0) {
-              const lastTab = vis[vis.length - 1];
-              if (draggedTabId() !== lastTab.id) {
-                props.onReorderTabs?.(draggedTabId()!, lastTab.id, false);
-              }
-            }
-            setDraggedTabId(null);
-            setTabDropTarget(null);
-          }
         }}
       >
         <For each={visibleTabs()}>
           {(tab) => {
             const isActive = () => tab.id === props.activeTabId;
             const isCompact = () => !!props.compactTabs;
-            const isTabDrop = () => tabDropTarget()?.id === tab.id;
-            const isTabDropBefore = () => tabDropTarget()?.isBefore;
 
             return (
               <div style={{ position: "relative", display: "inline-flex", "align-items": "center", "flex-shrink": 0 }}>
-                {/* Drop indicator line */}
-                <Show when={isTabDrop() && draggedTabId() && draggedTabId() !== tab.id}>
-                  <div
-                    style={{
-                      position: "absolute",
-                      top: "2px",
-                      bottom: "2px",
-                      left: isTabDropBefore() ? "-2px" : "auto",
-                      right: !isTabDropBefore() ? "-2px" : "auto",
-                      width: "3px",
-                      "border-radius": "2px",
-                      background: "var(--accent-default, #38bdf8)",
-                      "box-shadow": "0 0 8px rgba(56, 189, 248, 0.9)",
-                      "z-index": 100,
-                      "pointer-events": "none",
-                    }}
-                  />
-                </Show>
-
                 <div
-                  draggable={true}
-                  class={`web-loader-tab ${isActive() ? "active" : ""} ${isCompact() ? "web-loader-tab-compact" : ""}`}
+                  class={`web-loader-tab ${isActive() ? "active" : ""} ${isCompact() ? "web-loader-tab-compact" : ""} ${draggedTabId() === tab.id ? "dragging" : ""}`}
                   style={{
                     ...S.tab,
                     ...(isActive() ? S.tabActive : {}),
@@ -678,52 +698,21 @@ export function TabBar(props: TabBarProps) {
                           "justify-content": "center",
                         }
                       : {}),
-                    cursor: "grab",
+                    cursor: draggedTabId() === tab.id ? "grabbing" : "grab",
                     "user-select": "none",
                     "-webkit-user-select": "none",
+                    "touch-action": "none",
                     opacity: draggedTabId() === tab.id ? 0.45 : 1,
-                    transition: "opacity 0.15s ease",
+                    transition: "opacity 0.15s ease, transform 0.15s ease",
                   }}
-                  onDragStart={(e) => {
-                    e.dataTransfer!.setData(TAB_DRAG_MIME, tab.id);
-                    e.dataTransfer!.setData("text/plain", `flurer:tab:${tab.id}`);
-                    e.dataTransfer!.effectAllowed = "move";
-                    setDraggedTabId(tab.id);
-                  }}
-                  onDragEnd={() => {
-                    setDraggedTabId(null);
-                    setTabDropTarget(null);
-                  }}
-                  onDragOver={(e) => {
-                    if (draggedTabId()) {
-                      e.preventDefault();
-                      e.stopPropagation();
-                      e.dataTransfer!.dropEffect = "move";
-                      if (draggedTabId() !== tab.id) {
-                        const rect = e.currentTarget.getBoundingClientRect();
-                        const isBefore = e.clientX < rect.left + rect.width / 2;
-                        setTabDropTarget({ id: tab.id, isBefore });
-                      } else {
-                        setTabDropTarget(null);
-                      }
+                  onPointerDown={(e) => startTabDrag(e, tab.id)}
+                  onClick={() => {
+                    if (suppressTabClick) {
+                      suppressTabClick = false;
+                      return;
                     }
+                    props.onSelectTab(tab.id);
                   }}
-                  onDragLeave={(e) => {
-                    const related = e.relatedTarget as Node;
-                    if (related && (e.currentTarget as HTMLElement).contains(related)) return;
-                    if (tabDropTarget()?.id === tab.id) setTabDropTarget(null);
-                  }}
-                  onDrop={(e) => {
-                    if (draggedTabId() && draggedTabId() !== tab.id) {
-                      e.preventDefault();
-                      e.stopPropagation();
-                      const isBefore = tabDropTarget()?.isBefore ?? true;
-                      props.onReorderTabs?.(draggedTabId()!, tab.id, isBefore);
-                      setDraggedTabId(null);
-                      setTabDropTarget(null);
-                    }
-                  }}
-                  onClick={() => props.onSelectTab(tab.id)}
                   onMouseDown={(e) => {
                     // Middle click to close tab
                     if (e.button === 1) {
