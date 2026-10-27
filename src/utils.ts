@@ -666,12 +666,51 @@ export function getCurrentWindowLabel(): string {
   return "flurer-0";
 }
 
+async function hideStaleDockedWebview(label: string): Promise<void> {
+  if (!window.TauriCore || currentVisibleLabel === label) return;
+  try {
+    await window.TauriCore.invoke("plugin:webview|webview_hide", { label });
+  } catch {}
+}
+
+async function rollbackCreatedDockedWebview(tabId: string, label: string): Promise<void> {
+  if (tabWebviewRegistry.get(tabId)?.label === label) {
+    tabWebviewRegistry.delete(tabId);
+  }
+  if (currentVisibleLabel === label) {
+    currentVisibleTabId = null;
+    currentVisibleLabel = null;
+  }
+  if (!window.TauriCore) return;
+
+  try {
+    await window.TauriCore.invoke("plugin:webview|set_webview_position", {
+      label,
+      value: { Logical: { x: -10000, y: -10000 } },
+    });
+  } catch {}
+  try {
+    await window.TauriCore.invoke("plugin:webview|set_webview_size", {
+      label,
+      value: { Logical: { width: 0, height: 0 } },
+    });
+  } catch {}
+  try {
+    await window.TauriCore.invoke("plugin:webview|webview_hide", { label });
+  } catch {}
+  try {
+    await window.TauriCore.invoke("plugin:webview|webview_close", { label });
+  } catch {}
+}
+
 export async function createOrShowDockedWebview(
   tabId: string,
   url: string,
   rect: { x: number; y: number; width: number; height: number },
-  windowLabel?: string
-): Promise<{ success: boolean; error?: string; reused?: boolean }> {
+  windowLabel?: string,
+  shouldContinue: () => boolean = () => true
+): Promise<{ success: boolean; error?: string; reused?: boolean; cancelled?: boolean }> {
+  if (!shouldContinue()) return { success: false, cancelled: true };
   if (dockedWebviewSupported === false) {
     return { success: false, error: "Docked child webview not supported by host runtime" };
   }
@@ -691,80 +730,97 @@ export async function createOrShowDockedWebview(
   const width = Math.max(100, Math.round(rect.width));
   const height = Math.max(100, Math.round(rect.height));
 
+  const TauriCore = window.TauriCore as NonNullable<typeof window.TauriCore>;
+  const hideOtherWebviews = async (): Promise<boolean> => {
+    for (const [otherId, other] of tabWebviewRegistry.entries()) {
+      if (otherId === tabId) continue;
+      if (!shouldContinue()) return false;
+      try {
+        await TauriCore.invoke("plugin:webview|set_webview_position", {
+          label: other.label,
+          value: { Logical: { x: -10000, y: -10000 } },
+        });
+        if (!shouldContinue()) return false;
+        await TauriCore.invoke("plugin:webview|set_webview_size", {
+          label: other.label,
+          value: { Logical: { width: 0, height: 0 } },
+        });
+        if (!shouldContinue()) return false;
+        await TauriCore.invoke("plugin:webview|webview_hide", { label: other.label });
+        if (!shouldContinue()) return false;
+      } catch {}
+    }
+    return shouldContinue();
+  };
+
   // Case 1: Tab already has a child webview mounted
   const existing = tabWebviewRegistry.get(tabId);
   if (existing) {
     // If URL is the same: reuse existing webview! No reload!
     if (existing.url === sanitized.url) {
-      // Hide all other tab webviews
-      for (const [otherId, other] of tabWebviewRegistry.entries()) {
-        if (otherId !== tabId) {
-          try {
-            await window.TauriCore.invoke("plugin:webview|set_webview_position", {
-              label: other.label,
-              value: { Logical: { x: -10000, y: -10000 } },
-            });
-            await window.TauriCore.invoke("plugin:webview|set_webview_size", {
-              label: other.label,
-              value: { Logical: { width: 0, height: 0 } },
-            });
-            await window.TauriCore.invoke("plugin:webview|webview_hide", { label: other.label });
-          } catch {}
-        }
-      }
+      if (!(await hideOtherWebviews())) return { success: false, cancelled: true };
+
+      let existingShown = false;
+      const cancelExisting = async () => {
+        if (existingShown) await hideStaleDockedWebview(existing.label);
+        return { success: false, cancelled: true };
+      };
 
       // Show and update bounds of this tab's webview
       try {
         await window.TauriCore.invoke("plugin:webview|webview_show", { label: existing.label });
+        existingShown = true;
+        if (!shouldContinue()) return cancelExisting();
         await window.TauriCore.invoke("plugin:webview|set_webview_position", {
           label: existing.label,
           value: { Logical: { x, y } },
         });
+        if (!shouldContinue()) return cancelExisting();
         await window.TauriCore.invoke("plugin:webview|set_webview_size", {
           label: existing.label,
           value: { Logical: { width, height } },
         });
+        if (!shouldContinue()) return cancelExisting();
         await window.TauriCore.invoke("plugin:webview|set_webview_focus", { label: existing.label });
+        if (!shouldContinue()) return cancelExisting();
         currentVisibleTabId = tabId;
         currentVisibleLabel = existing.label;
         dockedWebviewSupported = true;
         return { success: true, reused: true };
       } catch (err: any) {
+        if (!shouldContinue()) return cancelExisting();
         console.warn("Failed to reuse existing docked webview, will recreate:", err);
         try {
           await window.TauriCore.invoke("plugin:webview|webview_close", { label: existing.label });
         } catch {}
-        tabWebviewRegistry.delete(tabId);
+        if (tabWebviewRegistry.get(tabId)?.label === existing.label) {
+          tabWebviewRegistry.delete(tabId);
+        }
+        if (!shouldContinue()) return { success: false, cancelled: true };
       }
     } else {
       // URL changed for this tab: close old webview and create a new one
+      if (!shouldContinue()) return { success: false, cancelled: true };
       try {
         await window.TauriCore.invoke("plugin:webview|webview_close", { label: existing.label });
       } catch {}
-      tabWebviewRegistry.delete(tabId);
+      if (tabWebviewRegistry.get(tabId)?.label === existing.label) {
+        tabWebviewRegistry.delete(tabId);
+      }
+      if (!shouldContinue()) return { success: false, cancelled: true };
     }
   }
 
   // Case 2: Create new child webview for this tab
-  // Hide all other webviews
-  for (const [otherId, other] of tabWebviewRegistry.entries()) {
-    if (otherId !== tabId) {
-      try {
-        await window.TauriCore.invoke("plugin:webview|set_webview_position", {
-          label: other.label,
-          value: { Logical: { x: -10000, y: -10000 } },
-        });
-        await window.TauriCore.invoke("plugin:webview|set_webview_size", {
-          label: other.label,
-          value: { Logical: { width: 0, height: 0 } },
-        });
-        await window.TauriCore.invoke("plugin:webview|webview_hide", { label: other.label });
-      } catch {}
-    }
-  }
+  if (!(await hideOtherWebviews())) return { success: false, cancelled: true };
 
   const cleanTabId = tabId.replace(/[^a-zA-Z0-9-]/g, "").slice(0, 16);
   const newLabel = `${DOCKED_WEBVIEW_PREFIX}-${cleanTabId}-${Date.now().toString(36)}-${(++dockedCounter).toString(36)}`;
+  let createdWebview = false;
+  const cancelCreated = async () => {
+    await rollbackCreatedDockedWebview(tabId, newLabel);
+    return { success: false, cancelled: true };
+  };
 
   try {
     const windowOptions: Record<string, any> = {
@@ -780,27 +836,34 @@ export async function createOrShowDockedWebview(
     };
 
     try {
+      if (!shouldContinue()) return { success: false, cancelled: true };
       await window.TauriCore.invoke("plugin:webview|create_webview", {
         windowLabel: targetWindowLabel,
         options: windowOptions,
       });
+      createdWebview = true;
     } catch (invokeErr: any) {
       const msg = String(invokeErr?.message || invokeErr);
       if (msg.includes("WindowNotFound") && targetWindowLabel !== "flurer-0") {
+        if (!shouldContinue()) return { success: false, cancelled: true };
         await window.TauriCore.invoke("plugin:webview|create_webview", {
           windowLabel: "flurer-0",
           options: windowOptions,
         });
+        createdWebview = true;
       } else if (msg.includes("WindowNotFound") && targetWindowLabel !== "main") {
+        if (!shouldContinue()) return { success: false, cancelled: true };
         await window.TauriCore.invoke("plugin:webview|create_webview", {
           windowLabel: "main",
           options: windowOptions,
         });
+        createdWebview = true;
       } else {
         throw invokeErr;
       }
     }
 
+    if (!shouldContinue()) return cancelCreated();
     tabWebviewRegistry.set(tabId, { label: newLabel, url: sanitized.url });
     currentVisibleTabId = tabId;
     currentVisibleLabel = newLabel;
@@ -808,6 +871,7 @@ export async function createOrShowDockedWebview(
 
     // Attach native OS accelerator key interception (Flurer Core & Global System)
     try {
+      if (!shouldContinue()) return cancelCreated();
       if ((window as any).attachChildWebviewShortcuts) {
         await (window as any).attachChildWebviewShortcuts(newLabel, "web-loader");
       } else {
@@ -817,15 +881,20 @@ export async function createOrShowDockedWebview(
         });
       }
     } catch {
+      if (!shouldContinue()) return cancelCreated();
       try {
         await window.TauriCore.invoke("attach_docked_webview_shortcuts", { label: newLabel });
       } catch (shortcutErr) {
+        if (!shouldContinue()) return cancelCreated();
         console.warn("attach_child_webview_shortcuts not supported or failed:", shortcutErr);
       }
     }
 
+    if (!shouldContinue()) return cancelCreated();
     return { success: true, reused: false };
   } catch (err: any) {
+    if (createdWebview && !shouldContinue()) return cancelCreated();
+    if (!shouldContinue()) return { success: false, cancelled: true };
     const errStr = String(err?.message || err);
     console.warn("create_webview error:", errStr);
     if (errStr.includes("UnstableFeatureNotSupported")) {
@@ -901,23 +970,42 @@ export function restoreMainWebviewFocus(): void {
 }
 
 export async function hideAllDockedWebviews(): Promise<void> {
-  if (!window.TauriCore) return;
-  for (const entry of tabWebviewRegistry.values()) {
-    try {
-      await window.TauriCore.invoke("plugin:webview|set_webview_position", {
-        label: entry.label,
-        value: { Logical: { x: -10000, y: -10000 } },
-      });
-      await window.TauriCore.invoke("plugin:webview|set_webview_size", {
-        label: entry.label,
-        value: { Logical: { width: 0, height: 0 } },
-      });
-      await window.TauriCore.invoke("plugin:webview|webview_hide", { label: entry.label });
-    } catch {}
-  }
+  const entries = Array.from(tabWebviewRegistry.values());
+  const visibleLabel = currentVisibleLabel;
   currentVisibleTabId = null;
   currentVisibleLabel = null;
-  restoreMainWebviewFocus();
+  const tauri = window.TauriCore;
+  if (!tauri) return;
+
+  const hideEntry = async (label: string) => {
+    try {
+      await tauri.invoke("plugin:webview|webview_hide", { label });
+      return;
+    } catch {}
+    if (currentVisibleLabel === label) return;
+    try {
+      await tauri.invoke("plugin:webview|set_webview_position", {
+        label,
+        value: { Logical: { x: -10000, y: -10000 } },
+      });
+    } catch {}
+    if (currentVisibleLabel === label) return;
+    try {
+      await tauri.invoke("plugin:webview|set_webview_size", {
+        label,
+        value: { Logical: { width: 0, height: 0 } },
+      });
+    } catch {}
+  };
+
+  const orderedEntries = visibleLabel
+    ? [
+        ...entries.filter((entry) => entry.label === visibleLabel),
+        ...entries.filter((entry) => entry.label !== visibleLabel),
+      ]
+    : entries;
+  await Promise.allSettled(orderedEntries.map((entry) => hideEntry(entry.label)));
+  if (!currentVisibleLabel) restoreMainWebviewFocus();
 }
 
 export async function closeTabWebview(tabId: string): Promise<void> {

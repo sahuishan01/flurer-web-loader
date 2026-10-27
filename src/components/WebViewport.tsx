@@ -56,7 +56,7 @@ export function WebViewport(props: WebViewportProps) {
   };
 
   const syncDockedBounds = () => {
-    if (!containerRef || props.isOverlayOpen) return;
+    if (!containerRef || disposed || props.active === false || props.isOverlayOpen) return;
     const rect = containerRef.getBoundingClientRect();
     if (rect.width <= 0 || rect.height <= 0) return;
 
@@ -78,49 +78,63 @@ export function WebViewport(props: WebViewportProps) {
   let syncSeq = 0;
   let isSyncing = false;
   let hasPendingSync = false;
+  let disposed = false;
 
   const syncCurrentTabDocked = async () => {
-    if (!containerRef) return;
+    if (!containerRef || disposed) return;
+
+    const currentSeq = ++syncSeq;
+    const tab = props.activeTab;
+    const tabId = tab?.id;
+    const tabUrl = tab?.url;
+    const shouldHide =
+      !tab ||
+      !tabUrl ||
+      tabUrl === "about:blank" ||
+      props.active === false ||
+      props.isOverlayOpen ||
+      props.dockedChildWebview === false ||
+      !!(tabId && forceEmbedTabs()[tabId]);
+    const shouldContinue = () =>
+      !disposed &&
+      currentSeq === syncSeq &&
+      props.active !== false &&
+      !props.isOverlayOpen &&
+      props.activeTab?.id === tabId &&
+      props.activeTab?.url === tabUrl &&
+      props.dockedChildWebview !== false &&
+      !(tabId && forceEmbedTabs()[tabId]);
+
+    if (shouldHide) {
+      hasPendingSync = false;
+      await hideAllDockedWebviews();
+      return;
+    }
 
     if (isSyncing) {
       hasPendingSync = true;
       return;
     }
 
-    const currentSeq = ++syncSeq;
-    const tab = props.activeTab;
-    const tabId = tab?.id;
-    const tabUrl = tab?.url;
-    const isPanelActive = props.active !== false;
-
     isSyncing = true;
     try {
-      // 1. If blank tab (New Tab / Home Page), panel inactive, or overlay is open: hide all docked webviews!
-      if (!tab || isBlank() || !tabUrl || !isPanelActive || props.isOverlayOpen) {
-        await hideAllDockedWebviews();
-        return;
-      }
-
-      // 2. If docked child webviews are disabled or tab forced embed: hide webviews
-      if (props.dockedChildWebview === false || (tabId && forceEmbedTabs()[tabId])) {
-        await hideAllDockedWebviews();
-        return;
-      }
-
       const rect = containerRef.getBoundingClientRect();
       if (rect.width <= 0 || rect.height <= 0) return;
 
-      const res = await createOrShowDockedWebview(tabId!, tabUrl, {
-        x: rect.left,
-        y: rect.top,
-        width: rect.width,
-        height: rect.height,
-      });
+      const res = await createOrShowDockedWebview(
+        tabId!,
+        tabUrl!,
+        {
+          x: rect.left,
+          y: rect.top,
+          width: rect.width,
+          height: rect.height,
+        },
+        undefined,
+        shouldContinue
+      );
 
-      // Stale check: if active tab changed while awaiting IPC, do not activate stale tab
-      if (currentSeq !== syncSeq || props.activeTab?.id !== tabId) {
-        return;
-      }
+      if (res.cancelled || !shouldContinue()) return;
 
       if (res.success) {
         setDockedActiveMap((prev) => ({ ...prev, [tabId!]: true }));
@@ -131,13 +145,12 @@ export function WebViewport(props: WebViewportProps) {
         setDockedFailed(true);
       }
     } catch (err) {
-      console.error("syncCurrentTabDocked error:", err);
+      if (shouldContinue()) console.error("syncCurrentTabDocked error:", err);
     } finally {
       isSyncing = false;
-      // If a newer sync was requested while busy or if activeTab changed in-flight, resync to latest state immediately!
-      if (hasPendingSync || currentSeq !== syncSeq || props.activeTab?.id !== tabId) {
+      if (!disposed && hasPendingSync) {
         hasPendingSync = false;
-        syncCurrentTabDocked();
+        void syncCurrentTabDocked();
       }
     }
   };
@@ -194,8 +207,11 @@ export function WebViewport(props: WebViewportProps) {
     ro.observe(containerRef);
 
     onCleanup(() => {
+      disposed = true;
+      syncSeq++;
+      hasPendingSync = false;
       ro.disconnect();
-      hideAllDockedWebviews();
+      void hideAllDockedWebviews();
     });
   });
 

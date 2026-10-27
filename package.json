@@ -1,6 +1,6 @@
 {
   "name": "flurer-plugin-web-loader",
-  "version": "0.1.55",
+  "version": "0.1.56",
   "private": true,
   "type": "module",
   "scripts": {
