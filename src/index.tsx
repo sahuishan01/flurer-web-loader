@@ -1506,6 +1506,8 @@ function WebBrowserPanel(props: MainPanelProps) {
             currentWorkspace={currentWorkspace()}
             compactTabs={compactTabs()}
             shortcuts={effectiveShortcuts()}
+            isWsMenuOpen={workspaceMenuOpen()}
+            onWsMenuToggle={(open) => setWorkspaceMenuOpen(open)}
             onSelectTab={handleSelectTab}
             onCloseTab={handleCloseTab}
             onNewTab={() => handleNewTab("about:blank")}

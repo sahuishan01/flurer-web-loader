@@ -32,18 +32,30 @@ interface TabBarProps {
   onOpenHistory?: () => void;
   onReopenClosedTab?: () => void;
   shortcuts?: Record<string, string>;
+  isWsMenuOpen?: boolean;
+  onWsMenuToggle?: (open: boolean) => void;
 }
 
 export function TabBar(props: TabBarProps) {
   const mod = getModifierKey();
   const [tabMenu, setTabMenu] = createSignal<{ tabId: string; x: number; y: number } | null>(null);
-  const [showWsMenu, setShowWsMenu] = createSignal(false);
+  const [internalWsMenu, setInternalWsMenu] = createSignal(false);
+  const showWsMenu = () => (props.isWsMenuOpen !== undefined ? props.isWsMenuOpen : internalWsMenu());
+  const setShowWsMenu = (open: boolean) => {
+    if (!open) {
+      setIsCreatingWs(false);
+      setNewWsName("");
+    }
+    setInternalWsMenu(open);
+    props.onWsMenuToggle?.(open);
+  };
   const [tabDropTarget, setTabDropTarget] = createSignal<{ id: string; isBefore: boolean } | null>(null);
   const [wsDropTarget, setWsDropTarget] = createSignal<{ id: string; isBefore: boolean } | null>(null);
   const [wsTabHoverTarget, setWsTabHoverTarget] = createSignal<string | null>(null);
   let wsHoverTimer: any = null;
 
   let tabStripRef: HTMLDivElement | undefined;
+  let wsPillRef: HTMLDivElement | undefined;
   let tabDrag: { tabId: string; startX: number; startY: number; moved: boolean } | null = null;
   let suppressTabClick = false;
 
@@ -54,8 +66,18 @@ export function TabBar(props: TabBarProps) {
       if (targetWs) {
         if (targetWs === "all") {
           props.onUpdateTabWorkspace?.(tabDrag.tabId, undefined);
+        } else if (targetWs === "new-group") {
+          const tid = tabDrag.tabId;
+          const tab = props.tabs.find((t) => t.id === tid);
+          const name = tab ? (tab.title && tab.title !== "New Tab" ? tab.title : getDomain(tab.url)) || "New Group" : "New Group";
+          const newId = props.onAddWorkspace?.(name, "#38bdf8");
+          if (newId) {
+            props.onUpdateTabWorkspace?.(tid, newId);
+            props.onSwitchWorkspace?.(newId);
+          }
         } else {
           props.onUpdateTabWorkspace?.(tabDrag.tabId, targetWs);
+          props.onSwitchWorkspace?.(targetWs);
         }
         setShowWsMenu(false);
       }
@@ -87,24 +109,35 @@ export function TabBar(props: TabBarProps) {
       document.body.style.userSelect = "none";
     }
 
-    // Check if hovering over a workspace drop target
+    // Check if hovering over the workspace pill or a workspace drop target
+    const pillRect = wsPillRef?.getBoundingClientRect();
+    const isOverPill =
+      pillRect &&
+      e.clientX >= pillRect.left - 6 &&
+      e.clientX <= pillRect.right + 6 &&
+      e.clientY >= pillRect.top - 6 &&
+      e.clientY <= pillRect.bottom + 6;
+
     const hit = document.elementFromPoint(e.clientX, e.clientY);
     const wsDropEl = hit?.closest("[data-workspace-drop-id]") as HTMLElement | null;
-    const wsPillEl = hit?.closest("[data-workspace-pill]") as HTMLElement | null;
 
     if (wsDropEl) {
       const wsId = wsDropEl.getAttribute("data-workspace-drop-id");
       setWsTabHoverTarget(wsId);
       setTabDropTarget(null);
+      if (wsHoverTimer) {
+        clearTimeout(wsHoverTimer);
+        wsHoverTimer = null;
+      }
       return;
-    } else if (wsPillEl && props.currentWorkspace) {
+    } else if (isOverPill && props.currentWorkspace) {
       setWsTabHoverTarget(props.currentWorkspace.id);
       setTabDropTarget(null);
       if (!showWsMenu() && !wsHoverTimer) {
         wsHoverTimer = setTimeout(() => {
           setShowWsMenu(true);
           wsHoverTimer = null;
-        }, 220);
+        }, 80);
       }
       return;
     } else {
@@ -337,6 +370,7 @@ export function TabBar(props: TabBarProps) {
       {/* Workspace Pill Dropdown Button (if workspaces available) */}
       <Show when={props.workspaces && props.workspaces.length > 0 && props.currentWorkspace}>
         <div
+          ref={wsPillRef}
           data-workspace-pill="true"
           data-workspace-drop-id={props.currentWorkspace!.id}
           style={{ position: "relative", "flex-shrink": 0 }}
@@ -501,6 +535,7 @@ export function TabBar(props: TabBarProps) {
                 fallback={
                   <button
                     type="button"
+                    data-workspace-drop-id="new-group"
                     style={{
                       display: "flex",
                       "align-items": "center",
