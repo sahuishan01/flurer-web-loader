@@ -565,6 +565,9 @@ function WebBrowserPanel(props: MainPanelProps) {
     };
 
     const handleGlobalKey = (e: KeyboardEvent) => {
+      // If the plugin panel is not active/visible, do not intercept or swallow keys
+      if (props.active === false) return;
+
       const isMod = e.ctrlKey || e.metaKey;
       const isShift = e.shiftKey;
       const isAlt = e.altKey;
@@ -624,6 +627,9 @@ function WebBrowserPanel(props: MainPanelProps) {
 
     if (window.TauriEvent?.listen) {
       const handlePayloadShortcut = (event: any) => {
+        // If web-loader panel is not currently active, do not intercept child shortcuts
+        if (props.active === false) return;
+
         const p = event?.payload;
         if (p) {
           // If event has pluginId, verify it matches our plugin or is meant for us
