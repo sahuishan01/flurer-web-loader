@@ -112,10 +112,10 @@ export function QuickTabSwitcher(props: QuickTabSwitcherProps) {
           style={{
             width: "90%",
             "max-width": "580px",
-            background: "rgba(15, 23, 42, 0.96)",
-            border: "1px solid rgba(56, 189, 248, 0.35)",
+            background: "var(--popover-bg, var(--panel-bg, rgba(24, 24, 27, 0.96)))",
+            border: "1px solid var(--border-strong, rgba(var(--accent-rgb, 56, 189, 248), 0.35))",
             "border-radius": "12px",
-            "box-shadow": "0 20px 50px rgba(0, 0, 0, 0.7), 0 0 24px rgba(56, 189, 248, 0.15)",
+            "box-shadow": "0 20px 50px rgba(0, 0, 0, 0.4), 0 0 24px rgba(var(--accent-rgb, 56, 189, 248), 0.15)",
             overflow: "hidden",
             display: "flex",
             "flex-direction": "column",

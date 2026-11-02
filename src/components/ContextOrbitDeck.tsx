@@ -489,8 +489,8 @@ export function ContextOrbitDeck(props: ContextOrbitDeckProps) {
           "justify-content": "space-between",
           padding: "12px 20px",
           border: "none",
-          "border-bottom": "1px solid rgba(255, 255, 255, 0.1)",
-          background: "rgba(15, 23, 42, 0.7)",
+          "border-bottom": "1px solid var(--border-color, rgba(255, 255, 255, 0.1))",
+          background: "var(--panel-bg, rgba(15, 23, 42, 0.7))",
           gap: "14px",
           "flex-shrink": 0,
         }}
@@ -638,13 +638,13 @@ export function ContextOrbitDeck(props: ContextOrbitDeckProps) {
                   left: "0",
                   "margin-top": "6px",
                   "z-index": 9999,
-                  background: "rgba(15, 23, 42, 0.98)",
-                  "backdrop-filter": "blur(20px)",
-                  "-webkit-backdrop-filter": "blur(20px)",
-                  border: "1px solid rgba(255, 255, 255, 0.22)",
+                  background: "var(--popover-bg, var(--panel-bg, rgba(24, 24, 27, 0.95)))",
+                  "backdrop-filter": "blur(var(--surface-blur, 20px))",
+                  "-webkit-backdrop-filter": "blur(var(--surface-blur, 20px))",
+                  border: "1px solid var(--border-strong, var(--border-color, rgba(255, 255, 255, 0.15)))",
                   "border-radius": "10px",
                   padding: "8px",
-                  "box-shadow": "0 16px 40px rgba(0, 0, 0, 0.7)",
+                  "box-shadow": "0 16px 40px rgba(0, 0, 0, 0.35)",
                   "min-width": "230px",
                   display: "flex",
                   "flex-direction": "column",
@@ -725,16 +725,16 @@ export function ContextOrbitDeck(props: ContextOrbitDeckProps) {
                             padding: "6px 8px",
                             "border-radius": "6px",
                             background: isHoveredForTab()
-                              ? "rgba(56, 189, 248, 0.22)"
+                              ? "rgba(var(--accent-rgb, 56, 189, 248), 0.22)"
                               : ws.id === props.currentWorkspace.id
-                              ? "rgba(255, 255, 255, 0.1)"
+                              ? "var(--hover-bg, rgba(255, 255, 255, 0.08))"
                               : "transparent",
                             border: isHoveredForTab()
                               ? "1px dashed var(--accent-default, #38bdf8)"
                               : "1px solid transparent",
                             color: ws.color,
                             "font-size": "12px",
-                            cursor: "grab",
+                            cursor: "pointer",
                             "user-select": "none",
                             "-webkit-user-select": "none",
                             "text-align": "left",
@@ -986,7 +986,7 @@ export function ContextOrbitDeck(props: ContextOrbitDeckProps) {
       <Show when={showRouterDrawer()}>
         <div
           style={{
-            background: "rgba(15, 23, 42, 0.95)",
+            background: "var(--popover-bg, var(--panel-bg, rgba(24, 24, 27, 0.95)))",
             "border-bottom": "1px solid rgba(168, 85, 247, 0.3)",
             padding: "12px 20px",
             display: "flex",
@@ -1164,12 +1164,12 @@ export function ContextOrbitDeck(props: ContextOrbitDeckProps) {
                       width: "320px",
                       "min-width": "300px",
                       "max-height": "100%",
-                      background: "rgba(15, 23, 42, 0.6)",
-                      border: `1px solid rgba(255, 255, 255, 0.08)`,
+                      background: "var(--card-bg, rgba(255, 255, 255, 0.04))",
+                      border: `1px solid var(--border-color, rgba(255, 255, 255, 0.08))`,
                       "border-top": `3px solid ${ws.color}`,
                       "border-radius": "12px",
                       overflow: "hidden",
-                      "box-shadow": "0 8px 24px rgba(0, 0, 0, 0.3)",
+                      "box-shadow": "0 8px 24px rgba(0, 0, 0, 0.2)",
                       "flex-shrink": 0,
                       opacity: draggedWorkspaceId() === ws.id ? 0.45 : 1,
                       transition: "opacity 0.15s ease",
@@ -1578,11 +1578,11 @@ export function ContextOrbitDeck(props: ContextOrbitDeckProps) {
               "align-items": "center",
               gap: "8px",
               padding: "6px 12px",
-              background: "rgba(15, 23, 42, 0.8)",
+              background: "var(--popover-bg, var(--panel-bg, rgba(24, 24, 27, 0.85)))",
               "backdrop-filter": "blur(12px)",
-              border: "1px solid rgba(255, 255, 255, 0.12)",
+              border: "1px solid var(--border-color, rgba(255, 255, 255, 0.12))",
               "border-radius": "10px",
-              "box-shadow": "0 6px 20px rgba(0, 0, 0, 0.35)",
+              "box-shadow": "0 6px 20px rgba(0, 0, 0, 0.25)",
             }}
           >
             <button
@@ -1708,12 +1708,12 @@ export function ContextOrbitDeck(props: ContextOrbitDeckProps) {
                       top: `${pos().y}px`,
                       width: "240px",
                       background: isActive()
-                        ? "rgba(15, 23, 42, 0.95)"
-                        : "rgba(20, 28, 48, 0.88)",
+                        ? "var(--popover-bg, var(--panel-bg, rgba(24, 24, 27, 0.95)))"
+                        : "var(--card-bg, rgba(255, 255, 255, 0.05))",
                       "backdrop-filter": "blur(12px)",
                       border: isActive()
                         ? `2px solid ${wsColor()}`
-                        : "1px solid rgba(255, 255, 255, 0.12)",
+                        : "1px solid var(--border-color, rgba(255, 255, 255, 0.12))",
                       "border-left": `4px solid ${wsColor()}`,
                       "border-radius": "10px",
                       padding: "8px 10px",
@@ -1841,14 +1841,14 @@ export function ContextOrbitDeck(props: ContextOrbitDeckProps) {
             onSubmit={handleCreateWorkspace}
             style={{
               width: "380px",
-              background: "rgba(15, 23, 42, 0.98)",
-              border: "1px solid rgba(255, 255, 255, 0.15)",
+              background: "var(--popover-bg, var(--panel-bg, rgba(24, 24, 27, 0.98)))",
+              border: "1px solid var(--border-strong, var(--border-color, rgba(255, 255, 255, 0.15)))",
               "border-radius": "14px",
               padding: "20px",
               display: "flex",
               "flex-direction": "column",
               gap: "14px",
-              "box-shadow": "0 20px 50px rgba(0, 0, 0, 0.6)",
+              "box-shadow": "0 20px 50px rgba(0, 0, 0, 0.5)",
             }}
             onClick={(e) => e.stopPropagation()}
           >

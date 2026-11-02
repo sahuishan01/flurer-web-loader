@@ -398,13 +398,13 @@ export function TabBar(props: TabBarProps) {
                 left: "0",
                 "margin-top": "6px",
                 "z-index": 9999,
-                background: "rgba(15, 23, 42, 0.98)",
-                "backdrop-filter": "blur(20px)",
-                "-webkit-backdrop-filter": "blur(20px)",
-                border: "1px solid rgba(255, 255, 255, 0.22)",
+                background: "var(--popover-bg, var(--panel-bg, rgba(24, 24, 27, 0.95)))",
+                "backdrop-filter": "blur(var(--surface-blur, 20px))",
+                "-webkit-backdrop-filter": "blur(var(--surface-blur, 20px))",
+                border: "1px solid var(--border-strong, var(--border-color, rgba(255, 255, 255, 0.15)))",
                 "border-radius": "10px",
                 padding: "8px",
-                "box-shadow": "0 16px 40px rgba(0, 0, 0, 0.7)",
+                "box-shadow": "0 16px 40px rgba(0, 0, 0, 0.35)",
                 "min-width": "220px",
                 "max-height": "420px",
                 "overflow-y": "auto",
@@ -446,16 +446,16 @@ export function TabBar(props: TabBarProps) {
                           padding: "6px 8px",
                           "border-radius": "6px",
                           background: isHoveredForTab()
-                            ? "rgba(56, 189, 248, 0.22)"
+                            ? "rgba(var(--accent-rgb, 56, 189, 248), 0.22)"
                             : ws.id === props.currentWorkspace?.id
-                            ? "rgba(255, 255, 255, 0.1)"
+                            ? "var(--hover-bg, rgba(255, 255, 255, 0.08))"
                             : "transparent",
                           border: isHoveredForTab()
                             ? "1px dashed var(--accent-default, #38bdf8)"
                             : "1px solid transparent",
                           color: ws.color,
                           "font-size": "12px",
-                          cursor: "grab",
+                          cursor: "pointer",
                           "user-select": "none",
                           "-webkit-user-select": "none",
                           "touch-action": "none",
@@ -493,7 +493,7 @@ export function TabBar(props: TabBarProps) {
               </For>
 
               {/* Divider */}
-              <div style={{ height: "1px", background: "rgba(255, 255, 255, 0.08)", margin: "4px 0" }} />
+              <div style={{ height: "1px", background: "var(--border-color, rgba(255, 255, 255, 0.08))", margin: "4px 0" }} />
 
               {/* New Group Option / Inline Creation Form */}
               <Show
@@ -508,11 +508,11 @@ export function TabBar(props: TabBarProps) {
                       padding: "6px 8px",
                       "border-radius": "6px",
                       background: wsTabHoverTarget() === "new-group"
-                        ? "rgba(56, 189, 248, 0.22)"
-                        : "rgba(255, 255, 255, 0.04)",
+                        ? "rgba(var(--accent-rgb, 56, 189, 248), 0.22)"
+                        : "var(--card-bg, rgba(255, 255, 255, 0.04))",
                       border: wsTabHoverTarget() === "new-group"
                         ? "1px dashed var(--accent-default, #38bdf8)"
-                        : "1px dashed rgba(255, 255, 255, 0.15)",
+                        : "1px dashed var(--border-color, rgba(255, 255, 255, 0.15))",
                       color: "var(--accent-default, #38bdf8)",
                       "font-size": "12px",
                       "font-weight": 500,
@@ -569,8 +569,8 @@ export function TabBar(props: TabBarProps) {
                     "flex-direction": "column",
                     gap: "8px",
                     padding: "8px",
-                    background: "rgba(0, 0, 0, 0.35)",
-                    border: "1px solid rgba(56, 189, 248, 0.35)",
+                    background: "var(--input-bg, rgba(0, 0, 0, 0.2))",
+                    border: "1px solid rgba(var(--accent-rgb, 56, 189, 248), 0.35)",
                     "border-radius": "6px",
                     margin: "2px 0",
                   }}
@@ -591,11 +591,11 @@ export function TabBar(props: TabBarProps) {
                       }}
                       style={{
                         flex: 1,
-                        background: "rgba(255, 255, 255, 0.08)",
-                        border: "1px solid rgba(255, 255, 255, 0.15)",
+                        background: "var(--input-bg, rgba(255, 255, 255, 0.08))",
+                        border: "1px solid var(--border-color, rgba(255, 255, 255, 0.15))",
                         "border-radius": "4px",
                         padding: "4px 8px",
-                        color: "#f8fafc",
+                        color: "var(--text-primary, #f8fafc)",
                         "font-size": "12px",
                         outline: "none",
                       }}
@@ -613,7 +613,7 @@ export function TabBar(props: TabBarProps) {
                               height: "16px",
                               "border-radius": "50%",
                               background: c,
-                              border: newWsColor() === c ? "2px solid #ffffff" : "1px solid rgba(0, 0, 0, 0.3)",
+                              border: newWsColor() === c ? "2px solid var(--text-primary, #ffffff)" : "1px solid rgba(0, 0, 0, 0.3)",
                               "box-shadow": newWsColor() === c ? `0 0 6px ${c}` : "none",
                               cursor: "pointer",
                               padding: 0,
@@ -649,7 +649,7 @@ export function TabBar(props: TabBarProps) {
                           background: "var(--accent-default, #38bdf8)",
                           border: "none",
                           "border-radius": "4px",
-                          color: "#0f172a",
+                          color: "var(--btn-accent-text, #0f172a)",
                           "font-size": "11px",
                           "font-weight": 600,
                           cursor: newWsName().trim() ? "pointer" : "not-allowed",
@@ -805,13 +805,13 @@ export function TabBar(props: TabBarProps) {
             top: `${tabMenu()!.y}px`,
             left: `${Math.min(tabMenu()!.x, window.innerWidth - 220)}px`,
             "z-index": 10000,
-            background: "rgba(15, 23, 42, 0.95)",
-            "backdrop-filter": "blur(16px)",
-            "-webkit-backdrop-filter": "blur(16px)",
-            border: "1px solid rgba(255, 255, 255, 0.15)",
+            background: "var(--popover-bg, var(--panel-bg, rgba(24, 24, 27, 0.95)))",
+            "backdrop-filter": "blur(var(--surface-blur, 16px))",
+            "-webkit-backdrop-filter": "blur(var(--surface-blur, 16px))",
+            border: "1px solid var(--border-strong, var(--border-color, rgba(255, 255, 255, 0.15)))",
             "border-radius": "10px",
             padding: "6px",
-            "box-shadow": "0 16px 36px rgba(0, 0, 0, 0.6), 0 0 1px rgba(255, 255, 255, 0.2)",
+            "box-shadow": "0 16px 36px rgba(0, 0, 0, 0.35)",
             "min-width": "200px",
             display: "flex",
             "flex-direction": "column",
@@ -849,7 +849,7 @@ export function TabBar(props: TabBarProps) {
                     gap: "8px",
                     padding: "6px 8px",
                     "border-radius": "6px",
-                    background: isCurrent() ? "rgba(255, 255, 255, 0.1)" : "transparent",
+                    background: isCurrent() ? "var(--hover-bg, rgba(255, 255, 255, 0.08))" : "transparent",
                     border: "none",
                     color: "var(--text-primary, #f8fafc)",
                     "font-size": "12px",
@@ -910,7 +910,7 @@ export function TabBar(props: TabBarProps) {
             <span>Create New Group...</span>
           </button>
 
-          <div style={{ height: "1px", background: "rgba(255, 255, 255, 0.08)", margin: "4px 0" }} />
+          <div style={{ height: "1px", background: "var(--border-color, rgba(255, 255, 255, 0.08))", margin: "4px 0" }} />
 
           <button
             type="button"
@@ -938,7 +938,7 @@ export function TabBar(props: TabBarProps) {
             <span>Ungroup Tab (General)</span>
           </button>
 
-          <div style={{ height: "1px", background: "rgba(255, 255, 255, 0.08)", margin: "4px 0" }} />
+          <div style={{ height: "1px", background: "var(--border-color, rgba(255, 255, 255, 0.08))", margin: "4px 0" }} />
 
           {/* Reopen Closed Tab */}
           <button
@@ -1002,7 +1002,7 @@ export function TabBar(props: TabBarProps) {
             </div>
           </button>
 
-          <div style={{ height: "1px", background: "rgba(255, 255, 255, 0.08)", margin: "4px 0" }} />
+          <div style={{ height: "1px", background: "var(--border-color, rgba(255, 255, 255, 0.08))", margin: "4px 0" }} />
 
           <button
             type="button"
