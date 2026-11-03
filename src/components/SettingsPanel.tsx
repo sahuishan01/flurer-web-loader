@@ -97,7 +97,40 @@ export function SettingsPanel(props: SettingsPanelProps) {
   const [layaOfflineReady, setLayaOfflineReady] = createSignal(isLayaOfflineDownloaded());
   const [testEndpointResult, setTestEndpointResult] = createSignal<string | null>(null);
   const [isTestingEndpoint, setIsTestingEndpoint] = createSignal(false);
-  const [testEndpointUrl, setTestEndpointUrl] = createSignal("https://news.ycombinator.com");
+  const [isDefaultBrowser, setIsDefaultBrowser] = createSignal<boolean | null>(null);
+  const [isRegisteringBrowser, setIsRegisteringBrowser] = createSignal(false);
+  const [browserNotice, setBrowserNotice] = createSignal("");
+
+  const checkDefaultBrowserStatus = async () => {
+    try {
+      if (window.TauriCore?.invoke) {
+        const res = await window.TauriCore.invoke<boolean>("check_is_default_browser");
+        setIsDefaultBrowser(res);
+      }
+    } catch (e) {
+      console.warn("Failed to check default browser status:", e);
+    }
+  };
+
+  const handleRegisterDefaultBrowser = async () => {
+    setIsRegisteringBrowser(true);
+    setBrowserNotice("");
+    try {
+      if (window.TauriCore?.invoke) {
+        await window.TauriCore.invoke("register_default_browser");
+        setIsDefaultBrowser(true);
+        setBrowserNotice("✓ Flurer registered as default browser handler. Windows Default Apps settings opened.");
+      }
+    } catch (e: any) {
+      setBrowserNotice(`Failed: ${e?.message || String(e)}`);
+    } finally {
+      setIsRegisteringBrowser(false);
+    }
+  };
+
+  onMount(() => {
+    checkDefaultBrowserStatus();
+  });
 
   const handleDownloadLaya = async () => {
     setIsDownloadingLaya(true);
@@ -1847,6 +1880,58 @@ export function SettingsPanel(props: SettingsPanelProps) {
           <label for="auto-launch-restricted" style={{ "font-size": "13px", cursor: "pointer" }}>
             Auto-open Native Window for frame-restricted sites (Outlook, GitHub, Google Auth)
           </label>
+        </div>
+
+        {/* Default Browser Integration */}
+        <div
+          style={{
+            display: "flex",
+            "flex-direction": "column",
+            gap: "8px",
+            padding: "14px",
+            background: "var(--input-bg, rgba(255, 255, 255, 0.04))",
+            border: "1px solid var(--border-color, rgba(255, 255, 255, 0.08))",
+            "border-radius": "8px",
+            "margin-top": "6px",
+          }}
+        >
+          <div style={{ display: "flex", "align-items": "center", "justify-content": "space-between" }}>
+            <div>
+              <div style={{ "font-size": "13px", "font-weight": 600, color: "var(--text-primary, #f8fafc)" }}>
+                Default Web Browser
+              </div>
+              <div style={{ "font-size": "12px", color: "var(--text-secondary, #94a3b8)", "margin-top": "2px" }}>
+                Register Flurer Web Loader as your default Windows browser for HTTP/HTTPS links
+              </div>
+            </div>
+            <button
+              type="button"
+              disabled={isRegisteringBrowser() || isDefaultBrowser() === null}
+              onClick={handleRegisterDefaultBrowser}
+              style={{
+                padding: "6px 14px",
+                "border-radius": "6px",
+                background: "var(--accent-default, #38bdf8)",
+                color: "#0f172a",
+                border: "none",
+                "font-weight": 600,
+                "font-size": "12.5px",
+                cursor: "pointer",
+                opacity: isRegisteringBrowser() ? 0.7 : 1,
+              }}
+            >
+              {isRegisteringBrowser()
+                ? "Registering..."
+                : isDefaultBrowser() === true
+                ? "Configure in Windows"
+                : "Set as Default Browser"}
+            </button>
+          </div>
+          <Show when={browserNotice()}>
+            <div style={{ "font-size": "12px", color: "var(--accent-default, #38bdf8)", "margin-top": "4px" }}>
+              {browserNotice()}
+            </div>
+          </Show>
         </div>
 
         {/* --- Security, Persistent Login & Privacy Systems --- */}
