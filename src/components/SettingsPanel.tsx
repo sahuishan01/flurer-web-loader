@@ -1,4 +1,4 @@
-import { For, Show, createSignal, createEffect, onCleanup } from "solid-js";
+import { For, Show, createSignal, createEffect, onCleanup, onMount } from "solid-js";
 import { SettingsPanelProps, SearchEngine, ShortcutActionId } from "../types";
 import {
   themeConfig,
@@ -97,6 +97,7 @@ export function SettingsPanel(props: SettingsPanelProps) {
   const [layaOfflineReady, setLayaOfflineReady] = createSignal(isLayaOfflineDownloaded());
   const [testEndpointResult, setTestEndpointResult] = createSignal<string | null>(null);
   const [isTestingEndpoint, setIsTestingEndpoint] = createSignal(false);
+  const [testEndpointUrl, setTestEndpointUrl] = createSignal("https://news.ycombinator.com");
   const [isDefaultBrowser, setIsDefaultBrowser] = createSignal<boolean | null>(null);
   const [isRegisteringBrowser, setIsRegisteringBrowser] = createSignal(false);
   const [browserNotice, setBrowserNotice] = createSignal("");
