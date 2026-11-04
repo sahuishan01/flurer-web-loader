@@ -9,7 +9,8 @@ export type PresetThemeId =
   | "minimal-dark"
   | "midnight-oled"
   | "tokyo-night"
-  | "nordic-frost";
+  | "nordic-frost"
+  | "paper-light";
 
 export interface ThemeColors {
   panelRgb: string;
@@ -149,6 +150,24 @@ export const PRESET_THEMES: Record<Exclude<PresetThemeId, "auto">, PresetDef> = 
       cardBorder: "rgba(136, 192, 208, 0.15)",
     },
   },
+  "paper-light": {
+    id: "paper-light",
+    name: "Paper Sepia",
+    description: "Warm off-white paper with terracotta ink and sepia accents",
+    colors: {
+      panelRgb: "250, 246, 238",
+      panelBg: "#faf6ee",
+      textPrimary: "#3b2f22",
+      textSecondary: "#6f5d47",
+      textMuted: "#8a7a68",
+      border: "rgba(176, 90, 26, 0.2)",
+      inputBg: "rgba(255, 255, 255, 0.8)",
+      accent: "#b05a1a",
+      accentRgb: "176, 90, 26",
+      cardBg: "rgba(255, 255, 255, 0.7)",
+      cardBorder: "rgba(176, 90, 26, 0.25)",
+    },
+  },
 };
 
 const THEME_STORAGE_KEY = "flurer-web-loader-theme-config";
@@ -209,30 +228,21 @@ export function getEffectiveThemeStyles(
   baseOpacity: number = 0.75,
   baseBlur: number = 12
 ): Record<string, string> {
-  const isLight = dataBgLightness === "light";
   const opacity = config.surfaceOpacity ?? baseOpacity;
   const blur = config.surfaceBlur ?? baseBlur;
 
   if (config.mode === "auto") {
-    // Mode: Auto (Inherits Flurer's native CSS custom properties directly)
-    return {
-      "--panel-rgb": isLight ? "255, 255, 255" : "var(--panel-rgb, 32, 32, 32)",
-      "--panel-bg": isLight ? "rgba(255, 255, 255, 0.85)" : "var(--panel-bg, rgba(32, 32, 32, 0.85))",
-      "--popover-bg": isLight ? "rgba(255, 255, 255, 0.95)" : "rgba(24, 24, 27, 0.95)",
-      "--text-primary": isLight ? "#1c1c1c" : "var(--text-primary, #ffffff)",
-      "--text-secondary": isLight ? "#5f5f5f" : "var(--text-secondary, #d4d4d4)",
-      "--text-muted": isLight ? "#767676" : "var(--text-muted, #a1a1aa)",
-      "--border-color": isLight ? "rgba(0, 0, 0, 0.08)" : "var(--border-color, rgba(255, 255, 255, 0.08))",
-      "--border-strong": isLight ? "rgba(0, 0, 0, 0.14)" : "var(--border-strong, rgba(255, 255, 255, 0.14))",
-      "--hover-bg": isLight ? "rgba(0, 0, 0, 0.05)" : "var(--hover-bg, rgba(255, 255, 255, 0.07))",
-      "--input-bg": isLight ? "rgba(0, 0, 0, 0.04)" : "var(--input-bg, rgba(255, 255, 255, 0.06))",
-      "--accent-default": "var(--accent-default, #38bdf8)",
-      "--accent-rgb": "var(--accent-rgb, 56, 189, 248)",
-      "--card-bg": isLight ? "rgba(255, 255, 255, 0.6)" : "var(--card-bg, rgba(255, 255, 255, 0.04))",
-      "--card-border": isLight ? "rgba(0, 0, 0, 0.08)" : "var(--card-border, rgba(255, 255, 255, 0.08))",
-      "--surface-blur": `${blur}px`,
-      "--plugin-surface-opacity": `${opacity}`,
-    };
+    // Mode: Auto (Inherits Flurer's native CSS custom properties directly from the document cascade)
+    // Avoid setting overriding color variables inline so Flurer's active theme (Light, Dark, Midnight, Ocean, Nord, Paper)
+    // applies automatically to all text, borders, accents, and surfaces.
+    const styles: Record<string, string> = {};
+    if (config.surfaceOpacity !== undefined) {
+      styles["--plugin-surface-opacity"] = `${opacity}`;
+    }
+    if (config.surfaceBlur !== undefined) {
+      styles["--surface-blur"] = `${blur}px`;
+    }
+    return styles;
   }
 
   if (config.mode === "preset" && config.preset !== "auto") {

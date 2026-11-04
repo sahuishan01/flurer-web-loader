@@ -84,13 +84,13 @@ function KeycapBadge(props: { keys: string }) {
               display: "inline-block",
               padding: "2px 7px",
               "border-radius": "4px",
-              background: "rgba(255, 255, 255, 0.08)",
-              border: "1px solid var(--border-color, rgba(255, 255, 255, 0.16))",
-              "box-shadow": "0 1px 2px rgba(0, 0, 0, 0.35), inset 0 1px 0 rgba(255, 255, 255, 0.1)",
-              "font-family": "Space Mono, monospace",
+              background: "var(--control-bg, rgba(var(--panel-rgb, 128, 128, 128), 0.12))",
+              border: "1px solid var(--border-color, rgba(128, 128, 128, 0.2))",
+              "box-shadow": "0 1px 2px rgba(0, 0, 0, 0.15), inset 0 1px 0 rgba(255, 255, 255, 0.1)",
+              "font-family": "var(--font-data, Space Mono, monospace)",
               "font-size": "11px",
               "font-weight": 600,
-              color: "var(--text-primary, #f8fafc)",
+              color: "var(--text-primary, var(--text-color, currentColor))",
               "line-height": "1.3",
               "min-width": "18px",
               "text-align": "center",
@@ -108,6 +108,43 @@ export function SettingsPanel(props: SettingsPanelProps) {
   // Navigation / active tab state
   const [activeTab, setActiveTab] = createSignal<SettingsTab>("appearance");
   const [globalSearch, setGlobalSearch] = createSignal("");
+
+  // Live Flurer Theme & Mode Observer
+  const [flurerTheme, setFlurerTheme] = createSignal(
+    document.documentElement?.dataset?.theme || "dark"
+  );
+  const [flurerMode, setFlurerMode] = createSignal(
+    document.documentElement?.dataset?.mode ||
+      (props.dataBgLightness === "light" ? "light" : "dark")
+  );
+
+  onMount(() => {
+    checkDefaultBrowserStatus();
+
+    const updateThemeState = () => {
+      const theme = document.documentElement?.dataset?.theme || "dark";
+      const mode =
+        document.documentElement?.dataset?.mode ||
+        (theme === "light" || theme === "paper" ? "light" : "dark");
+      setFlurerTheme(theme);
+      setFlurerMode(mode);
+    };
+    updateThemeState();
+
+    const observer = new MutationObserver(() => {
+      updateThemeState();
+    });
+
+    observer.observe(document.documentElement, {
+      attributes: true,
+      attributeFilter: ["data-theme", "data-mode", "data-bg-lightness"],
+    });
+
+    onCleanup(() => observer.disconnect());
+  });
+
+  const isLightMode = () => flurerMode() === "light";
+  const accentTextColor = () => (isLightMode() ? "#ffffff" : "#0f172a");
 
   // Direct plugin settings accessors
   const currentEngine = () => props.pluginSettings.searchEngine ?? "duckduckgo";
@@ -171,10 +208,6 @@ export function SettingsPanel(props: SettingsPanelProps) {
       setIsRegisteringBrowser(false);
     }
   };
-
-  onMount(() => {
-    checkDefaultBrowserStatus();
-  });
 
   const handleDownloadLaya = async () => {
     setIsDownloadingLaya(true);
@@ -449,8 +482,8 @@ export function SettingsPanel(props: SettingsPanelProps) {
         "flex-direction": "column",
         gap: "24px",
         padding: "20px 24px",
-        color: "var(--text-primary, #f8fafc)",
-        "font-family": "system-ui, -apple-system, sans-serif",
+        color: "var(--text-primary, var(--text-color, currentColor))",
+        "font-family": "var(--fluent-font, system-ui, -apple-system, sans-serif)",
         "max-width": "940px",
         margin: "0 auto",
         width: "100%",
@@ -466,7 +499,7 @@ export function SettingsPanel(props: SettingsPanelProps) {
           gap: "16px",
           "flex-wrap": "wrap",
           "padding-bottom": "18px",
-          "border-bottom": "1px solid var(--border-color, rgba(255, 255, 255, 0.08))",
+          "border-bottom": "1px solid var(--border-color, rgba(128, 128, 128, 0.15))",
         }}
       >
         <div style={{ display: "flex", "align-items": "center", gap: "12px" }}>
@@ -474,14 +507,14 @@ export function SettingsPanel(props: SettingsPanelProps) {
             style={{
               width: "36px",
               height: "36px",
-              "border-radius": "8px",
-              background: "rgba(var(--accent-rgb, 56, 189, 248), 0.15)",
-              border: "1px solid rgba(var(--accent-rgb, 56, 189, 248), 0.3)",
+              "border-radius": "var(--radius-md, 8px)",
+              background: "var(--accent-bg-soft, var(--accent-soft, rgba(var(--accent-rgb, 56, 189, 248), 0.12)))",
+              border: "1px solid var(--accent-border, rgba(var(--accent-rgb, 56, 189, 248), 0.3))",
               display: "flex",
               "align-items": "center",
               "justify-content": "center",
-              color: "var(--accent-default, #38bdf8)",
-              "box-shadow": "0 0 12px rgba(var(--accent-rgb, 56, 189, 248), 0.2)",
+              color: "var(--accent-default, var(--accent, #38bdf8))",
+              "box-shadow": "0 0 12px var(--accent-border, rgba(var(--accent-rgb, 56, 189, 248), 0.15))",
             }}
           >
             <GlobeIcon size={20} />
@@ -494,22 +527,24 @@ export function SettingsPanel(props: SettingsPanelProps) {
               <span
                 style={{
                   "font-size": "10.5px",
-                  "font-family": "Space Mono, monospace",
-                  padding: "2px 6px",
+                  "font-family": "var(--font-data, Space Mono, monospace)",
+                  padding: "2px 7px",
                   "border-radius": "4px",
-                  background: "rgba(255, 255, 255, 0.08)",
-                  border: "1px solid rgba(255, 255, 255, 0.1)",
-                  color: "var(--accent-default, #38bdf8)",
+                  background: "var(--control-bg, rgba(var(--panel-rgb, 128, 128, 128), 0.1))",
+                  border: "1px solid var(--border-color, rgba(128, 128, 128, 0.15))",
+                  color: "var(--accent-default, var(--accent, #38bdf8))",
+                  "font-weight": 600,
                 }}
               >
-                v0.1.61
+                v0.1.62
               </span>
             </div>
             <p
               style={{
                 margin: "2px 0 0 0",
                 "font-size": "12px",
-                color: "var(--text-secondary, #94a3b8)",
+                color: "var(--text-secondary, currentColor)",
+                opacity: 0.85,
               }}
             >
               Configure browser chrome appearance, tabs paradigm, keyboard hotkeys, and Windows integration.
@@ -532,7 +567,8 @@ export function SettingsPanel(props: SettingsPanelProps) {
             style={{
               position: "absolute",
               left: "10px",
-              color: "var(--text-secondary, #94a3b8)",
+              color: "var(--text-secondary, currentColor)",
+              opacity: 0.7,
               display: "flex",
               "pointer-events": "none",
             }}
@@ -547,20 +583,20 @@ export function SettingsPanel(props: SettingsPanelProps) {
             style={{
               width: "100%",
               padding: "7px 30px 7px 32px",
-              background: "rgba(0, 0, 0, 0.3)",
-              border: "1px solid var(--border-color, rgba(255, 255, 255, 0.12))",
-              "border-radius": "6px",
-              color: "var(--text-primary, #f8fafc)",
+              background: "var(--input-bg, var(--control-bg, rgba(var(--panel-rgb, 128, 128, 128), 0.08)))",
+              border: "1px solid var(--border-color, rgba(128, 128, 128, 0.18))",
+              "border-radius": "var(--radius-sm, 6px)",
+              color: "var(--text-primary, var(--text-color, currentColor))",
               "font-size": "12px",
               outline: "none",
               transition: "border-color 0.2s ease, box-shadow 0.2s ease",
             }}
             onFocus={(e) => {
-              e.currentTarget.style.borderColor = "var(--accent-default, #38bdf8)";
-              e.currentTarget.style.boxShadow = "0 0 0 2px rgba(var(--accent-rgb, 56, 189, 248), 0.25)";
+              e.currentTarget.style.borderColor = "var(--accent-default, var(--accent, #38bdf8))";
+              e.currentTarget.style.boxShadow = "0 0 0 2px var(--accent-border, rgba(var(--accent-rgb, 56, 189, 248), 0.25))";
             }}
             onBlur={(e) => {
-              e.currentTarget.style.borderColor = "var(--border-color, rgba(255, 255, 255, 0.12))";
+              e.currentTarget.style.borderColor = "var(--border-color, rgba(128, 128, 128, 0.18))";
               e.currentTarget.style.boxShadow = "none";
             }}
           />
@@ -573,7 +609,7 @@ export function SettingsPanel(props: SettingsPanelProps) {
                 right: "8px",
                 background: "transparent",
                 border: "none",
-                color: "var(--text-secondary, #94a3b8)",
+                color: "var(--text-secondary, currentColor)",
                 cursor: "pointer",
                 padding: "2px",
                 "font-size": "12px",
@@ -591,12 +627,12 @@ export function SettingsPanel(props: SettingsPanelProps) {
         <div
           style={{
             display: "flex",
-            gap: "6px",
+            gap: "4px",
             "overflow-x": "auto",
             "scrollbar-width": "none",
             padding: "4px",
-            background: "rgba(0, 0, 0, 0.25)",
-            border: "1px solid var(--border-color, rgba(255, 255, 255, 0.08))",
+            background: "var(--control-bg, rgba(var(--panel-rgb, 128, 128, 128), 0.1))",
+            border: "1px solid var(--border-color, rgba(128, 128, 128, 0.12))",
             "border-radius": "10px",
             "user-select": "none",
           }}
@@ -615,19 +651,21 @@ export function SettingsPanel(props: SettingsPanelProps) {
                     gap: "8px",
                     padding: "8px 14px",
                     "border-radius": "7px",
-                    border: "none",
+                    border: isSelected()
+                      ? "1px solid var(--accent-border, transparent)"
+                      : "1px solid transparent",
                     background: isSelected()
-                      ? "var(--accent-default, #38bdf8)"
+                      ? "var(--accent-default, var(--accent, #38bdf8))"
                       : "transparent",
-                    color: isSelected() ? "#0f172a" : "var(--text-secondary, #cbd5e1)",
+                    color: isSelected()
+                      ? accentTextColor()
+                      : "var(--text-secondary, currentColor)",
                     "font-size": "12.5px",
                     "font-weight": isSelected() ? 600 : 500,
                     cursor: "pointer",
-                    transition: "all 0.18s cubic-bezier(0.16, 1, 0.3, 1)",
+                    transition: "all 0.16s cubic-bezier(0.16, 1, 0.3, 1)",
                     "white-space": "nowrap",
-                    "box-shadow": isSelected()
-                      ? "0 2px 8px rgba(0, 0, 0, 0.3), 0 0 12px rgba(var(--accent-rgb, 56, 189, 248), 0.3)"
-                      : "none",
+                    "box-shadow": isSelected() ? "0 2px 8px rgba(0, 0, 0, 0.18)" : "none",
                   }}
                 >
                   <IconComp size={15} />
@@ -647,13 +685,13 @@ export function SettingsPanel(props: SettingsPanelProps) {
             "align-items": "center",
             "justify-content": "space-between",
             padding: "10px 14px",
-            background: "rgba(var(--accent-rgb, 56, 189, 248), 0.08)",
-            border: "1px solid rgba(var(--accent-rgb, 56, 189, 248), 0.25)",
-            "border-radius": "8px",
+            background: "var(--accent-bg-soft, var(--accent-soft, rgba(var(--accent-rgb, 56, 189, 248), 0.08)))",
+            border: "1px solid var(--accent-border, rgba(var(--accent-rgb, 56, 189, 248), 0.25))",
+            "border-radius": "var(--radius-md, 8px)",
             "font-size": "12px",
           }}
         >
-          <span style={{ color: "var(--text-primary, #f8fafc)" }}>
+          <span style={{ color: "var(--text-primary, var(--text-color, currentColor))" }}>
             Showing search results for: <strong>"{globalSearch()}"</strong>
           </span>
           <button
@@ -661,9 +699,9 @@ export function SettingsPanel(props: SettingsPanelProps) {
             onClick={() => setGlobalSearch("")}
             style={{
               background: "transparent",
-              border: "1px solid var(--border-color, rgba(255, 255, 255, 0.15))",
-              color: "var(--accent-default, #38bdf8)",
-              padding: "3px 8px",
+              border: "1px solid var(--border-color, rgba(128, 128, 128, 0.2))",
+              color: "var(--accent-default, var(--accent, #38bdf8))",
+              padding: "4px 10px",
               "border-radius": "4px",
               "font-size": "11px",
               cursor: "pointer",
@@ -681,12 +719,13 @@ export function SettingsPanel(props: SettingsPanelProps) {
             display: "flex",
             "flex-direction": "column",
             gap: "20px",
-            background: "var(--card-bg, rgba(255, 255, 255, 0.035))",
-            border: "1px solid var(--card-border, rgba(255, 255, 255, 0.08))",
-            "box-shadow": "inset 0 1px 0 0 rgba(255, 255, 255, 0.05)",
+            background: "var(--card-bg, rgba(var(--panel-rgb, 128, 128, 128), 0.05))",
+            border: "1px solid var(--card-border, var(--border-color, rgba(128, 128, 128, 0.12)))",
+            "box-shadow": "inset 0 1px 0 0 rgba(var(--panel-rgb, 255, 255, 255), 0.1)",
             padding: "20px 24px",
-            "border-radius": "10px",
-            "backdrop-filter": "blur(12px)",
+            "border-radius": "var(--radius-lg, 10px)",
+            "backdrop-filter": "blur(var(--surface-blur, 12px))",
+            "-webkit-backdrop-filter": "blur(var(--surface-blur, 12px))",
           }}
         >
           <div style={{ display: "flex", "align-items": "flex-start", "justify-content": "space-between", gap: "12px", "flex-wrap": "wrap" }}>
@@ -694,10 +733,10 @@ export function SettingsPanel(props: SettingsPanelProps) {
               <span
                 style={{
                   "font-size": "11px",
-                  "font-family": "Space Mono, monospace",
+                  "font-family": "var(--font-data, Space Mono, monospace)",
                   "text-transform": "uppercase",
                   "letter-spacing": "0.12em",
-                  color: "var(--accent-default, #38bdf8)",
+                  color: "var(--accent-default, var(--accent, #38bdf8))",
                   display: "block",
                   "margin-bottom": "4px",
                 }}
@@ -707,8 +746,8 @@ export function SettingsPanel(props: SettingsPanelProps) {
               <h3 style={{ margin: 0, "font-size": "15px", "font-weight": 600 }}>
                 Visual Chrome & Surface Styling
               </h3>
-              <p style={{ margin: "2px 0 0 0", "font-size": "12px", color: "var(--text-secondary, #94a3b8)" }}>
-                Select automatic Flurer token sync, choose curated dark templates, or design custom accents.
+              <p style={{ margin: "2px 0 0 0", "font-size": "12px", color: "var(--text-secondary, currentColor)", opacity: 0.85 }}>
+                Select automatic Flurer token sync, choose curated templates, or design custom accents.
               </p>
             </div>
 
@@ -716,13 +755,13 @@ export function SettingsPanel(props: SettingsPanelProps) {
               type="button"
               onClick={handleResetToAuto}
               style={{
-                background: "rgba(255, 255, 255, 0.05)",
-                border: "1px solid var(--border-color, rgba(255, 255, 255, 0.15))",
-                color: "var(--text-secondary, #cbd5e1)",
+                background: "var(--control-bg, rgba(var(--panel-rgb, 128, 128, 128), 0.1))",
+                border: "1px solid var(--border-color, rgba(128, 128, 128, 0.18))",
+                color: "var(--text-primary, var(--text-color, currentColor))",
                 padding: "6px 12px",
-                "border-radius": "6px",
+                "border-radius": "var(--radius-sm, 6px)",
                 "font-size": "11.5px",
-                "font-family": "Space Mono, monospace",
+                "font-family": "var(--font-data, Space Mono, monospace)",
                 cursor: "pointer",
                 transition: "all 0.15s ease",
               }}
@@ -737,8 +776,8 @@ export function SettingsPanel(props: SettingsPanelProps) {
               display: "inline-flex",
               gap: "4px",
               padding: "4px",
-              background: "rgba(0, 0, 0, 0.3)",
-              border: "1px solid var(--border-color, rgba(255, 255, 255, 0.08))",
+              background: "var(--control-bg, rgba(var(--panel-rgb, 128, 128, 128), 0.1))",
+              border: "1px solid var(--border-color, rgba(128, 128, 128, 0.12))",
               "border-radius": "8px",
               "align-self": "flex-start",
             }}
@@ -750,9 +789,9 @@ export function SettingsPanel(props: SettingsPanelProps) {
                 padding: "6px 14px",
                 "border-radius": "6px",
                 border: "none",
-                background: currentThemeMode() === "auto" ? "var(--accent-default, #38bdf8)" : "transparent",
-                color: currentThemeMode() === "auto" ? "#0f172a" : "var(--text-secondary, #cbd5e1)",
-                "font-family": "Space Mono, monospace",
+                background: currentThemeMode() === "auto" ? "var(--accent-default, var(--accent, #38bdf8))" : "transparent",
+                color: currentThemeMode() === "auto" ? accentTextColor() : "var(--text-secondary, currentColor)",
+                "font-family": "var(--font-data, Space Mono, monospace)",
                 "font-size": "11.5px",
                 "font-weight": 600,
                 cursor: "pointer",
@@ -768,9 +807,9 @@ export function SettingsPanel(props: SettingsPanelProps) {
                 padding: "6px 14px",
                 "border-radius": "6px",
                 border: "none",
-                background: currentThemeMode() === "preset" ? "var(--accent-default, #38bdf8)" : "transparent",
-                color: currentThemeMode() === "preset" ? "#0f172a" : "var(--text-secondary, #cbd5e1)",
-                "font-family": "Space Mono, monospace",
+                background: currentThemeMode() === "preset" ? "var(--accent-default, var(--accent, #38bdf8))" : "transparent",
+                color: currentThemeMode() === "preset" ? accentTextColor() : "var(--text-secondary, currentColor)",
+                "font-family": "var(--font-data, Space Mono, monospace)",
                 "font-size": "11.5px",
                 "font-weight": 600,
                 cursor: "pointer",
@@ -786,9 +825,9 @@ export function SettingsPanel(props: SettingsPanelProps) {
                 padding: "6px 14px",
                 "border-radius": "6px",
                 border: "none",
-                background: currentThemeMode() === "custom" ? "var(--accent-default, #38bdf8)" : "transparent",
-                color: currentThemeMode() === "custom" ? "#0f172a" : "var(--text-secondary, #cbd5e1)",
-                "font-family": "Space Mono, monospace",
+                background: currentThemeMode() === "custom" ? "var(--accent-default, var(--accent, #38bdf8))" : "transparent",
+                color: currentThemeMode() === "custom" ? accentTextColor() : "var(--text-secondary, currentColor)",
+                "font-family": "var(--font-data, Space Mono, monospace)",
                 "font-size": "11.5px",
                 "font-weight": 600,
                 cursor: "pointer",
@@ -799,28 +838,61 @@ export function SettingsPanel(props: SettingsPanelProps) {
             </button>
           </div>
 
-          {/* Auto Mode Explanation */}
+          {/* Auto Mode: Live Flurer Synchronizer Status */}
           <Show when={currentThemeMode() === "auto"}>
             <div
               style={{
-                padding: "14px 18px",
-                "border-radius": "8px",
-                background: "rgba(var(--accent-rgb, 56, 189, 248), 0.04)",
-                border: "1px dashed rgba(var(--accent-rgb, 56, 189, 248), 0.3)",
-                "font-size": "12.5px",
-                "line-height": 1.5,
-                color: "var(--text-secondary, #cbd5e1)",
+                padding: "16px 18px",
+                "border-radius": "var(--radius-md, 8px)",
+                background: "var(--accent-bg-soft, var(--accent-soft, rgba(var(--accent-rgb, 56, 189, 248), 0.06)))",
+                border: "1px dashed var(--accent-border, rgba(var(--accent-rgb, 56, 189, 248), 0.3))",
                 display: "flex",
-                gap: "12px",
-                "align-items": "flex-start",
+                "flex-direction": "column",
+                gap: "10px",
               }}
             >
-              <div style={{ color: "var(--accent-default, #38bdf8)", "margin-top": "2px" }}>
-                <CheckIcon size={16} />
+              <div style={{ display: "flex", "align-items": "center", "justify-content": "space-between", "flex-wrap": "wrap", gap: "10px" }}>
+                <div style={{ display: "flex", "align-items": "center", gap: "8px" }}>
+                  <div style={{ color: "var(--accent-default, var(--accent, #38bdf8))" }}>
+                    <CheckIcon size={16} />
+                  </div>
+                  <strong style={{ "font-size": "13px", color: "var(--text-primary, var(--text-color, currentColor))" }}>
+                    Flurer System Sync Active
+                  </strong>
+                </div>
+
+                <div style={{ display: "flex", "align-items": "center", gap: "8px" }}>
+                  <span
+                    style={{
+                      "font-size": "11px",
+                      "font-family": "var(--font-data, Space Mono, monospace)",
+                      padding: "2px 8px",
+                      "border-radius": "4px",
+                      background: "var(--control-bg, rgba(var(--panel-rgb), 0.15))",
+                      border: "1px solid var(--border-color, rgba(128, 128, 128, 0.2))",
+                      color: "var(--text-primary, var(--text-color, currentColor))",
+                      "font-weight": 600,
+                    }}
+                  >
+                    Theme: {flurerTheme().toUpperCase()} ({flurerMode().toUpperCase()})
+                  </span>
+                  <div
+                    style={{
+                      width: "14px",
+                      height: "14px",
+                      "border-radius": "50%",
+                      background: "var(--accent-default, var(--accent, #38bdf8))",
+                      border: "1px solid rgba(255, 255, 255, 0.4)",
+                      "box-shadow": "0 0 6px var(--accent-default)",
+                    }}
+                    title="Active Accent Color"
+                  />
+                </div>
               </div>
-              <div>
-                <strong style={{ color: "var(--text-primary, #f8fafc)" }}>Automatic Dynamic Sync:</strong> Web Loader inherits Flurer's native tokens (<code>--panel-rgb</code>, <code>--text-primary</code>, <code>--accent-default</code>, <code>--surface-blur</code>) and harmonizes contrast automatically with Flurer's host theme.
-              </div>
+
+              <p style={{ margin: 0, "font-size": "12px", "line-height": 1.5, color: "var(--text-secondary, currentColor)", opacity: 0.9 }}>
+                Web Loader is listening to Flurer's theme engine. Switching Flurer between <strong>Light</strong>, <strong>Dark</strong>, <strong>Midnight</strong>, <strong>Ocean</strong>, <strong>Nord</strong>, and <strong>Paper</strong> instantly shifts all text colors, cards, accent borders, and input controls.
+              </p>
             </div>
           </Show>
 
@@ -838,11 +910,11 @@ export function SettingsPanel(props: SettingsPanelProps) {
                         "flex-direction": "column",
                         gap: "8px",
                         padding: "14px 16px",
-                        "border-radius": "8px",
+                        "border-radius": "var(--radius-md, 8px)",
                         background: p.colors.panelBg,
                         border: isSelected()
                           ? `2px solid ${p.colors.accent}`
-                          : "1px solid rgba(255, 255, 255, 0.1)",
+                          : "1px solid var(--border-color, rgba(128, 128, 128, 0.2))",
                         cursor: "pointer",
                         transition: "transform 0.18s ease, box-shadow 0.18s ease",
                         "box-shadow": isSelected() ? `0 0 16px ${p.colors.accent}40` : "none",
@@ -854,12 +926,12 @@ export function SettingsPanel(props: SettingsPanelProps) {
                           {p.name}
                         </span>
                         {isSelected() && (
-                          <span style={{ "font-size": "10px", "font-family": "Space Mono, monospace", color: p.colors.accent, "font-weight": 700 }}>
+                          <span style={{ "font-size": "10px", "font-family": "var(--font-data, Space Mono, monospace)", color: p.colors.accent, "font-weight": 700 }}>
                             ● ACTIVE
                           </span>
                         )}
                       </div>
-                      <span style={{ "font-size": "11.5px", color: p.colors.textMuted }}>
+                      <span style={{ "font-size": "11.5px", color: p.colors.textSecondary }}>
                         {p.description}
                       </span>
                       <div style={{ display: "flex", gap: "6px", "margin-top": "6px" }}>
@@ -896,10 +968,10 @@ export function SettingsPanel(props: SettingsPanelProps) {
                     style={{
                       padding: "6px 12px",
                       "border-radius": "6px",
-                      background: "rgba(0, 0, 0, 0.3)",
-                      border: "1px solid var(--border-color, rgba(255, 255, 255, 0.12))",
-                      color: "var(--text-primary, #f8fafc)",
-                      "font-family": "Space Mono, monospace",
+                      background: "var(--input-bg, var(--control-bg, rgba(var(--panel-rgb), 0.15)))",
+                      border: "1px solid var(--border-color, rgba(128, 128, 128, 0.2))",
+                      color: "var(--text-primary, var(--text-color, currentColor))",
+                      "font-family": "var(--font-data, Space Mono, monospace)",
                       "font-size": "12px",
                       width: "90px",
                     }}
@@ -915,7 +987,7 @@ export function SettingsPanel(props: SettingsPanelProps) {
                             "border-radius": "4px",
                             background: c.hex,
                             cursor: "pointer",
-                            border: themeConfig().customColors?.accent === c.hex ? "2px solid #ffffff" : "1px solid rgba(255,255,255,0.2)",
+                            border: themeConfig().customColors?.accent === c.hex ? "2px solid #ffffff" : "1px solid rgba(128,128,128,0.3)",
                             transition: "transform 0.15s ease",
                           }}
                           title={c.name}
@@ -940,10 +1012,10 @@ export function SettingsPanel(props: SettingsPanelProps) {
                     style={{
                       padding: "6px 12px",
                       "border-radius": "6px",
-                      background: "rgba(0, 0, 0, 0.3)",
-                      border: "1px solid var(--border-color, rgba(255, 255, 255, 0.12))",
-                      color: "var(--text-primary, #f8fafc)",
-                      "font-family": "Space Mono, monospace",
+                      background: "var(--input-bg, var(--control-bg, rgba(var(--panel-rgb), 0.15)))",
+                      border: "1px solid var(--border-color, rgba(128, 128, 128, 0.2))",
+                      color: "var(--text-primary, var(--text-color, currentColor))",
+                      "font-family": "var(--font-data, Space Mono, monospace)",
                       "font-size": "12px",
                       width: "120px",
                     }}
@@ -959,7 +1031,7 @@ export function SettingsPanel(props: SettingsPanelProps) {
                             "border-radius": "4px",
                             background: p.hex,
                             cursor: "pointer",
-                            border: themeConfig().customColors?.panelRgb === p.rgb ? "2px solid var(--accent-default, #38bdf8)" : "1px solid rgba(255,255,255,0.2)",
+                            border: themeConfig().customColors?.panelRgb === p.rgb ? "2px solid var(--accent-default, #38bdf8)" : "1px solid rgba(128,128,128,0.3)",
                             transition: "transform 0.15s ease",
                           }}
                           title={p.name}
@@ -979,15 +1051,15 @@ export function SettingsPanel(props: SettingsPanelProps) {
               "grid-template-columns": "repeat(auto-fit, minmax(260px, 1fr))",
               gap: "16px",
               padding: "16px",
-              background: "rgba(0, 0, 0, 0.2)",
-              border: "1px solid var(--border-color, rgba(255, 255, 255, 0.08))",
-              "border-radius": "8px",
+              background: "var(--control-bg, rgba(var(--panel-rgb, 128, 128, 128), 0.08))",
+              border: "1px solid var(--border-color, rgba(128, 128, 128, 0.12))",
+              "border-radius": "var(--radius-md, 8px)",
             }}
           >
             <div>
               <div style={{ display: "flex", "justify-content": "space-between", "font-size": "12px", "margin-bottom": "6px" }}>
                 <span style={{ "font-weight": 500 }}>Surface Opacity</span>
-                <span style={{ "font-family": "Space Mono, monospace", color: "var(--accent-default, #38bdf8)" }}>
+                <span style={{ "font-family": "var(--font-data, Space Mono, monospace)", color: "var(--accent-default, var(--accent, #38bdf8))" }}>
                   {Math.round(surfaceOpacity() * 100)}%
                 </span>
               </div>
@@ -998,14 +1070,14 @@ export function SettingsPanel(props: SettingsPanelProps) {
                 step="0.05"
                 value={surfaceOpacity()}
                 onInput={(e) => updateTheme({ surfaceOpacity: parseFloat(e.currentTarget.value) })}
-                style={{ width: "100%", "accent-color": "var(--accent-default, #38bdf8)", cursor: "pointer" }}
+                style={{ width: "100%", "accent-color": "var(--accent-default, var(--accent, #38bdf8))", cursor: "pointer" }}
               />
             </div>
 
             <div>
               <div style={{ display: "flex", "justify-content": "space-between", "font-size": "12px", "margin-bottom": "6px" }}>
                 <span style={{ "font-weight": 500 }}>Backdrop Blur</span>
-                <span style={{ "font-family": "Space Mono, monospace", color: "var(--accent-default, #38bdf8)" }}>
+                <span style={{ "font-family": "var(--font-data, Space Mono, monospace)", color: "var(--accent-default, var(--accent, #38bdf8))" }}>
                   {surfaceBlur()}px
                 </span>
               </div>
@@ -1016,7 +1088,7 @@ export function SettingsPanel(props: SettingsPanelProps) {
                 step="2"
                 value={surfaceBlur()}
                 onInput={(e) => updateTheme({ surfaceBlur: parseInt(e.currentTarget.value) })}
-                style={{ width: "100%", "accent-color": "var(--accent-default, #38bdf8)", cursor: "pointer" }}
+                style={{ width: "100%", "accent-color": "var(--accent-default, var(--accent, #38bdf8))", cursor: "pointer" }}
               />
             </div>
           </div>
@@ -1030,22 +1102,23 @@ export function SettingsPanel(props: SettingsPanelProps) {
             display: "flex",
             "flex-direction": "column",
             gap: "20px",
-            background: "var(--card-bg, rgba(255, 255, 255, 0.035))",
-            border: "1px solid var(--card-border, rgba(255, 255, 255, 0.08))",
-            "box-shadow": "inset 0 1px 0 0 rgba(255, 255, 255, 0.05)",
+            background: "var(--card-bg, rgba(var(--panel-rgb, 128, 128, 128), 0.05))",
+            border: "1px solid var(--card-border, var(--border-color, rgba(128, 128, 128, 0.12)))",
+            "box-shadow": "inset 0 1px 0 0 rgba(var(--panel-rgb, 255, 255, 255), 0.1)",
             padding: "20px 24px",
-            "border-radius": "10px",
-            "backdrop-filter": "blur(12px)",
+            "border-radius": "var(--radius-lg, 10px)",
+            "backdrop-filter": "blur(var(--surface-blur, 12px))",
+            "-webkit-backdrop-filter": "blur(var(--surface-blur, 12px))",
           }}
         >
           <div>
             <span
               style={{
                 "font-size": "11px",
-                "font-family": "Space Mono, monospace",
+                "font-family": "var(--font-data, Space Mono, monospace)",
                 "text-transform": "uppercase",
                 "letter-spacing": "0.12em",
-                color: "var(--accent-default, #38bdf8)",
+                color: "var(--accent-default, var(--accent, #38bdf8))",
                 display: "block",
                 "margin-bottom": "4px",
               }}
@@ -1055,7 +1128,7 @@ export function SettingsPanel(props: SettingsPanelProps) {
             <h3 style={{ margin: 0, "font-size": "15px", "font-weight": 600 }}>
               Navigation Paradigm & Smart Router (The Third Design)
             </h3>
-            <p style={{ margin: "2px 0 0 0", "font-size": "12px", color: "var(--text-secondary, #94a3b8)" }}>
+            <p style={{ margin: "2px 0 0 0", "font-size": "12px", color: "var(--text-secondary, currentColor)", opacity: 0.85 }}>
               Context Capsule HUD and extensible Workspace Orbit Deck with on-device routing.
             </p>
           </div>
@@ -1069,22 +1142,26 @@ export function SettingsPanel(props: SettingsPanelProps) {
               <div
                 style={{
                   padding: "16px",
-                  "border-radius": "8px",
-                  background: designMode() === "context-orbit" ? "rgba(var(--accent-rgb, 56, 189, 248), 0.1)" : "rgba(255, 255, 255, 0.025)",
-                  border: designMode() === "context-orbit" ? "1px solid var(--accent-default, #38bdf8)" : "1px solid var(--border-color, rgba(255, 255, 255, 0.08))",
+                  "border-radius": "var(--radius-md, 8px)",
+                  background: designMode() === "context-orbit"
+                    ? "var(--accent-bg-soft, var(--accent-soft, rgba(var(--accent-rgb), 0.1)))"
+                    : "var(--control-bg, rgba(var(--panel-rgb, 128, 128, 128), 0.04))",
+                  border: designMode() === "context-orbit"
+                    ? "1px solid var(--accent-default, var(--accent, #38bdf8))"
+                    : "1px solid var(--border-color, rgba(128, 128, 128, 0.12))",
                   cursor: "pointer",
                   transition: "all 0.18s ease",
-                  "box-shadow": designMode() === "context-orbit" ? "0 0 12px rgba(var(--accent-rgb, 56, 189, 248), 0.2)" : "none",
+                  "box-shadow": designMode() === "context-orbit" ? "0 0 12px var(--accent-border, rgba(var(--accent-rgb), 0.2))" : "none",
                 }}
                 onClick={() => props.onPluginSettingsChange({ designMode: "context-orbit" })}
               >
                 <div style={{ display: "flex", "align-items": "center", gap: "8px", "margin-bottom": "6px" }}>
                   <OrbitIcon size={18} />
-                  <span style={{ "font-weight": 600, "font-size": "13px", color: designMode() === "context-orbit" ? "var(--accent-default, #38bdf8)" : "var(--text-primary, #f8fafc)" }}>
+                  <span style={{ "font-weight": 600, "font-size": "13px", color: designMode() === "context-orbit" ? "var(--accent-default, var(--accent, #38bdf8))" : "var(--text-primary, var(--text-color, currentColor))" }}>
                     Context Orbit & Flow Deck (Third-Gen)
                   </span>
                 </div>
-                <p style={{ margin: 0, "font-size": "11.5px", color: "var(--text-secondary, #94a3b8)", "line-height": 1.45 }}>
+                <p style={{ margin: 0, "font-size": "11.5px", color: "var(--text-secondary, currentColor)", opacity: 0.85, "line-height": 1.45 }}>
                   HUD Context Capsule with Project Pills, Lineage Breadcrumbs, and instant Workspace Orbit Deck (Matrix & Spatial Canvas).
                 </p>
               </div>
@@ -1092,22 +1169,26 @@ export function SettingsPanel(props: SettingsPanelProps) {
               <div
                 style={{
                   padding: "16px",
-                  "border-radius": "8px",
-                  background: designMode() === "standard-tabs" ? "rgba(var(--accent-rgb, 56, 189, 248), 0.1)" : "rgba(255, 255, 255, 0.025)",
-                  border: designMode() === "standard-tabs" ? "1px solid var(--accent-default, #38bdf8)" : "1px solid var(--border-color, rgba(255, 255, 255, 0.08))",
+                  "border-radius": "var(--radius-md, 8px)",
+                  background: designMode() === "standard-tabs"
+                    ? "var(--accent-bg-soft, var(--accent-soft, rgba(var(--accent-rgb), 0.1)))"
+                    : "var(--control-bg, rgba(var(--panel-rgb, 128, 128, 128), 0.04))",
+                  border: designMode() === "standard-tabs"
+                    ? "1px solid var(--accent-default, var(--accent, #38bdf8))"
+                    : "1px solid var(--border-color, rgba(128, 128, 128, 0.12))",
                   cursor: "pointer",
                   transition: "all 0.18s ease",
-                  "box-shadow": designMode() === "standard-tabs" ? "0 0 12px rgba(var(--accent-rgb, 56, 189, 248), 0.2)" : "none",
+                  "box-shadow": designMode() === "standard-tabs" ? "0 0 12px var(--accent-border, rgba(var(--accent-rgb), 0.2))" : "none",
                 }}
                 onClick={() => props.onPluginSettingsChange({ designMode: "standard-tabs" })}
               >
                 <div style={{ display: "flex", "align-items": "center", gap: "8px", "margin-bottom": "6px" }}>
                   <LayersIcon size={18} />
-                  <span style={{ "font-weight": 600, "font-size": "13px", color: designMode() === "standard-tabs" ? "var(--accent-default, #38bdf8)" : "var(--text-primary, #f8fafc)" }}>
+                  <span style={{ "font-weight": 600, "font-size": "13px", color: designMode() === "standard-tabs" ? "var(--accent-default, var(--accent, #38bdf8))" : "var(--text-primary, var(--text-color, currentColor))" }}>
                     Classic Horizontal Tab Strip
                   </span>
                 </div>
-                <p style={{ margin: 0, "font-size": "11.5px", color: "var(--text-secondary, #94a3b8)", "line-height": 1.45 }}>
+                <p style={{ margin: 0, "font-size": "11.5px", color: "var(--text-secondary, currentColor)", opacity: 0.85, "line-height": 1.45 }}>
                   Traditional browser tabs strip docked at the top with tab titles, favicons, and close buttons.
                 </p>
               </div>
@@ -1136,12 +1217,12 @@ export function SettingsPanel(props: SettingsPanelProps) {
                   "align-items": "center",
                   gap: "6px",
                   padding: "8px 14px",
-                  "border-radius": "6px",
-                  background: orbitLayout() === "matrix" ? "rgba(var(--accent-rgb, 56, 189, 248), 0.18)" : "rgba(255, 255, 255, 0.05)",
-                  border: orbitLayout() === "matrix" ? "1px solid var(--accent-default, #38bdf8)" : "1px solid rgba(255, 255, 255, 0.1)",
-                  color: orbitLayout() === "matrix" ? "var(--accent-default, #38bdf8)" : "var(--text-secondary, #cbd5e1)",
+                  "border-radius": "var(--radius-sm, 6px)",
+                  background: orbitLayout() === "matrix" ? "var(--accent-bg-soft, var(--accent-soft))" : "var(--control-bg, rgba(var(--panel-rgb), 0.06))",
+                  border: orbitLayout() === "matrix" ? "1px solid var(--accent-default, var(--accent, #38bdf8))" : "1px solid var(--border-color, rgba(128, 128, 128, 0.15))",
+                  color: orbitLayout() === "matrix" ? "var(--accent-default, var(--accent, #38bdf8))" : "var(--text-secondary, currentColor)",
                   "font-size": "12px",
-                  "font-family": "Space Mono, monospace",
+                  "font-family": "var(--font-data, Space Mono, monospace)",
                   cursor: "pointer",
                 }}
                 onClick={() => props.onPluginSettingsChange({ orbitDeckLayout: "matrix" })}
@@ -1157,12 +1238,12 @@ export function SettingsPanel(props: SettingsPanelProps) {
                   "align-items": "center",
                   gap: "6px",
                   padding: "8px 14px",
-                  "border-radius": "6px",
-                  background: orbitLayout() === "spatial" ? "rgba(var(--accent-rgb, 56, 189, 248), 0.18)" : "rgba(255, 255, 255, 0.05)",
-                  border: orbitLayout() === "spatial" ? "1px solid var(--accent-default, #38bdf8)" : "1px solid rgba(255, 255, 255, 0.1)",
-                  color: orbitLayout() === "spatial" ? "var(--accent-default, #38bdf8)" : "var(--text-secondary, #cbd5e1)",
+                  "border-radius": "var(--radius-sm, 6px)",
+                  background: orbitLayout() === "spatial" ? "var(--accent-bg-soft, var(--accent-soft))" : "var(--control-bg, rgba(var(--panel-rgb), 0.06))",
+                  border: orbitLayout() === "spatial" ? "1px solid var(--accent-default, var(--accent, #38bdf8))" : "1px solid var(--border-color, rgba(128, 128, 128, 0.15))",
+                  color: orbitLayout() === "spatial" ? "var(--accent-default, var(--accent, #38bdf8))" : "var(--text-secondary, currentColor)",
                   "font-size": "12px",
-                  "font-family": "Space Mono, monospace",
+                  "font-family": "var(--font-data, Space Mono, monospace)",
                   cursor: "pointer",
                 }}
                 onClick={() => props.onPluginSettingsChange({ orbitDeckLayout: "spatial" })}
@@ -1180,9 +1261,9 @@ export function SettingsPanel(props: SettingsPanelProps) {
               "flex-direction": "column",
               gap: "14px",
               padding: "16px",
-              background: "rgba(0, 0, 0, 0.25)",
-              border: "1px solid var(--border-color, rgba(255, 255, 255, 0.08))",
-              "border-radius": "8px",
+              background: "var(--control-bg, rgba(var(--panel-rgb, 128, 128, 128), 0.06))",
+              border: "1px solid var(--border-color, rgba(128, 128, 128, 0.12))",
+              "border-radius": "var(--radius-md, 8px)",
             }}
           >
             <SwitchToggle
@@ -1203,7 +1284,7 @@ export function SettingsPanel(props: SettingsPanelProps) {
             <Show when={currentSmartRouter().enabled}>
               <div style={{ display: "flex", "flex-direction": "column", gap: "12px" }}>
                 <div>
-                  <label style={{ "font-size": "12px", color: "var(--text-secondary, #94a3b8)", display: "block", "margin-bottom": "6px" }}>
+                  <label style={{ "font-size": "12px", color: "var(--text-secondary, currentColor)", opacity: 0.85, display: "block", "margin-bottom": "6px" }}>
                     Select Smart Router Engine
                   </label>
                   <select
@@ -1219,11 +1300,12 @@ export function SettingsPanel(props: SettingsPanelProps) {
                     style={{
                       width: "100%",
                       padding: "8px 12px",
-                      background: "rgba(0, 0, 0, 0.4)",
-                      border: "1px solid rgba(255, 255, 255, 0.15)",
-                      color: "#f8fafc",
-                      "border-radius": "6px",
+                      background: "var(--input-bg, var(--control-bg, rgba(var(--panel-rgb), 0.12)))",
+                      border: "1px solid var(--border-color, rgba(128, 128, 128, 0.2))",
+                      color: "var(--text-primary, var(--text-color, currentColor))",
+                      "border-radius": "var(--radius-sm, 6px)",
                       "font-size": "12px",
+                      outline: "none",
                     }}
                   >
                     <option value="heuristic">Option 1: Built-in Zero-Latency Heuristic (Instant, 0ms, 100% Offline)</option>
@@ -1237,12 +1319,12 @@ export function SettingsPanel(props: SettingsPanelProps) {
                   <div
                     style={{
                       padding: "12px 14px",
-                      "border-radius": "6px",
-                      background: "rgba(5, 255, 176, 0.06)",
+                      "border-radius": "var(--radius-sm, 6px)",
+                      background: "rgba(5, 255, 176, 0.08)",
                       border: "1px solid rgba(5, 255, 176, 0.25)",
                       "font-size": "12px",
                       "line-height": 1.5,
-                      color: "var(--text-secondary, #cbd5e1)",
+                      color: "var(--text-secondary, currentColor)",
                     }}
                   >
                     <div style={{ display: "flex", "align-items": "center", gap: "6px", "margin-bottom": "4px", color: "#05ffb0", "font-weight": 600 }}>
@@ -1261,21 +1343,21 @@ export function SettingsPanel(props: SettingsPanelProps) {
                       "flex-direction": "column",
                       gap: "12px",
                       padding: "14px",
-                      "border-radius": "6px",
-                      background: "rgba(56, 189, 248, 0.05)",
-                      border: "1px solid rgba(56, 189, 248, 0.25)",
+                      "border-radius": "var(--radius-sm, 6px)",
+                      background: "var(--accent-bg-soft, var(--accent-soft, rgba(var(--accent-rgb), 0.08)))",
+                      border: "1px solid var(--accent-border, rgba(var(--accent-rgb), 0.25))",
                     }}
                   >
-                    <div style={{ "font-size": "12.5px", color: "var(--accent-default, #38bdf8)", "font-weight": 600 }}>
+                    <div style={{ "font-size": "12.5px", color: "var(--accent-default, var(--accent, #38bdf8))", "font-weight": 600 }}>
                       OpenAPI / OpenAI-Compatible Endpoint Configuration
                     </div>
-                    <div style={{ "font-size": "11.5px", color: "var(--text-secondary, #94a3b8)" }}>
+                    <div style={{ "font-size": "11.5px", color: "var(--text-secondary, currentColor)", opacity: 0.85 }}>
                       Connect to local offline backends (LM Studio, vLLM, LocalAI, Ollama /v1) or online APIs (OpenRouter, OpenAI, Groq).
                     </div>
 
                     <div style={{ display: "grid", "grid-template-columns": "repeat(auto-fit, minmax(220px, 1fr))", gap: "10px" }}>
                       <div>
-                        <label style={{ "font-size": "11px", color: "var(--text-secondary, #94a3b8)", display: "block", "margin-bottom": "4px" }}>
+                        <label style={{ "font-size": "11px", color: "var(--text-secondary, currentColor)", opacity: 0.85, display: "block", "margin-bottom": "4px" }}>
                           API Base / Chat URL
                         </label>
                         <input
@@ -1289,22 +1371,23 @@ export function SettingsPanel(props: SettingsPanelProps) {
                               },
                             })
                           }
-                          placeholder="http://127.0.0.1:1234/v1 or https://openrouter.ai/api/v1"
+                          placeholder="http://127.0.0.1:1234/v1"
                           style={{
                             width: "100%",
                             padding: "7px 10px",
-                            background: "rgba(0, 0, 0, 0.4)",
-                            border: "1px solid rgba(255, 255, 255, 0.15)",
-                            color: "#f8fafc",
-                            "border-radius": "6px",
+                            background: "var(--input-bg, var(--control-bg, rgba(var(--panel-rgb), 0.12)))",
+                            border: "1px solid var(--border-color, rgba(128, 128, 128, 0.2))",
+                            color: "var(--text-primary, var(--text-color, currentColor))",
+                            "border-radius": "var(--radius-sm, 6px)",
                             "font-size": "12px",
-                            "font-family": "Space Mono, monospace",
+                            "font-family": "var(--font-data, Space Mono, monospace)",
+                            outline: "none",
                           }}
                         />
                       </div>
 
                       <div>
-                        <label style={{ "font-size": "11px", color: "var(--text-secondary, #94a3b8)", display: "block", "margin-bottom": "4px" }}>
+                        <label style={{ "font-size": "11px", color: "var(--text-secondary, currentColor)", opacity: 0.85, display: "block", "margin-bottom": "4px" }}>
                           API Key (Optional / Bearer Token)
                         </label>
                         <input
@@ -1322,18 +1405,19 @@ export function SettingsPanel(props: SettingsPanelProps) {
                           style={{
                             width: "100%",
                             padding: "7px 10px",
-                            background: "rgba(0, 0, 0, 0.4)",
-                            border: "1px solid rgba(255, 255, 255, 0.15)",
-                            color: "#f8fafc",
-                            "border-radius": "6px",
+                            background: "var(--input-bg, var(--control-bg, rgba(var(--panel-rgb), 0.12)))",
+                            border: "1px solid var(--border-color, rgba(128, 128, 128, 0.2))",
+                            color: "var(--text-primary, var(--text-color, currentColor))",
+                            "border-radius": "var(--radius-sm, 6px)",
                             "font-size": "12px",
-                            "font-family": "Space Mono, monospace",
+                            "font-family": "var(--font-data, Space Mono, monospace)",
+                            outline: "none",
                           }}
                         />
                       </div>
 
                       <div>
-                        <label style={{ "font-size": "11px", color: "var(--text-secondary, #94a3b8)", display: "block", "margin-bottom": "4px" }}>
+                        <label style={{ "font-size": "11px", color: "var(--text-secondary, currentColor)", opacity: 0.85, display: "block", "margin-bottom": "4px" }}>
                           Model Name / Identifier
                         </label>
                         <input
@@ -1351,12 +1435,13 @@ export function SettingsPanel(props: SettingsPanelProps) {
                           style={{
                             width: "100%",
                             padding: "7px 10px",
-                            background: "rgba(0, 0, 0, 0.4)",
-                            border: "1px solid rgba(255, 255, 255, 0.15)",
-                            color: "#f8fafc",
-                            "border-radius": "6px",
+                            background: "var(--input-bg, var(--control-bg, rgba(var(--panel-rgb), 0.12)))",
+                            border: "1px solid var(--border-color, rgba(128, 128, 128, 0.2))",
+                            color: "var(--text-primary, var(--text-color, currentColor))",
+                            "border-radius": "var(--radius-sm, 6px)",
                             "font-size": "12px",
-                            "font-family": "Space Mono, monospace",
+                            "font-family": "var(--font-data, Space Mono, monospace)",
+                            outline: "none",
                           }}
                         />
                       </div>
@@ -1372,11 +1457,12 @@ export function SettingsPanel(props: SettingsPanelProps) {
                         style={{
                           flex: "1 1 240px",
                           padding: "6px 10px",
-                          background: "rgba(0, 0, 0, 0.4)",
-                          border: "1px solid rgba(255, 255, 255, 0.15)",
-                          color: "#f8fafc",
-                          "border-radius": "6px",
+                          background: "var(--input-bg, var(--control-bg, rgba(var(--panel-rgb), 0.12)))",
+                          border: "1px solid var(--border-color, rgba(128, 128, 128, 0.2))",
+                          color: "var(--text-primary, var(--text-color, currentColor))",
+                          "border-radius": "var(--radius-sm, 6px)",
                           "font-size": "12px",
+                          outline: "none",
                         }}
                       />
                       <button
@@ -1385,13 +1471,14 @@ export function SettingsPanel(props: SettingsPanelProps) {
                         disabled={isTestingEndpoint()}
                         style={{
                           padding: "6px 14px",
-                          background: "rgba(56, 189, 248, 0.2)",
-                          border: "1px solid rgba(56, 189, 248, 0.5)",
-                          color: "#38bdf8",
-                          "border-radius": "6px",
+                          background: "var(--accent-bg-soft, var(--accent-soft))",
+                          border: "1px solid var(--accent-border)",
+                          color: "var(--accent-default, var(--accent, #38bdf8))",
+                          "border-radius": "var(--radius-sm, 6px)",
                           "font-size": "11.5px",
-                          "font-family": "Space Mono, monospace",
+                          "font-family": "var(--font-data, Space Mono, monospace)",
                           cursor: "pointer",
+                          "font-weight": 600,
                         }}
                       >
                         {isTestingEndpoint() ? "Testing Connection..." : "Test Endpoint"}
@@ -1402,11 +1489,11 @@ export function SettingsPanel(props: SettingsPanelProps) {
                       <div
                         style={{
                           padding: "8px 12px",
-                          "border-radius": "6px",
-                          background: "rgba(0, 0, 0, 0.5)",
-                          border: "1px solid rgba(255, 255, 255, 0.1)",
+                          "border-radius": "var(--radius-sm, 6px)",
+                          background: "var(--control-bg, rgba(var(--panel-rgb), 0.2))",
+                          border: "1px solid var(--border-color, rgba(128, 128, 128, 0.2))",
                           "font-size": "11.5px",
-                          "font-family": "Space Mono, monospace",
+                          "font-family": "var(--font-data, Space Mono, monospace)",
                           color: testEndpointResult()?.startsWith("✓") ? "#05ffb0" : "#ef4444",
                         }}
                       >
@@ -1424,8 +1511,8 @@ export function SettingsPanel(props: SettingsPanelProps) {
                       "flex-direction": "column",
                       gap: "12px",
                       padding: "14px",
-                      "border-radius": "6px",
-                      background: "rgba(168, 85, 247, 0.06)",
+                      "border-radius": "var(--radius-sm, 6px)",
+                      background: "rgba(168, 85, 247, 0.08)",
                       border: "1px solid rgba(168, 85, 247, 0.25)",
                     }}
                   >
@@ -1443,7 +1530,7 @@ export function SettingsPanel(props: SettingsPanelProps) {
                               background: "rgba(245, 158, 11, 0.15)",
                               color: "#f59e0b",
                               "font-size": "10.5px",
-                              "font-family": "Space Mono, monospace",
+                              "font-family": "var(--font-data, Space Mono, monospace)",
                             }}
                           >
                             ○ Not Downloaded
@@ -1457,7 +1544,7 @@ export function SettingsPanel(props: SettingsPanelProps) {
                             background: "rgba(5, 255, 176, 0.15)",
                             color: "#05ffb0",
                             "font-size": "10.5px",
-                            "font-family": "Space Mono, monospace",
+                            "font-family": "var(--font-data, Space Mono, monospace)",
                           }}
                         >
                           ● Offline Engine Cached
@@ -1465,22 +1552,22 @@ export function SettingsPanel(props: SettingsPanelProps) {
                       </Show>
                     </div>
 
-                    <p style={{ margin: 0, "font-size": "11.5px", color: "var(--text-secondary, #94a3b8)", "line-height": 1.5 }}>
+                    <p style={{ margin: 0, "font-size": "11.5px", color: "var(--text-secondary, currentColor)", opacity: 0.85, "line-height": 1.5 }}>
                       Laya Offline downloads lightweight quantized semantic vector tables (4.8 MB) directly into client storage. It runs 100% on-device inside Flurer without requiring any local daemon or active internet connection.
                     </p>
 
                     <Show when={isDownloadingLaya()}>
                       <div style={{ display: "flex", "flex-direction": "column", gap: "6px" }}>
-                        <div style={{ display: "flex", "justify-content": "space-between", "font-size": "11px", "font-family": "Space Mono, monospace" }}>
+                        <div style={{ display: "flex", "justify-content": "space-between", "font-size": "11px", "font-family": "var(--font-data, Space Mono, monospace)" }}>
                           <span style={{ color: "#a855f7" }}>{layaDownloadStage()}</span>
-                          <span style={{ color: "#f8fafc" }}>{layaDownloadProgress()}%</span>
+                          <span style={{ color: "var(--text-primary, currentColor)" }}>{layaDownloadProgress()}%</span>
                         </div>
-                        <div style={{ height: "6px", width: "100%", background: "rgba(255, 255, 255, 0.1)", "border-radius": "3px", overflow: "hidden" }}>
+                        <div style={{ height: "6px", width: "100%", background: "var(--border-color, rgba(128, 128, 128, 0.2))", "border-radius": "3px", overflow: "hidden" }}>
                           <div
                             style={{
                               height: "100%",
                               width: `${layaDownloadProgress()}%`,
-                              background: "linear-gradient(90deg, #a855f7, #38bdf8)",
+                              background: "linear-gradient(90deg, #a855f7, var(--accent-default, #38bdf8))",
                               transition: "width 0.2s ease-out",
                             }}
                           />
@@ -1498,10 +1585,10 @@ export function SettingsPanel(props: SettingsPanelProps) {
                             disabled={isDownloadingLaya()}
                             style={{
                               padding: "8px 16px",
-                              background: "linear-gradient(135deg, rgba(168, 85, 247, 0.3), rgba(56, 189, 248, 0.3))",
+                              background: "linear-gradient(135deg, rgba(168, 85, 247, 0.3), var(--accent-bg-soft, rgba(56, 189, 248, 0.3)))",
                               border: "1px solid rgba(168, 85, 247, 0.6)",
-                              color: "#f8fafc",
-                              "border-radius": "6px",
+                              color: "var(--text-primary, currentColor)",
+                              "border-radius": "var(--radius-sm, 6px)",
                               "font-size": "12px",
                               "font-weight": 600,
                               cursor: "pointer",
@@ -1517,10 +1604,10 @@ export function SettingsPanel(props: SettingsPanelProps) {
                           disabled={isDownloadingLaya()}
                           style={{
                             padding: "6px 12px",
-                            background: "rgba(255, 255, 255, 0.08)",
-                            border: "1px solid rgba(255, 255, 255, 0.2)",
-                            color: "#f8fafc",
-                            "border-radius": "6px",
+                            background: "var(--control-bg, rgba(var(--panel-rgb), 0.1))",
+                            border: "1px solid var(--border-color, rgba(128, 128, 128, 0.25))",
+                            color: "var(--text-primary, currentColor)",
+                            "border-radius": "var(--radius-sm, 6px)",
                             "font-size": "11.5px",
                             cursor: "pointer",
                           }}
@@ -1535,7 +1622,7 @@ export function SettingsPanel(props: SettingsPanelProps) {
                             background: "rgba(239, 68, 68, 0.15)",
                             border: "1px solid rgba(239, 68, 68, 0.3)",
                             color: "#ef4444",
-                            "border-radius": "6px",
+                            "border-radius": "var(--radius-sm, 6px)",
                             "font-size": "11.5px",
                             cursor: "pointer",
                           }}
@@ -1565,10 +1652,10 @@ export function SettingsPanel(props: SettingsPanelProps) {
                       "align-items": "center",
                       gap: "6px",
                       padding: "5px 10px",
-                      "border-radius": "6px",
-                      background: "rgba(255, 255, 255, 0.04)",
+                      "border-radius": "var(--radius-sm, 6px)",
+                      background: "var(--control-bg, rgba(var(--panel-rgb, 128, 128, 128), 0.08))",
                       border: `1px solid ${ws.color}55`,
-                      color: "var(--text-primary, #f8fafc)",
+                      color: "var(--text-primary, var(--text-color, currentColor))",
                       "font-size": "12px",
                     }}
                   >
@@ -1580,7 +1667,7 @@ export function SettingsPanel(props: SettingsPanelProps) {
                         style={{
                           background: "transparent",
                           border: "none",
-                          color: "var(--text-secondary, #94a3b8)",
+                          color: "var(--text-secondary, currentColor)",
                           cursor: "pointer",
                           padding: "0 2px",
                           "font-size": "11px",
@@ -1613,11 +1700,12 @@ export function SettingsPanel(props: SettingsPanelProps) {
                 onInput={(e) => setNewWsName(e.currentTarget.value)}
                 style={{
                   padding: "7px 12px",
-                  background: "rgba(0, 0, 0, 0.3)",
-                  border: "1px solid rgba(255, 255, 255, 0.15)",
-                  color: "#f8fafc",
-                  "border-radius": "6px",
+                  background: "var(--input-bg, var(--control-bg, rgba(var(--panel-rgb), 0.08)))",
+                  border: "1px solid var(--border-color, rgba(128, 128, 128, 0.2))",
+                  color: "var(--text-primary, var(--text-color, currentColor))",
+                  "border-radius": "var(--radius-sm, 6px)",
                   "font-size": "12px",
+                  outline: "none",
                   flex: "1 1 140px",
                 }}
               />
@@ -1628,11 +1716,12 @@ export function SettingsPanel(props: SettingsPanelProps) {
                 onInput={(e) => setNewWsKeywords(e.currentTarget.value)}
                 style={{
                   padding: "7px 12px",
-                  background: "rgba(0, 0, 0, 0.3)",
-                  border: "1px solid rgba(255, 255, 255, 0.15)",
-                  color: "#f8fafc",
-                  "border-radius": "6px",
+                  background: "var(--input-bg, var(--control-bg, rgba(var(--panel-rgb), 0.08)))",
+                  border: "1px solid var(--border-color, rgba(128, 128, 128, 0.2))",
+                  color: "var(--text-primary, var(--text-color, currentColor))",
+                  "border-radius": "var(--radius-sm, 6px)",
                   "font-size": "12px",
+                  outline: "none",
                   flex: "2 1 200px",
                 }}
               />
@@ -1640,12 +1729,12 @@ export function SettingsPanel(props: SettingsPanelProps) {
                 type="button"
                 style={{
                   padding: "7px 16px",
-                  background: "rgba(56, 189, 248, 0.2)",
-                  border: "1px solid rgba(56, 189, 248, 0.4)",
-                  color: "var(--accent-default, #38bdf8)",
-                  "border-radius": "6px",
+                  background: "var(--accent-bg-soft, var(--accent-soft))",
+                  border: "1px solid var(--accent-border)",
+                  color: "var(--accent-default, var(--accent, #38bdf8))",
+                  "border-radius": "var(--radius-sm, 6px)",
                   "font-size": "12px",
-                  "font-family": "Space Mono, monospace",
+                  "font-family": "var(--font-data, Space Mono, monospace)",
                   cursor: "pointer",
                   "font-weight": 600,
                 }}
@@ -1665,12 +1754,13 @@ export function SettingsPanel(props: SettingsPanelProps) {
             display: "flex",
             "flex-direction": "column",
             gap: "18px",
-            background: "var(--card-bg, rgba(255, 255, 255, 0.035))",
-            border: "1px solid var(--card-border, rgba(255, 255, 255, 0.08))",
-            "box-shadow": "inset 0 1px 0 0 rgba(255, 255, 255, 0.05)",
+            background: "var(--card-bg, rgba(var(--panel-rgb, 128, 128, 128), 0.05))",
+            border: "1px solid var(--card-border, var(--border-color, rgba(128, 128, 128, 0.12)))",
+            "box-shadow": "inset 0 1px 0 0 rgba(var(--panel-rgb, 255, 255, 255), 0.1)",
             padding: "20px 24px",
-            "border-radius": "10px",
-            "backdrop-filter": "blur(12px)",
+            "border-radius": "var(--radius-lg, 10px)",
+            "backdrop-filter": "blur(var(--surface-blur, 12px))",
+            "-webkit-backdrop-filter": "blur(var(--surface-blur, 12px))",
           }}
         >
           <div style={{ display: "flex", "align-items": "flex-start", "justify-content": "space-between", gap: "12px", "flex-wrap": "wrap" }}>
@@ -1678,10 +1768,10 @@ export function SettingsPanel(props: SettingsPanelProps) {
               <span
                 style={{
                   "font-size": "11px",
-                  "font-family": "Space Mono, monospace",
+                  "font-family": "var(--font-data, Space Mono, monospace)",
                   "text-transform": "uppercase",
                   "letter-spacing": "0.12em",
-                  color: "var(--accent-default, #38bdf8)",
+                  color: "var(--accent-default, var(--accent, #38bdf8))",
                   display: "block",
                   "margin-bottom": "4px",
                 }}
@@ -1691,7 +1781,7 @@ export function SettingsPanel(props: SettingsPanelProps) {
               <h3 style={{ margin: 0, "font-size": "15px", "font-weight": 600 }}>
                 Interactive Hotkey Customization Map
               </h3>
-              <p style={{ margin: "2px 0 0 0", "font-size": "12px", color: "var(--text-secondary, #94a3b8)" }}>
+              <p style={{ margin: "2px 0 0 0", "font-size": "12px", color: "var(--text-secondary, currentColor)", opacity: 0.85 }}>
                 Click any key combination to record custom hotkeys with live conflict detection.
               </p>
             </div>
@@ -1700,13 +1790,13 @@ export function SettingsPanel(props: SettingsPanelProps) {
               type="button"
               onClick={handleResetAllShortcuts}
               style={{
-                background: "rgba(255, 255, 255, 0.05)",
-                border: "1px solid var(--border-color, rgba(255, 255, 255, 0.15))",
-                color: "var(--text-secondary, #cbd5e1)",
+                background: "var(--control-bg, rgba(var(--panel-rgb, 128, 128, 128), 0.1))",
+                border: "1px solid var(--border-color, rgba(128, 128, 128, 0.18))",
+                color: "var(--text-primary, var(--text-color, currentColor))",
                 padding: "6px 12px",
-                "border-radius": "6px",
+                "border-radius": "var(--radius-sm, 6px)",
                 "font-size": "11.5px",
-                "font-family": "Space Mono, monospace",
+                "font-family": "var(--font-data, Space Mono, monospace)",
                 cursor: "pointer",
                 transition: "all 0.15s ease",
               }}
@@ -1720,12 +1810,12 @@ export function SettingsPanel(props: SettingsPanelProps) {
             <div
               style={{
                 padding: "10px 14px",
-                "border-radius": "6px",
+                "border-radius": "var(--radius-sm, 6px)",
                 background: "rgba(5, 255, 176, 0.1)",
                 border: "1px solid rgba(5, 255, 176, 0.3)",
                 color: "#05ffb0",
                 "font-size": "12px",
-                "font-family": "Space Mono, monospace",
+                "font-family": "var(--font-data, Space Mono, monospace)",
               }}
             >
               {shortcutSuccessNotice()}
@@ -1736,12 +1826,12 @@ export function SettingsPanel(props: SettingsPanelProps) {
             <div
               style={{
                 padding: "10px 14px",
-                "border-radius": "6px",
-                background: "rgba(245, 158, 11, 0.1)",
-                border: "1px solid rgba(245, 158, 11, 0.3)",
+                "border-radius": "var(--radius-sm, 6px)",
+                background: "rgba(245, 158, 11, 0.12)",
+                border: "1px solid rgba(245, 158, 11, 0.35)",
                 color: "#f59e0b",
                 "font-size": "12px",
-                "font-family": "Space Mono, monospace",
+                "font-family": "var(--font-data, Space Mono, monospace)",
               }}
             >
               ⚠️ {recordingWarning()}
@@ -1750,7 +1840,16 @@ export function SettingsPanel(props: SettingsPanelProps) {
 
           {/* Toolbar: Category tabs + Search Filter */}
           <div style={{ display: "flex", "align-items": "center", "justify-content": "space-between", gap: "12px", "flex-wrap": "wrap" }}>
-            <div style={{ display: "flex", gap: "4px", padding: "3px", background: "rgba(0, 0, 0, 0.3)", "border-radius": "6px" }}>
+            <div
+              style={{
+                display: "flex",
+                gap: "4px",
+                padding: "3px",
+                background: "var(--control-bg, rgba(var(--panel-rgb, 128, 128, 128), 0.1))",
+                border: "1px solid var(--border-color, rgba(128, 128, 128, 0.12))",
+                "border-radius": "var(--radius-sm, 6px)",
+              }}
+            >
               <For each={["All", "Navigation", "Tabs", "Workspaces", "Tools"]}>
                 {(cat) => (
                   <button
@@ -1760,11 +1859,12 @@ export function SettingsPanel(props: SettingsPanelProps) {
                       padding: "4px 10px",
                       "border-radius": "4px",
                       border: "none",
-                      background: selectedCategory() === cat ? "var(--accent-default, #38bdf8)" : "transparent",
-                      color: selectedCategory() === cat ? "#0f172a" : "var(--text-secondary, #94a3b8)",
+                      background: selectedCategory() === cat ? "var(--accent-default, var(--accent, #38bdf8))" : "transparent",
+                      color: selectedCategory() === cat ? accentTextColor() : "var(--text-secondary, currentColor)",
                       "font-size": "11px",
                       "font-weight": selectedCategory() === cat ? 600 : 500,
                       cursor: "pointer",
+                      transition: "all 0.15s ease",
                     }}
                   >
                     {cat}
@@ -1782,11 +1882,12 @@ export function SettingsPanel(props: SettingsPanelProps) {
                 style={{
                   width: "100%",
                   padding: "5px 10px",
-                  background: "rgba(0, 0, 0, 0.3)",
-                  border: "1px solid var(--border-color, rgba(255, 255, 255, 0.12))",
-                  "border-radius": "6px",
-                  color: "#f8fafc",
+                  background: "var(--input-bg, var(--control-bg, rgba(var(--panel-rgb), 0.08)))",
+                  border: "1px solid var(--border-color, rgba(128, 128, 128, 0.18))",
+                  "border-radius": "var(--radius-sm, 6px)",
+                  color: "var(--text-primary, var(--text-color, currentColor))",
                   "font-size": "11.5px",
+                  outline: "none",
                 }}
               />
             </div>
@@ -1809,12 +1910,12 @@ export function SettingsPanel(props: SettingsPanelProps) {
                       "justify-content": "space-between",
                       padding: "10px 14px",
                       background: isRecording()
-                        ? "rgba(var(--accent-rgb, 56, 189, 248), 0.12)"
-                        : "rgba(255, 255, 255, 0.025)",
+                        ? "var(--accent-bg-soft, var(--accent-soft, rgba(var(--accent-rgb), 0.12)))"
+                        : "var(--control-bg, rgba(var(--panel-rgb, 128, 128, 128), 0.04))",
                       border: isRecording()
-                        ? "1px solid var(--accent-default, #38bdf8)"
-                        : "1px solid var(--border-color, rgba(255, 255, 255, 0.06))",
-                      "border-radius": "8px",
+                        ? "1px solid var(--accent-default, var(--accent, #38bdf8))"
+                        : "1px solid var(--border-color, rgba(128, 128, 128, 0.1))",
+                      "border-radius": "var(--radius-sm, 6px)",
                       transition: "all 0.15s ease",
                     }}
                   >
@@ -1826,24 +1927,25 @@ export function SettingsPanel(props: SettingsPanelProps) {
                         <span
                           style={{
                             "font-size": "9.5px",
-                            "font-family": "Space Mono, monospace",
-                            padding: "1px 5px",
+                            "font-family": "var(--font-data, Space Mono, monospace)",
+                            padding: "1px 6px",
                             "border-radius": "3px",
-                            background: "rgba(255, 255, 255, 0.06)",
-                            color: "var(--text-secondary, #94a3b8)",
+                            background: "var(--control-bg, rgba(var(--panel-rgb), 0.1))",
+                            color: "var(--text-secondary, currentColor)",
+                            opacity: 0.85,
                           }}
                         >
                           {meta.category.toUpperCase()}
                         </span>
                       </div>
-                      <span style={{ "font-size": "11.5px", color: "var(--text-secondary, #94a3b8)" }}>
+                      <span style={{ "font-size": "11.5px", color: "var(--text-secondary, currentColor)", opacity: 0.85 }}>
                         {meta.description}
                       </span>
                     </div>
 
                     <div style={{ display: "flex", "align-items": "center", gap: "10px" }}>
                       <Show when={conflict()}>
-                        <span style={{ "font-size": "11px", color: "#f59e0b", "font-family": "Space Mono, monospace" }}>
+                        <span style={{ "font-size": "11px", color: "#f59e0b", "font-family": "var(--font-data, Space Mono, monospace)" }}>
                           ⚠️ Conflicts with {conflict()?.label}
                         </span>
                       </Show>
@@ -1854,12 +1956,12 @@ export function SettingsPanel(props: SettingsPanelProps) {
                           <div
                             style={{
                               padding: "4px 10px",
-                              "border-radius": "6px",
-                              background: "rgba(var(--accent-rgb, 56, 189, 248), 0.25)",
-                              border: "1px dashed var(--accent-default, #38bdf8)",
-                              color: "var(--accent-default, #38bdf8)",
+                              "border-radius": "4px",
+                              background: "var(--accent-bg-soft, var(--accent-soft))",
+                              border: "1px dashed var(--accent-default, var(--accent, #38bdf8))",
+                              color: "var(--accent-default, var(--accent, #38bdf8))",
                               "font-size": "11px",
-                              "font-family": "Space Mono, monospace",
+                              "font-family": "var(--font-data, Space Mono, monospace)",
                               "font-weight": 600,
                             }}
                           >
@@ -1892,7 +1994,7 @@ export function SettingsPanel(props: SettingsPanelProps) {
                           style={{
                             background: "transparent",
                             border: "none",
-                            color: "var(--text-secondary, #94a3b8)",
+                            color: "var(--text-secondary, currentColor)",
                             cursor: "pointer",
                             padding: "4px",
                             "font-size": "12px",
@@ -1918,22 +2020,23 @@ export function SettingsPanel(props: SettingsPanelProps) {
             display: "flex",
             "flex-direction": "column",
             gap: "20px",
-            background: "var(--card-bg, rgba(255, 255, 255, 0.035))",
-            border: "1px solid var(--card-border, rgba(255, 255, 255, 0.08))",
-            "box-shadow": "inset 0 1px 0 0 rgba(255, 255, 255, 0.05)",
+            background: "var(--card-bg, rgba(var(--panel-rgb, 128, 128, 128), 0.05))",
+            border: "1px solid var(--card-border, var(--border-color, rgba(128, 128, 128, 0.12)))",
+            "box-shadow": "inset 0 1px 0 0 rgba(var(--panel-rgb, 255, 255, 255), 0.1)",
             padding: "20px 24px",
-            "border-radius": "10px",
-            "backdrop-filter": "blur(12px)",
+            "border-radius": "var(--radius-lg, 10px)",
+            "backdrop-filter": "blur(var(--surface-blur, 12px))",
+            "-webkit-backdrop-filter": "blur(var(--surface-blur, 12px))",
           }}
         >
           <div>
             <span
               style={{
                 "font-size": "11px",
-                "font-family": "Space Mono, monospace",
+                "font-family": "var(--font-data, Space Mono, monospace)",
                 "text-transform": "uppercase",
                 "letter-spacing": "0.12em",
-                color: "var(--accent-default, #38bdf8)",
+                color: "var(--accent-default, var(--accent, #38bdf8))",
                 display: "block",
                 "margin-bottom": "4px",
               }}
@@ -1943,7 +2046,7 @@ export function SettingsPanel(props: SettingsPanelProps) {
             <h3 style={{ margin: 0, "font-size": "15px", "font-weight": 600 }}>
               Navigation, Omnibox & Windows Association
             </h3>
-            <p style={{ margin: "2px 0 0 0", "font-size": "12px", color: "var(--text-secondary, #94a3b8)" }}>
+            <p style={{ margin: "2px 0 0 0", "font-size": "12px", color: "var(--text-secondary, currentColor)", opacity: 0.85 }}>
               Configure search engine preferences, startup behaviors, and system default browser registration.
             </p>
           </div>
@@ -1955,16 +2058,16 @@ export function SettingsPanel(props: SettingsPanelProps) {
               "flex-direction": "column",
               gap: "12px",
               padding: "18px 20px",
-              background: "rgba(var(--accent-rgb, 56, 189, 248), 0.06)",
-              border: "1px solid rgba(var(--accent-rgb, 56, 189, 248), 0.3)",
-              "box-shadow": "0 2px 12px rgba(0, 0, 0, 0.2), inset 0 1px 0 rgba(255, 255, 255, 0.06)",
-              "border-radius": "8px",
+              background: "var(--accent-bg-soft, var(--accent-soft, rgba(var(--accent-rgb, 56, 189, 248), 0.08)))",
+              border: "1px solid var(--accent-border, rgba(var(--accent-rgb, 56, 189, 248), 0.3))",
+              "box-shadow": "0 2px 12px rgba(0, 0, 0, 0.08), inset 0 1px 0 rgba(255, 255, 255, 0.1)",
+              "border-radius": "var(--radius-md, 8px)",
             }}
           >
             <div style={{ display: "flex", "align-items": "center", "justify-content": "space-between", gap: "16px", "flex-wrap": "wrap" }}>
               <div style={{ display: "flex", "flex-direction": "column", gap: "4px" }}>
                 <div style={{ display: "flex", "align-items": "center", gap: "10px" }}>
-                  <span style={{ "font-size": "14px", "font-weight": 600, color: "var(--text-primary, #f8fafc)" }}>
+                  <span style={{ "font-size": "14px", "font-weight": 600, color: "var(--text-primary, var(--text-color, currentColor))" }}>
                     Windows Default Browser
                   </span>
                   <Show
@@ -1973,11 +2076,11 @@ export function SettingsPanel(props: SettingsPanelProps) {
                       <span
                         style={{
                           "font-size": "10.5px",
-                          "font-family": "Space Mono, monospace",
+                          "font-family": "var(--font-data, Space Mono, monospace)",
                           padding: "2px 8px",
                           "border-radius": "10px",
-                          background: "rgba(255, 255, 255, 0.08)",
-                          color: "var(--text-secondary, #94a3b8)",
+                          background: "var(--control-bg, rgba(var(--panel-rgb), 0.1))",
+                          color: "var(--text-secondary, currentColor)",
                         }}
                       >
                         ● Checking status...
@@ -1987,7 +2090,7 @@ export function SettingsPanel(props: SettingsPanelProps) {
                     <span
                       style={{
                         "font-size": "10.5px",
-                        "font-family": "Space Mono, monospace",
+                        "font-family": "var(--font-data, Space Mono, monospace)",
                         padding: "2px 8px",
                         "border-radius": "10px",
                         background: isDefaultBrowser() ? "rgba(5, 255, 176, 0.15)" : "rgba(245, 158, 11, 0.15)",
@@ -2000,7 +2103,7 @@ export function SettingsPanel(props: SettingsPanelProps) {
                     </span>
                   </Show>
                 </div>
-                <span style={{ "font-size": "12px", color: "var(--text-secondary, #cbd5e1)" }}>
+                <span style={{ "font-size": "12px", color: "var(--text-secondary, currentColor)", opacity: 0.9 }}>
                   Register Flurer Web Loader as your default Windows browser handler for HTTP and HTTPS links.
                 </span>
               </div>
@@ -2014,18 +2117,22 @@ export function SettingsPanel(props: SettingsPanelProps) {
                   "align-items": "center",
                   gap: "8px",
                   padding: "8px 16px",
-                  "border-radius": "6px",
+                  "border-radius": "var(--radius-sm, 6px)",
                   background: isDefaultBrowser()
-                    ? "rgba(255, 255, 255, 0.1)"
-                    : "var(--accent-default, #38bdf8)",
-                  color: isDefaultBrowser() ? "#f8fafc" : "#0f172a",
-                  border: isDefaultBrowser() ? "1px solid rgba(255, 255, 255, 0.2)" : "none",
+                    ? "var(--control-bg, rgba(var(--panel-rgb, 128, 128, 128), 0.15))"
+                    : "var(--accent-default, var(--accent, #38bdf8))",
+                  color: isDefaultBrowser()
+                    ? "var(--text-primary, var(--text-color, currentColor))"
+                    : accentTextColor(),
+                  border: isDefaultBrowser()
+                    ? "1px solid var(--border-color, rgba(128, 128, 128, 0.2))"
+                    : "none",
                   "font-weight": 600,
                   "font-size": "12.5px",
                   cursor: "pointer",
                   opacity: isRegisteringBrowser() ? 0.7 : 1,
                   transition: "all 0.18s cubic-bezier(0.16, 1, 0.3, 1)",
-                  "box-shadow": isDefaultBrowser() ? "none" : "0 2px 8px rgba(var(--accent-rgb, 56, 189, 248), 0.35)",
+                  "box-shadow": isDefaultBrowser() ? "none" : "0 2px 8px var(--accent-border, rgba(var(--accent-rgb), 0.3))",
                 }}
               >
                 {isRegisteringBrowser()
@@ -2043,11 +2150,11 @@ export function SettingsPanel(props: SettingsPanelProps) {
                   "align-items": "center",
                   gap: "8px",
                   padding: "8px 12px",
-                  background: "rgba(var(--accent-rgb, 56, 189, 248), 0.12)",
-                  border: "1px solid rgba(var(--accent-rgb, 56, 189, 248), 0.25)",
-                  "border-radius": "6px",
+                  background: "var(--accent-bg-soft, var(--accent-soft))",
+                  border: "1px solid var(--accent-border)",
+                  "border-radius": "var(--radius-sm, 6px)",
                   "font-size": "12px",
-                  color: "var(--accent-default, #38bdf8)",
+                  color: "var(--accent-default, var(--accent, #38bdf8))",
                 }}
               >
                 <CheckIcon size={14} />
@@ -2068,11 +2175,11 @@ export function SettingsPanel(props: SettingsPanelProps) {
               }
               style={{
                 padding: "8px 12px",
-                "border-radius": "6px",
-                background: "var(--input-bg, rgba(255, 255, 255, 0.06))",
-                border: "1px solid var(--border-color, rgba(255, 255, 255, 0.12))",
-                color: "var(--text-primary, #f8fafc)",
-                "font-family": "Space Mono, monospace",
+                "border-radius": "var(--radius-sm, 6px)",
+                background: "var(--input-bg, var(--control-bg, rgba(var(--panel-rgb), 0.08)))",
+                border: "1px solid var(--border-color, rgba(128, 128, 128, 0.18))",
+                color: "var(--text-primary, var(--text-color, currentColor))",
+                "font-family": "var(--font-data, Space Mono, monospace)",
                 "font-size": "12.5px",
                 outline: "none",
                 "max-width": "340px",
@@ -2097,11 +2204,11 @@ export function SettingsPanel(props: SettingsPanelProps) {
               onInput={(e) => props.onPluginSettingsChange({ homeUrl: e.currentTarget.value })}
               style={{
                 padding: "8px 12px",
-                "border-radius": "6px",
-                background: "var(--input-bg, rgba(255, 255, 255, 0.06))",
-                border: "1px solid var(--border-color, rgba(255, 255, 255, 0.12))",
-                color: "var(--text-primary, #f8fafc)",
-                "font-family": "Space Mono, monospace",
+                "border-radius": "var(--radius-sm, 6px)",
+                background: "var(--input-bg, var(--control-bg, rgba(var(--panel-rgb), 0.08)))",
+                border: "1px solid var(--border-color, rgba(128, 128, 128, 0.18))",
+                color: "var(--text-primary, var(--text-color, currentColor))",
+                "font-family": "var(--font-data, Space Mono, monospace)",
                 "font-size": "12.5px",
                 outline: "none",
                 "max-width": "460px",
@@ -2121,11 +2228,11 @@ export function SettingsPanel(props: SettingsPanelProps) {
               }
               style={{
                 padding: "8px 12px",
-                "border-radius": "6px",
-                background: "var(--input-bg, rgba(255, 255, 255, 0.06))",
-                border: "1px solid var(--border-color, rgba(255, 255, 255, 0.12))",
-                color: "var(--text-primary, #f8fafc)",
-                "font-family": "Space Mono, monospace",
+                "border-radius": "var(--radius-sm, 6px)",
+                background: "var(--input-bg, var(--control-bg, rgba(var(--panel-rgb), 0.08)))",
+                border: "1px solid var(--border-color, rgba(128, 128, 128, 0.18))",
+                color: "var(--text-primary, var(--text-color, currentColor))",
+                "font-family": "var(--font-data, Space Mono, monospace)",
                 "font-size": "12.5px",
                 outline: "none",
                 "max-width": "380px",
@@ -2172,22 +2279,23 @@ export function SettingsPanel(props: SettingsPanelProps) {
             display: "flex",
             "flex-direction": "column",
             gap: "20px",
-            background: "var(--card-bg, rgba(255, 255, 255, 0.035))",
-            border: "1px solid var(--card-border, rgba(255, 255, 255, 0.08))",
-            "box-shadow": "inset 0 1px 0 0 rgba(255, 255, 255, 0.05)",
+            background: "var(--card-bg, rgba(var(--panel-rgb, 128, 128, 128), 0.05))",
+            border: "1px solid var(--card-border, var(--border-color, rgba(128, 128, 128, 0.12)))",
+            "box-shadow": "inset 0 1px 0 0 rgba(var(--panel-rgb, 255, 255, 255), 0.1)",
             padding: "20px 24px",
-            "border-radius": "10px",
-            "backdrop-filter": "blur(12px)",
+            "border-radius": "var(--radius-lg, 10px)",
+            "backdrop-filter": "blur(var(--surface-blur, 12px))",
+            "-webkit-backdrop-filter": "blur(var(--surface-blur, 12px))",
           }}
         >
           <div>
             <span
               style={{
                 "font-size": "11px",
-                "font-family": "Space Mono, monospace",
+                "font-family": "var(--font-data, Space Mono, monospace)",
                 "text-transform": "uppercase",
                 "letter-spacing": "0.12em",
-                color: "var(--accent-default, #38bdf8)",
+                color: "var(--accent-default, var(--accent, #38bdf8))",
                 display: "block",
                 "margin-bottom": "4px",
               }}
@@ -2197,7 +2305,7 @@ export function SettingsPanel(props: SettingsPanelProps) {
             <h3 style={{ margin: 0, "font-size": "15px", "font-weight": 600 }}>
               Session Persistence & Storage Invariants
             </h3>
-            <p style={{ margin: "2px 0 0 0", "font-size": "12px", color: "var(--text-secondary, #94a3b8)" }}>
+            <p style={{ margin: "2px 0 0 0", "font-size": "12px", color: "var(--text-secondary, currentColor)", opacity: 0.85 }}>
               Manage authentication storage, private ephemeral mode, user-agent identity, and cached assets.
             </p>
           </div>
@@ -2239,13 +2347,18 @@ export function SettingsPanel(props: SettingsPanelProps) {
                 style={{
                   padding: "6px 14px",
                   "font-size": "12px",
-                  "font-family": "Space Mono, monospace",
-                  "border-radius": "6px",
-                  border: "1px solid var(--border-color, rgba(255, 255, 255, 0.12))",
-                  background: customUserAgent() === DEFAULT_DESKTOP_USER_AGENT ? "var(--accent-default, #38bdf8)" : "rgba(255, 255, 255, 0.05)",
-                  color: customUserAgent() === DEFAULT_DESKTOP_USER_AGENT ? "#0f172a" : "var(--text-primary, #f8fafc)",
+                  "font-family": "var(--font-data, Space Mono, monospace)",
+                  "border-radius": "var(--radius-sm, 6px)",
+                  border: "1px solid var(--border-color, rgba(128, 128, 128, 0.18))",
+                  background: customUserAgent() === DEFAULT_DESKTOP_USER_AGENT
+                    ? "var(--accent-default, var(--accent, #38bdf8))"
+                    : "var(--control-bg, rgba(var(--panel-rgb), 0.08))",
+                  color: customUserAgent() === DEFAULT_DESKTOP_USER_AGENT
+                    ? accentTextColor()
+                    : "var(--text-primary, var(--text-color, currentColor))",
                   cursor: "pointer",
                   "font-weight": customUserAgent() === DEFAULT_DESKTOP_USER_AGENT ? 600 : 400,
+                  transition: "all 0.15s ease",
                 }}
                 onClick={() => props.onPluginSettingsChange({ customUserAgent: DEFAULT_DESKTOP_USER_AGENT })}
               >
@@ -2256,13 +2369,18 @@ export function SettingsPanel(props: SettingsPanelProps) {
                 style={{
                   padding: "6px 14px",
                   "font-size": "12px",
-                  "font-family": "Space Mono, monospace",
-                  "border-radius": "6px",
-                  border: "1px solid var(--border-color, rgba(255, 255, 255, 0.12))",
-                  background: customUserAgent() === CHROME_DESKTOP_USER_AGENT ? "var(--accent-default, #38bdf8)" : "rgba(255, 255, 255, 0.05)",
-                  color: customUserAgent() === CHROME_DESKTOP_USER_AGENT ? "#0f172a" : "var(--text-primary, #f8fafc)",
+                  "font-family": "var(--font-data, Space Mono, monospace)",
+                  "border-radius": "var(--radius-sm, 6px)",
+                  border: "1px solid var(--border-color, rgba(128, 128, 128, 0.18))",
+                  background: customUserAgent() === CHROME_DESKTOP_USER_AGENT
+                    ? "var(--accent-default, var(--accent, #38bdf8))"
+                    : "var(--control-bg, rgba(var(--panel-rgb), 0.08))",
+                  color: customUserAgent() === CHROME_DESKTOP_USER_AGENT
+                    ? accentTextColor()
+                    : "var(--text-primary, var(--text-color, currentColor))",
                   cursor: "pointer",
                   "font-weight": customUserAgent() === CHROME_DESKTOP_USER_AGENT ? 600 : 400,
+                  transition: "all 0.15s ease",
                 }}
                 onClick={() => props.onPluginSettingsChange({ customUserAgent: CHROME_DESKTOP_USER_AGENT })}
               >
@@ -2275,11 +2393,11 @@ export function SettingsPanel(props: SettingsPanelProps) {
               onInput={(e) => props.onPluginSettingsChange({ customUserAgent: e.currentTarget.value })}
               style={{
                 padding: "8px 12px",
-                "border-radius": "6px",
-                background: "var(--input-bg, rgba(255, 255, 255, 0.06))",
-                border: "1px solid var(--border-color, rgba(255, 255, 255, 0.12))",
-                color: "var(--text-primary, #f8fafc)",
-                "font-family": "Space Mono, monospace",
+                "border-radius": "var(--radius-sm, 6px)",
+                background: "var(--input-bg, var(--control-bg, rgba(var(--panel-rgb), 0.08)))",
+                border: "1px solid var(--border-color, rgba(128, 128, 128, 0.18))",
+                color: "var(--text-primary, var(--text-color, currentColor))",
+                "font-family": "var(--font-data, Space Mono, monospace)",
                 "font-size": "12px",
                 outline: "none",
                 "max-width": "640px",
@@ -2292,9 +2410,9 @@ export function SettingsPanel(props: SettingsPanelProps) {
             style={{
               "margin-top": "10px",
               padding: "18px",
-              background: "rgba(239, 68, 68, 0.05)",
-              border: "1px solid rgba(239, 68, 68, 0.2)",
-              "border-radius": "8px",
+              background: isLightMode() ? "rgba(220, 38, 38, 0.06)" : "rgba(239, 68, 68, 0.06)",
+              border: `1px solid ${isLightMode() ? "rgba(220, 38, 38, 0.25)" : "rgba(239, 68, 68, 0.25)"}`,
+              "border-radius": "var(--radius-md, 8px)",
               display: "flex",
               "flex-direction": "column",
               gap: "12px",
@@ -2302,11 +2420,11 @@ export function SettingsPanel(props: SettingsPanelProps) {
           >
             <div style={{ display: "flex", "align-items": "center", gap: "8px" }}>
               <TrashIcon size={16} />
-              <span style={{ "font-size": "13px", "font-weight": 600, color: "#f87171" }}>
+              <span style={{ "font-size": "13px", "font-weight": 600, color: isLightMode() ? "#dc2626" : "#f87171" }}>
                 Session Data & Storage Purge
               </span>
             </div>
-            <p style={{ margin: 0, "font-size": "12px", color: "var(--text-secondary, #94a3b8)", "line-height": 1.45 }}>
+            <p style={{ margin: 0, "font-size": "12px", color: "var(--text-secondary, currentColor)", opacity: 0.85, "line-height": 1.45 }}>
               Purge all stored session tokens, cookies, indexedDB databases, and cached web assets from disk.
             </p>
 
@@ -2314,12 +2432,12 @@ export function SettingsPanel(props: SettingsPanelProps) {
               <div
                 style={{
                   padding: "8px 12px",
-                  background: "rgba(56, 189, 248, 0.15)",
-                  border: "1px solid rgba(56, 189, 248, 0.3)",
-                  "border-radius": "6px",
-                  color: "var(--text-primary, #f8fafc)",
+                  background: "var(--accent-bg-soft, var(--accent-soft))",
+                  border: "1px solid var(--accent-border)",
+                  "border-radius": "var(--radius-sm, 6px)",
+                  color: "var(--text-primary, var(--text-color, currentColor))",
                   "font-size": "12px",
-                  "font-family": "Space Mono, monospace",
+                  "font-family": "var(--font-data, Space Mono, monospace)",
                 }}
               >
                 {securityStatus()}
@@ -2338,10 +2456,10 @@ export function SettingsPanel(props: SettingsPanelProps) {
                   background: "#ef4444",
                   color: "#ffffff",
                   border: "none",
-                  "border-radius": "6px",
+                  "border-radius": "var(--radius-sm, 6px)",
                   "font-size": "12px",
                   "font-weight": 600,
-                  "font-family": "Space Mono, monospace",
+                  "font-family": "var(--font-data, Space Mono, monospace)",
                   cursor: isWiping() ? "wait" : "pointer",
                   opacity: isWiping() ? 0.6 : 1,
                   transition: "opacity 0.15s ease",
@@ -2370,12 +2488,12 @@ export function SettingsPanel(props: SettingsPanelProps) {
                   "align-items": "center",
                   gap: "6px",
                   padding: "8px 14px",
-                  background: "rgba(255, 255, 255, 0.08)",
-                  color: "var(--text-primary, #f8fafc)",
-                  border: "1px solid var(--border-color, rgba(255, 255, 255, 0.15))",
-                  "border-radius": "6px",
+                  background: "var(--control-bg, rgba(var(--panel-rgb), 0.1))",
+                  color: "var(--text-primary, var(--text-color, currentColor))",
+                  border: "1px solid var(--border-color, rgba(128, 128, 128, 0.2))",
+                  "border-radius": "var(--radius-sm, 6px)",
                   "font-size": "12px",
-                  "font-family": "Space Mono, monospace",
+                  "font-family": "var(--font-data, Space Mono, monospace)",
                   cursor: "pointer",
                 }}
                 onClick={() => {

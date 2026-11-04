@@ -31,24 +31,26 @@ export function SwitchToggle(props: SwitchToggleProps) {
         gap: "16px",
         padding: "14px 16px",
         background: props.checked
-          ? "rgba(var(--accent-rgb, 56, 189, 248), 0.06)"
-          : "rgba(255, 255, 255, 0.025)",
+          ? "var(--accent-bg-soft, var(--accent-soft, rgba(var(--accent-rgb, 56, 189, 248), 0.08)))"
+          : "var(--control-bg, rgba(var(--panel-rgb, 128, 128, 128), 0.04))",
         border: props.checked
-          ? "1px solid rgba(var(--accent-rgb, 56, 189, 248), 0.3)"
-          : "1px solid var(--border-color, rgba(255, 255, 255, 0.08))",
-        "border-radius": "8px",
+          ? "1px solid var(--accent-border, rgba(var(--accent-rgb, 56, 189, 248), 0.35))"
+          : "1px solid var(--border-color, rgba(128, 128, 128, 0.12))",
+        "border-radius": "var(--radius-md, 8px)",
         cursor: props.disabled ? "not-allowed" : "pointer",
         opacity: props.disabled ? 0.5 : 1,
-        transition: "all 0.2s cubic-bezier(0.16, 1, 0.3, 1)",
+        transition: "all 0.18s cubic-bezier(0.16, 1, 0.3, 1)",
       }}
     >
       <div style={{ display: "flex", gap: "12px", "align-items": "flex-start", flex: "1 1 auto" }}>
         {props.icon && (
           <div
             style={{
-              color: props.checked ? "var(--accent-default, #38bdf8)" : "var(--text-secondary, #94a3b8)",
+              color: props.checked
+                ? "var(--accent-default, var(--accent, #38bdf8))"
+                : "var(--text-secondary, currentColor)",
               "margin-top": "2px",
-              transition: "color 0.2s ease",
+              transition: "color 0.18s ease",
               "flex-shrink": 0,
             }}
           >
@@ -60,8 +62,8 @@ export function SwitchToggle(props: SwitchToggleProps) {
             style={{
               "font-size": "13px",
               "font-weight": 600,
-              color: props.checked ? "var(--text-primary, #f8fafc)" : "var(--text-secondary, #e2e8f0)",
-              transition: "color 0.2s ease",
+              color: "var(--text-primary, var(--text-color, currentColor))",
+              transition: "color 0.18s ease",
             }}
           >
             {props.label}
@@ -70,7 +72,8 @@ export function SwitchToggle(props: SwitchToggleProps) {
             <span
               style={{
                 "font-size": "11.5px",
-                color: "var(--text-secondary, #94a3b8)",
+                color: "var(--text-secondary, currentColor)",
+                opacity: 0.85,
                 "line-height": 1.45,
               }}
             >
@@ -87,14 +90,14 @@ export function SwitchToggle(props: SwitchToggleProps) {
           "min-width": "38px",
           "border-radius": "11px",
           background: props.checked
-            ? "var(--accent-default, #38bdf8)"
-            : "rgba(255, 255, 255, 0.15)",
+            ? "var(--accent-default, var(--accent, #38bdf8))"
+            : "var(--border-strong, rgba(128, 128, 128, 0.28))",
           padding: "2px",
           "box-sizing": "border-box",
           position: "relative",
-          transition: "background 0.2s cubic-bezier(0.16, 1, 0.3, 1)",
+          transition: "background 0.18s cubic-bezier(0.16, 1, 0.3, 1)",
           "box-shadow": props.checked
-            ? "0 0 10px rgba(var(--accent-rgb, 56, 189, 248), 0.35)"
+            ? "0 0 10px var(--accent-border, rgba(var(--accent-rgb, 56, 189, 248), 0.35))"
             : "none",
           "flex-shrink": 0,
           "margin-top": "2px",
@@ -105,10 +108,10 @@ export function SwitchToggle(props: SwitchToggleProps) {
             width: "18px",
             height: "18px",
             "border-radius": "50%",
-            background: props.checked ? "#0f172a" : "#ffffff",
+            background: "#ffffff",
             transform: props.checked ? "translateX(16px)" : "translateX(0)",
-            transition: "transform 0.2s cubic-bezier(0.16, 1, 0.3, 1), background 0.2s ease",
-            "box-shadow": "0 1px 3px rgba(0, 0, 0, 0.4)",
+            transition: "transform 0.18s cubic-bezier(0.16, 1, 0.3, 1)",
+            "box-shadow": "0 1px 3px rgba(0, 0, 0, 0.35)",
           }}
         />
       </div>
