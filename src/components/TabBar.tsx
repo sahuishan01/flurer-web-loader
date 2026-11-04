@@ -185,7 +185,7 @@ export function TabBar(props: TabBarProps) {
   function startTabDrag(e: PointerEvent, tabId: string) {
     if (e.button !== 0) return;
     const target = e.target as HTMLElement;
-    if (target.closest(".web-loader-tab-close")) {
+    if (target?.closest?.(".web-loader-tab-close") || (target as any)?.parentElement?.closest?.(".web-loader-tab-close")) {
       return;
     }
     tabDrag = { tabId, startX: e.clientX, startY: e.clientY, moved: false };
@@ -766,30 +766,39 @@ export function TabBar(props: TabBarProps) {
                   <Show when={!isCompact()}>
                     <span style={S.tabTitle}>{tab.title || "New Tab"}</span>
                   </Show>
-                  <button
-                    type="button"
-                    class="icon-btn web-loader-icon-btn web-loader-tab-close"
-                    style={{
-                      ...S.tabCloseBtn,
-                      ...(isCompact()
-                        ? {
-                            width: "14px",
-                            height: "14px",
-                            "min-width": "14px",
-                            "min-height": "14px",
-                            padding: "0",
-                            ...(isActive() ? {} : { display: "none" }),
-                          }
-                        : {}),
-                    }}
-                    title={`Close Tab (${props.shortcuts?.closeTab || "Ctrl+W"})`}
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      props.onCloseTab(tab.id);
-                    }}
-                  >
-                    <CloseIcon size={isCompact() ? 10 : 15} />
-                  </button>
+                  <Show when={visibleTabs().length > 1 || (tab.url && tab.url !== "about:blank")}>
+                    <button
+                      type="button"
+                      class="icon-btn web-loader-icon-btn web-loader-tab-close"
+                      style={{
+                        ...S.tabCloseBtn,
+                        ...(isCompact()
+                          ? {
+                              width: "14px",
+                              height: "14px",
+                              "min-width": "14px",
+                              "min-height": "14px",
+                              padding: "0",
+                              ...(isActive() ? {} : { display: "none" }),
+                            }
+                          : {}),
+                      }}
+                      title={`Close Tab (${props.shortcuts?.closeTab || "Ctrl+W"})`}
+                      onPointerDown={(e) => {
+                        e.stopPropagation();
+                      }}
+                      onMouseDown={(e) => {
+                        e.stopPropagation();
+                      }}
+                      onClick={(e) => {
+                        e.preventDefault();
+                        e.stopPropagation();
+                        props.onCloseTab(tab.id);
+                      }}
+                    >
+                      <CloseIcon size={isCompact() ? 10 : 15} />
+                    </button>
+                  </Show>
                 </div>
               </div>
             );

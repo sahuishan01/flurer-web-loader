@@ -1,5 +1,7 @@
 import { For, Show, createSignal, createEffect, onCleanup, onMount, JSX } from "solid-js";
 import { SettingsPanelProps, SearchEngine, ShortcutActionId, NavDesignMode, OrbitLayoutMode } from "../types";
+
+declare const __VERSION__: string;
 import {
   themeConfig,
   setThemeConfig,
@@ -185,11 +187,18 @@ export function SettingsPanel(props: SettingsPanelProps) {
   const checkDefaultBrowserStatus = async () => {
     try {
       if (window.TauriCore?.invoke) {
-        const res = await window.TauriCore.invoke<boolean>("check_is_default_browser");
+        const timeoutPromise = new Promise<boolean>((_, reject) =>
+          setTimeout(() => reject(new Error("Timeout checking default browser")), 2000)
+        );
+        const res = await Promise.race([
+          window.TauriCore.invoke<boolean>("check_is_default_browser"),
+          timeoutPromise,
+        ]);
         setIsDefaultBrowser(res);
       }
     } catch (e) {
       console.warn("Failed to check default browser status:", e);
+      setIsDefaultBrowser(false);
     }
   };
 
@@ -536,7 +545,7 @@ export function SettingsPanel(props: SettingsPanelProps) {
                   "font-weight": 600,
                 }}
               >
-                v0.1.62
+                v{typeof __VERSION__ !== "undefined" ? __VERSION__ : "0.1.64"}
               </span>
             </div>
             <p

@@ -974,7 +974,13 @@ export function ContextOrbitDeck(props: ContextOrbitDeckProps) {
               "border-radius": "8px",
               background: "rgba(255, 255, 255, 0.08)",
             }}
-            onClick={props.onClose}
+            onPointerDown={(e) => e.stopPropagation()}
+            onMouseDown={(e) => e.stopPropagation()}
+            onClick={(e) => {
+              e.preventDefault();
+              e.stopPropagation();
+              props.onClose();
+            }}
             title={`Close Orbit Deck (Esc / ${mod}+E)`}
           >
             <CloseIcon size={16} />
@@ -1383,7 +1389,10 @@ export function ContextOrbitDeck(props: ContextOrbitDeckProps) {
                                       "min-width": "18px",
                                       "min-height": "18px",
                                     }}
+                                    onPointerDown={(e) => e.stopPropagation()}
+                                    onMouseDown={(e) => e.stopPropagation()}
                                     onClick={(e) => {
+                                      e.preventDefault();
                                       e.stopPropagation();
                                       props.onCloseTab(tab.id);
                                     }}
@@ -1773,7 +1782,10 @@ export function ContextOrbitDeck(props: ContextOrbitDeckProps) {
                             "min-width": "16px",
                             "min-height": "16px",
                           }}
+                          onPointerDown={(e) => e.stopPropagation()}
+                          onMouseDown={(e) => e.stopPropagation()}
                           onClick={(e) => {
+                            e.preventDefault();
                             e.stopPropagation();
                             props.onCloseTab(tab.id);
                           }}

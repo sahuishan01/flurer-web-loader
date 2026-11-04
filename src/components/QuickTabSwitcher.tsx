@@ -328,7 +328,10 @@ export function QuickTabSwitcher(props: QuickTabSwitcherProps) {
                           color: "var(--text-muted, #94a3b8)",
                           cursor: "pointer",
                         }}
+                        onPointerDown={(e) => e.stopPropagation()}
+                        onMouseDown={(e) => e.stopPropagation()}
                         onClick={(e) => {
+                          e.preventDefault();
                           e.stopPropagation();
                           props.onCloseTab(tab.id);
                         }}

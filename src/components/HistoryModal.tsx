@@ -228,7 +228,13 @@ export function HistoryModal(props: HistoryModalProps) {
                 "align-items": "center",
                 "justify-content": "center",
               }}
-              onClick={props.onClose}
+              onPointerDown={(e) => e.stopPropagation()}
+              onMouseDown={(e) => e.stopPropagation()}
+              onClick={(e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                props.onClose();
+              }}
               title="Close (Esc)"
             >
               <CloseIcon size={16} />
